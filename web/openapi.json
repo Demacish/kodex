@@ -6947,7 +6947,7 @@
   "info": {
     "description": "Self-hosted library server and reader for comics, manga and e-books",
     "title": "Kodex",
-    "version": "0.1.0"
+    "version": "2.0.0"
   },
   "openapi": "3.1.0",
   "paths": {

@@ -6,6 +6,8 @@ All notable changes to Kodex are listed here. The format follows
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-28
+
 The v2 rebuild: phase 0 (foundations), phase 1 (matching engine), phase 2
 (formats, libraries, jobs), phase 3 (the web client), phase 4 (reading,
 collections, OPDS and Kobo), phase 5 (the Android app), phase 6
@@ -253,7 +255,9 @@ collections, OPDS and Kobo), phase 5 (the Android app), phase 6
 - A skipped item in the review queue can be undone.
 - Uploading into a library folder the server may not write to says so
   (409) instead of failing with a server error.
-
 - Automatic enrichment no longer changes which Comic Vine issue a book is
   linked to for a series the matching engine has matched; it only fills in
   missing details.
+
+[Unreleased]: https://github.com/Demacish/kodex/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/Demacish/kodex/releases/tag/v2.0.0

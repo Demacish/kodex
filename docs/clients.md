@@ -6,10 +6,14 @@ Appar och enheter and shown once.
 
 ## The Kodex Android app
 
-Android 9 or later. The APK comes from the Android workflow in GitHub
-Actions (the `kodex-android` artifact): `app.kodex` is the release build,
-signed with the project's key, so a newer one installs over an older one;
-`app.kodex.dev` is the debug build, which installs beside it.
+Android 9 or later. Each [release](https://github.com/Demacish/kodex/releases)
+has the app as `kodex-<version>.apk`, with its SHA-256. It is signed with the
+project's key, so a newer one installs over an older one; the certificate's
+SHA-256 is
+`8b61c574ec87a4b9f37c48a2591e2936e2c313337ff12372e3347a953f40000e`
+(`apksigner verify --print-certs` shows it). Builds of the main branch are
+the Android workflow's `kodex-android` artifact in GitHub Actions, where
+`app.kodex.dev` is the debug build, which installs beside the release.
 
 1. Type the server's address.
 2. Log in with your username and password, and with the code from your

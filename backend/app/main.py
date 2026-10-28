@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 
+import kodex
 from app.api.routes import (
     ai,
     books,
@@ -72,7 +73,7 @@ def _operation_id(route: APIRoute) -> str:
 app = FastAPI(
     title="Kodex",
     description="Self-hosted library server and reader for comics, manga and e-books",
-    version="0.1.0",
+    version=kodex.__version__,
     lifespan=lifespan,
     openapi_url="/api/openapi.json",
     docs_url="/api/docs",

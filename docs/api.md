@@ -67,5 +67,6 @@ These have their own specifications and aren't in the OpenAPI document's
 
 ## Stability
 
-Until v2's first release, the API can still change. Every change shows in
+Since 2.0.0 the API follows the version number: a change that breaks a
+client waits for a new major version. Every change shows in
 `web/openapi.json`'s history and in `CHANGELOG.md`.

@@ -5,6 +5,9 @@ name: Android
 on:
   push:
     branches: [main]
+    # A release tag (v2.0.0) builds it too, and the release job below
+    # publishes the signed APK; paths don't apply to tags.
+    tags: ["v*"]
     paths:
       - "androidApp/**"
       - "shared/**"
@@ -146,3 +149,44 @@ jobs:
           name: device-test-reports
           path: androidApp/build/reports/androidTests
           if-no-files-found: ignore
+
+  release:
+    name: GitHub release with the signed APK
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      # The project's signing certificate (docs/clients.md): a release is never
+      # published with an APK signed by anything else, or unsigned.
+      CERT_SHA256: 8b61c574ec87a4b9f37c48a2591e2936e2c313337ff12372e3347a953f40000e
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: kodex-android
+          path: ${{ runner.temp }}/android
+      - name: The APK is signed with the project's certificate
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          apk=$(find "$RUNNER_TEMP/android" -path '*release*' -name '*.apk' | head -n 1)
+          apksigner="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)/apksigner"
+          "$apksigner" verify --print-certs "$apk" | grep -qi "certificate SHA-256 digest: $CERT_SHA256"
+          cp "$apk" "kodex-$version.apk"
+          sha256sum "kodex-$version.apk" > "kodex-$version.apk.sha256"
+      - name: The release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          image="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/kodex"
+          {
+            echo "**Server:** \`$image:$version\` for amd64 and arm64; [docs/install.md]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/blob/$GITHUB_REF_NAME/docs/install.md) has the walk-through."
+            echo
+            echo "**Android app:** \`kodex-$version.apk\` (Android 9 or later), signed with the certificate whose SHA-256 is \`$CERT_SHA256\`."
+            echo
+            awk -v heading="## [$version]" 'index($0, heading) == 1 {on = 1; next} on && /^## \[/ {exit} on' CHANGELOG.md
+          } > "$RUNNER_TEMP/notes.md"
+          gh release create "$GITHUB_REF_NAME" --verify-tag --title "Kodex $version" \
+            --notes-file "$RUNNER_TEMP/notes.md" "kodex-$version.apk" "kodex-$version.apk.sha256"

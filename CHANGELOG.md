@@ -6,6 +6,8 @@ All notable changes to Kodex are listed here. The format follows
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-10-28
+
 ### Changed
 
 - The pages before login have a new look: a dark backdrop with the accent's
@@ -17,7 +19,6 @@ All notable changes to Kodex are listed here. The format follows
 - "Remember me on this device" when logging in: without it, the login ends
   when the browser closes (and lasts a day while used). "Forgot your
   password?" says how to get a new one.
-
 - A server with accounts but no admin who can log in (one adopted from
   v1, whose users only logged in through Authentik) is set up on its first
   page too: with the setup code the api writes to its log, a username and
@@ -28,6 +29,9 @@ All notable changes to Kodex are listed here. The format follows
 
 - The api waits up to two minutes for the database before migrating, so
   it no longer exits when it starts first.
+- The passkey offered among the username's suggestions no longer shows an
+  error when the device has none.
+- Error messages meet WCAG AA in light and dark mode.
 
 ## [2.0.0] - 2026-10-28
 
@@ -282,5 +286,6 @@ collections, OPDS and Kobo), phase 5 (the Android app), phase 6
   linked to for a series the matching engine has matched; it only fills in
   missing details.
 
-[Unreleased]: https://github.com/Demacish/kodex/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/Demacish/kodex/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/Demacish/kodex/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/Demacish/kodex/releases/tag/v2.0.0

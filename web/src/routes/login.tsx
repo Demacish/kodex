@@ -81,7 +81,7 @@ function LoginPage() {
     let response: Response;
     if (setup) {
       const result = await fetchClient.POST("/api/auth/setup", {
-        body: { username, password, email: String(form.get("email") ?? "") || null, code: claim ? String(form.get("code") ?? "") : null },
+        body: { username, password, remember, email: String(form.get("email") ?? "") || null, code: claim ? String(form.get("code") ?? "") : null },
       });
       setBusy(false);
       if (result.data) return finish(result.data);

@@ -1,0 +1,51 @@
+[project]
+name = "kodex"
+version = "2.0.0.dev0"
+description = "Self-hosted library server and reader for comics, manga and e-books"
+license = "MIT"
+requires-python = ">=3.14"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-p no:cacheprovider"
+
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "BLE", "RUF100"]
+ignore = [
+    "E501",   # line length is the formatter's job; long strings and URLs stay
+    "UP042",  # (str, Enum) -> StrEnum changes str() of stored enum values
+]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+    "fastapi.Depends", "fastapi.Query", "fastapi.Header", "fastapi.Body", "fastapi.File", "fastapi.Form",
+    "fastapi.Path", "fastapi.Security",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Environment variables have to be set before the app is imported.
+"tests/conftest.py" = ["E402"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "kodex", "tests"]
+
+# kodex/ (v2) is type-checked strictly. v1 code under app/ is only
+# followed for the types kodex/ imports from it, and gets checked as it
+# moves into kodex/.
+[tool.mypy]
+python_version = "3.14"
+packages = ["kodex"]
+strict = true
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = ["app.*"]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = ["rarfile", "cv2", "pypdfium2", "pyvips", "py7zr", "py7zr.*"]
+ignore_missing_imports = true

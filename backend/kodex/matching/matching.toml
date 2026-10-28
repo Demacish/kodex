@@ -1,0 +1,142 @@
+# Default matching configuration (docs/plan.sv.md, "Konfiguration").
+# Override any value with a file named by KODEX_MATCHING_CONFIG. The weights
+# are starting values: they are renormalised over the signals a candidate
+# actually has, and tuned against the evaluation corpus, not by hand.
+
+auto_min = 0.95
+auto_margin = 0.10
+auto_single = 0.95
+review_min = 0.50
+min_positive_signals = 2
+# Titles below this similarity scale the whole score down (see score.py).
+title_gate = 0.95
+
+[weights]
+title = 0.30
+issue_coverage = 0.25
+year = 0.10
+publisher = 0.10
+pages = 0.05
+cover = 0.20
+
+[prefilter]
+ratio_min = 0.70
+
+[language]
+# The language comics are assumed to be in when neither ComicInfo
+# (LanguageISO) nor the file names say. Set "" to assume nothing.
+comics_default = "en"
+
+# Comic Vine catalogues every translated edition as a run of its own, under
+# the same title and often the same year as the original. A candidate whose
+# publisher puts out translations in another language than the files' is
+# disqualified when a candidate in the files' language (or of unknown
+# language) exists; "reprint" marks publishers of reprint editions in the
+# original language, which give way to the original edition. Names are
+# compared after normalisation (lower case, without "Comics", "Inc." and
+# the like): the whole name first, then a word from the second table in it
+# ("Panini Verlag"), then a name that starts with one from the first table
+# ("Norma Editorial").
+[publisher_languages]
+"urban" = "fr"
+"dargaud" = "fr"
+"delcourt" = "fr"
+"glenat" = "fr"
+"kana" = "fr"
+"casterman" = "fr"
+"dupuis" = "fr"
+"le lombard" = "fr"
+"soleil" = "fr"
+"ankama" = "fr"
+"carlsen" = "de"
+"ehapa" = "de"
+"egmont ehapa" = "de"
+"cross cult" = "de"
+"splitter" = "de"
+"norma" = "es"
+"ecc" = "es"
+"planeta" = "es"
+"planeta deagostini" = "es"
+"ovni press" = "es"
+"salvat" = "es"
+"altaya" = "es"
+"televisa" = "es"
+"panini" = "it"
+"mondadori" = "it"
+"rw lion" = "it"
+"saldapress" = "it"
+"bao" = "it"
+"mythos" = "pt"
+"abril" = "pt"
+"jbc" = "pt"
+"egmont polska" = "pl"
+"mucha" = "pl"
+"story house egmont" = "pl"
+"semic" = "sv"
+"egmont karnan" = "sv"
+"bonnier" = "sv"
+"marvel uk panini" = "reprint"
+"panini uk" = "reprint"
+
+[publisher_language_words]
+"verlag" = "de"
+"deutschland" = "de"
+"editorial" = "es"
+"ediciones" = "es"
+"espana" = "es"
+"mexico" = "es"
+"argentina" = "es"
+"edizioni" = "it"
+"editrice" = "it"
+"italia" = "it"
+"editions" = "fr"
+"france" = "fr"
+"editora" = "pt"
+"brasil" = "pt"
+"portugal" = "pt"
+"polska" = "pl"
+"wydawnictwo" = "pl"
+"nederland" = "nl"
+"sverige" = "sv"
+"danmark" = "da"
+"norge" = "nb"
+"suomi" = "fi"
+"turkiye" = "tr"
+"kiado" = "hu"
+
+[cover]
+strong = 8
+weak = 16
+top_n = 3
+min_title = 0.60
+
+[cache]
+search_ttl_days = 7
+id_ttl_days = 30
+
+[search]
+# Candidates kept after the title prefilter, and how many of the best get
+# their issue list fetched (each list costs calls).
+max_candidates = 25
+issue_lists = 5
+
+[providers.comics]
+order = ["comicvine", "metron"]
+
+[providers.manga]
+order = ["mangadex", "anilist", "mangaupdates"]
+
+[providers.ebooks]
+order = ["open_library", "google_books", "hardcover"]
+
+[grouping]
+strategy = "metadata"
+
+[write_back]
+# Which files a library with write-back on (Library.write_back) gets.
+comicinfo = true
+series_json = true
+
+[llm]
+enabled = false
+max_calls_per_day = 50

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="back">Tillbaka</string>
+    <string name="off">Av</string>
+    <string name="version">Version %1$s</string>
+
+    <string name="tab_home">Läs</string>
+    <string name="tab_library">Bibliotek</string>
+    <string name="tab_downloads">Nedladdat</string>
+    <string name="tab_settings">Inställningar</string>
+
+    <string name="login_intro">Logga in på din Kodex-server. Appen får en egen nyckel, som du kan återkalla under Inställningar på servern.</string>
+    <string name="login_server">Serverns adress</string>
+    <string name="login_connect">Fortsätt</string>
+    <string name="login_username">Användarnamn</string>
+    <string name="login_password">Lösenord</string>
+    <string name="login_button">Logga in</string>
+    <string name="login_second_step">Skriv koden från din autentiseringsapp, eller en återställningskod.</string>
+    <string name="login_code">Kod</string>
+    <string name="login_confirm">Bekräfta</string>
+    <string name="login_start_over">Börja om</string>
+    <string name="login_with">Logga in med %1$s</string>
+    <string name="login_passkey">Logga in med nyckel (passkey)</string>
+    <string name="login_browser">Logga in i webbläsaren</string>
+    <string name="login_browser_help">Öppnar servern i webbläsaren; godkänn appen där så kommer du tillbaka hit.</string>
+    <string name="login_not_kodex">Adressen svarar inte som en Kodex-server.</string>
+    <string name="login_unreachable">Når inte servern. Kontrollera adressen och anslutningen.</string>
+    <string name="login_browser_failed">Inloggningen i webbläsaren kom inte tillbaka i tid. Försök igen.</string>
+    <string name="login_refused">Servern nekade inloggningen.</string>
+
+    <string name="home_empty">Inget påbörjat ännu. Hitta något i biblioteket.</string>
+    <string name="continue_reading">Fortsätt läsa</string>
+    <string name="collections">Samlingar</string>
+    <string name="collection_empty">Samlingen är tom.</string>
+    <string name="search_books">Sök bland böckerna</string>
+    <string name="library_empty">Biblioteket är tomt, eller har inte synkats ännu.</string>
+    <string name="library_nothing">Inget i det här biblioteket ännu.</string>
+    <string name="series_read">%1$d av %2$d lästa</string>
+    <string name="pages_count">%1$d s.</string>
+
+    <string name="read">Läs</string>
+    <string name="read_percent">%1$d %% läst</string>
+    <string name="finished">Läst</string>
+    <string name="mark_read">Markera som läst</string>
+    <string name="mark_unread">Markera som oläst</string>
+    <string name="download">Ladda ner</string>
+    <string name="downloaded">Nedladdad</string>
+    <string name="remove_download">Ta bort nedladdning</string>
+    <string name="cancel_download">Avbryt nedladdning</string>
+    <string name="download_to_read">EPUB- och PDF-böcker läses från enheten: ladda ner den först.</string>
+    <string name="download_waiting">Väntar på nätverk (%1$s av %2$s)</string>
+    <string name="downloading_size">Laddar ner %1$s av %2$s</string>
+    <string name="download_failed">Nedladdningen misslyckades: %1$s</string>
+    <string name="downloaded_size">Nedladdad (%1$s)</string>
+    <string name="downloaded_verified">Nedladdad och kontrollerad, %1$s</string>
+    <string name="downloaded_pages">Nedladdad sida för sida, %1$s</string>
+    <string name="download_automatic">Hämtad som nästa i serien</string>
+    <string name="downloads_empty">Inget nedladdat. Nedladdade böcker kan läsas utan anslutning.</string>
+    <string name="downloads_used">%1$s på enheten</string>
+    <string name="downloads_channel">Nedladdningar</string>
+    <string name="downloading">Laddar ner %1$s</string>
+
+    <string name="reader_needs_download">Boken är inte nedladdad, och servern går inte att nå.</string>
+    <string name="reader_failed">Boken kunde inte öppnas: %1$s</string>
+    <string name="reader_no_pages">Boken har inga sidor.</string>
+    <string name="reader_page">Sida %1$d</string>
+    <string name="reader_page_failed">Sida %1$d kunde inte visas.</string>
+    <string name="reader_page_of">Sida %1$d av %2$d</string>
+    <string name="reader_menu">Meny</string>
+    <string name="mode_ltr">Vänster till höger</string>
+    <string name="mode_rtl">Höger till vänster</string>
+    <string name="mode_vertical">Lodrätt</string>
+    <string name="tts_start">Läs upp</string>
+    <string name="tts_stop">Sluta läsa upp</string>
+
+    <string name="settings_account">Konto</string>
+    <string name="settings_synced">Senast synkad</string>
+    <string name="settings_never_synced">Inte ännu</string>
+    <plurals name="settings_positions_waiting">
+        <item quantity="one">%1$d position väntar på att skickas</item>
+        <item quantity="other">%1$d positioner väntar på att skickas</item>
+    </plurals>
+    <string name="settings_sync_now">Synka</string>
+    <string name="settings_downloads">Nedladdningar</string>
+    <string name="settings_wifi_only">Bara på wifi</string>
+    <string name="settings_wifi_only_help">Nedladdningar väntar på ett nät utan datapott.</string>
+    <string name="settings_auto_next">Ladda ner nästa i en serie</string>
+    <string name="settings_reading">Läsning</string>
+    <string name="settings_image_mode">Serier och manga</string>
+    <string name="settings_spreads">Två sidor bredvid varandra</string>
+    <string name="settings_spreads_help">När skärmen är bredare än hög.</string>
+    <string name="settings_cover_alone">Omslaget för sig</string>
+    <string name="settings_keep_screen_on">Håll skärmen tänd vid läsning</string>
+    <string name="settings_theme">Tema</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Ljust</string>
+    <string name="theme_dark">Mörkt</string>
+    <string name="logout">Logga ut</string>
+    <string name="logout_help">Återkallar appens nyckel och tar bort katalogen och nedladdningarna från enheten.</string>
+
+    <string name="reader_next">Nästa i serien</string>
+    <string name="reader_open_next">Läs den</string>
+    <string name="settings_split_wide">Breda sidor i halvor</string>
+    <string name="settings_split_wide_help">På en smal skärm visas ett uppslag en halva i taget.</string>
+    <string name="settings_tap_layout">Bläddra med ett tryck</string>
+    <string name="tap_sides">Vid sidorna</string>
+    <string name="tap_edges">Vid kanterna</string>
+    <string name="settings_filter">Färger</string>
+    <string name="filter_none">Som tryckt</string>
+    <string name="filter_grayscale">Grå</string>
+    <string name="filter_sepia">Sepia</string>
+    <string name="filter_invert">Inverterade</string>
+    <string name="settings_trim">Skär bort tomma marginaler</string>
+    <string name="settings_trim_help">För sidor som läses från servern; nedladdade böcker visas som de är.</string>
+
+    <string name="widget_name">Fortsätt läsa</string>
+    <string name="widget_description">Boken du läste senast, ett tryck bort.</string>
+    <string name="widget_nothing">Inget påbörjat ännu</string>
+</resources>

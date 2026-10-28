@@ -1,0 +1,12 @@
+{
+  "comment": "Public-domain EPUB 3 test books from Project Gutenberg, fetched by fetch_gutenberg.py (never committed). Chosen for language and script variety. Gutenberg rebuilds its files now and then; a changed checksum is reported, and --accept-changed records the new one.",
+  "url": "https://www.gutenberg.org/ebooks/{id}.epub3.images",
+  "books": [
+    {"id": 11, "title": "Alice's Adventures in Wonderland", "language": "en", "sha256": "4f81245d31380ac1d6eafb9a321e3691369bc70985736ae4bccf849a4f784036"},
+    {"id": 5200, "title": "Metamorphosis", "language": "en", "sha256": "eb16950e2cd88b0ae3cc9c8a81cdc8f236e5262f673a983f82a16426bb446c91"},
+    {"id": 22367, "title": "Die Verwandlung", "language": "de", "sha256": "bfd98560075632c0b805720a00c3143044df38dae447e8c3c04f117bc4560d25"},
+    {"id": 1982, "title": "羅生門", "language": "ja", "sha256": "090f520a4178b3a5575952728e5da718cc5e631de5255130d5ccd6608d11ed94"},
+    {"id": 2000, "title": "Don Quijote", "language": "es", "sha256": "8ee8c3650d397da45097214f21cff57d2ce8d035dfcd6585e0096e3bb74989fa"},
+    {"id": 62806, "title": "Kåtornas folk", "language": "sv", "sha256": "bd4e6477b0ae1e248c1a79c971a7c36c8f6da41634089738e954d63999efe134"}
+  ]
+}

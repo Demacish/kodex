@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!-- Kodex on Unraid: kodex.xml (the web client and the API) and
+     kodex-worker.xml (background jobs), beside a PostgreSQL 18 container of
+     your choice. docs/install.md, "On a NAS". -->
+<Container version="2">
+  <Name>kodex-worker</Name>
+  <Repository>ghcr.io/demacish/kodex:latest</Repository>
+  <Registry>https://github.com/Demacish/kodex/pkgs/container/kodex</Registry>
+  <Network>bridge</Network>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/Demacish/kodex/issues</Support>
+  <Project>https://github.com/Demacish/kodex</Project>
+  <Overview>Kodex's background jobs: scans, matching, covers and nightly backups. Install it beside the kodex container, with the same paths, database and secret key.</Overview>
+  <Category>MediaServer:Books</Category>
+  <WebUI/>
+  <TemplateURL>https://raw.githubusercontent.com/Demacish/kodex/main/deploy/unraid/kodex-worker.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/Demacish/kodex/main/web/public/icon-512.png</Icon>
+  <ExtraParams>--read-only --tmpfs /tmp --security-opt no-new-privileges --health-cmd "python -m kodex.jobs.worker --check" --health-start-period 30s</ExtraParams>
+  <PostArgs>worker</PostArgs>
+  <Config Name="Libraries" Target="/libraries" Default="/mnt/user/books" Mode="rw" Description="The folder with your libraries, one subfolder per library." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/books</Config>
+  <Config Name="Sorted" Target="/libraries/_sorterat" Default="/mnt/user/books-sorted" Mode="rw" Description="A separate, empty folder, where the sorting assistant puts what it sorts." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/books-sorted</Config>
+  <Config Name="Covers" Target="/data/covers" Default="/mnt/user/appdata/kodex/covers" Mode="rw" Description="" Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/kodex/covers</Config>
+  <Config Name="Downloads" Target="/data/downloads" Default="/mnt/user/appdata/kodex/downloads" Mode="rw" Description="" Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/kodex/downloads</Config>
+  <Config Name="Backups" Target="/data/backups" Default="/mnt/user/appdata/kodex/backups" Mode="rw" Description="Nightly database dumps." Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/kodex/backups</Config>
+  <Config Name="Database" Target="DATABASE_URL" Default="postgresql+psycopg://kodex:PASSWORD@UNRAID-IP:5432/kodex" Mode="" Description="Your PostgreSQL 18 container, with a database and user kodex. The same in both Kodex containers." Type="Variable" Display="always" Required="true" Mask="true">postgresql+psycopg://kodex:PASSWORD@UNRAID-IP:5432/kodex</Config>
+  <Config Name="PUID" Target="PUID" Default="99" Mode="" Description="Who Kodex runs as: the owner of your books (99 is nobody)." Type="Variable" Display="always" Required="true" Mask="false">99</Config>
+  <Config Name="PGID" Target="PGID" Default="100" Mode="" Description="Its group (100 is users)." Type="Variable" Display="always" Required="true" Mask="false">100</Config>
+  <Config Name="Secret key" Target="SECRET_KEY" Default="" Mode="" Description="Encrypts two-step login secrets and tracker tokens: a long random string, set once and never changed. The same in both Kodex containers." Type="Variable" Display="always" Required="false" Mask="true"></Config>
+</Container>

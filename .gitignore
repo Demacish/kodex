@@ -1,0 +1,32 @@
+__pycache__/
+*.pyc
+.venv/
+.venv-test/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local dev artifacts
+backend/*.db
+.env.*
+!.env.example
+.env
+
+# Editor/OS
+.DS_Store
+.idea/
+.vscode/
+.mypy_cache/
+.ruff_cache/
+
+# tools/dev-stack.sh
+.dev/
+
+# Gradle and Android (shared/, androidApp/)
+.gradle/
+.kotlin/
+build/
+local.properties
+*.iml
+captures/

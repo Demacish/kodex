@@ -1,0 +1,89 @@
+name: Bench
+
+# Phase 7's numbers (docs/plan.sv.md): 50 000 books scanned by the server
+# image with 2 GB of memory and two CPUs (a NAS), then the API's lists,
+# search, OPDS and the apps' delta sync on them. By hand, and weekly:
+#   gh workflow run bench.yml -f files=50000
+on:
+  workflow_dispatch:
+    inputs:
+      files:
+        description: Books to generate
+        default: "50000"
+  schedule:
+    - cron: "17 4 * * 0"
+
+permissions:
+  contents: read
+
+jobs:
+  bench:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: kodex
+          POSTGRES_PASSWORD: kodex
+          POSTGRES_DB: kodex_bench
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U kodex -d kodex_bench"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      FILES: ${{ inputs.files || '50000' }}
+    defaults:
+      run:
+        # pipefail: a failing benchmark mustn't pass through `tee`.
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - name: The server image
+        run: docker build --build-context webapp=web -t kodex:bench backend
+      - name: A library of ${{ env.FILES }} invented books
+        run: |
+          mkdir -p "$RUNNER_TEMP/lib"
+          docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD/tools:/tools:ro" -v "$RUNNER_TEMP/lib:/out" \
+            --entrypoint sh kodex:bench -c "python -I /tools/fixtures/generate_library.py --out /out --files $FILES --pages 2 --page-size 200x300"
+          du -sh "$RUNNER_TEMP/lib"
+      - name: Scan, with 2 GB and two CPUs
+        run: |
+          docker run --rm --network host --memory 2g --memory-swap 2g --cpus 2 \
+            -e DATABASE_URL=postgresql+psycopg://kodex:kodex@127.0.0.1:5432/kodex_bench -e SCAN_WORKERS=2 -e PYTHONPATH=/app \
+            -v "$PWD/tools:/tools:ro" -v "$RUNNER_TEMP/lib:/library:ro" --entrypoint sh kodex:bench \
+            -c "python /tools/bench/scan.py --root /library --rescans 1 && echo peak_memory_mb=\$((\$(cat /sys/fs/cgroup/memory.peak) / 1048576))" \
+            | tee scan.txt
+      - name: The API on them, with 1 GB
+        run: |
+          docker run --rm --network host --memory 1g --memory-swap 1g --cpus 2 \
+            -e DATABASE_URL=postgresql+psycopg://kodex:kodex@127.0.0.1:5432/kodex_bench -e AUTH_DISABLED=true -e PYTHONPATH=/app \
+            -v "$PWD/tools:/tools:ro" --entrypoint sh kodex:bench \
+            -c "python /tools/bench/api.py && echo peak_memory_mb=\$((\$(cat /sys/fs/cgroup/memory.peak) / 1048576))" \
+            | tee api.txt
+      # Its cgroup's peak counts the page cache of the files it read, as the
+      # other two do: an upper bound, not what it needs.
+      - name: PostgreSQL's memory
+        if: always()
+        run: |
+          id=$(docker ps -q --no-trunc --filter ancestor=postgres:18)
+          group=$(dirname "$(find /sys/fs/cgroup -path "*$id*" -name memory.peak | head -1)")
+          echo "postgres_peak_memory_mb=$(($(cat "$group/memory.peak") / 1048576))" | tee pg.txt
+          echo "postgres_anon_now_mb=$(($(awk '$1 == "anon" {print $2}' "$group/memory.stat") / 1048576))" | tee -a pg.txt
+      - name: Report
+        if: always()
+        run: |
+          {
+            echo "## $FILES books"
+            echo '```'
+            cat scan.txt api.txt pg.txt 2>/dev/null
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: bench
+          path: |
+            scan.txt
+            api.txt
+            pg.txt

@@ -1,0 +1,375 @@
+{"input": "Absolute Corvid 001 (2024) (Webrip) (The Quiet Archivist-DCP).cbz", "kind": "comic", "expect": {"series": "Absolute Corvid", "issue": "1", "year": 2024}}
+{"input": "Batman 001 (2016) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2016}}
+{"input": "Batman 050 (2018) (2 covers) (digital) (Son of Ultron-Empire).cbr", "kind": "comic", "expect": {"series": "Batman", "issue": "50", "year": 2018}}
+{"input": "Detective Comics 1027 (2020) (Webrip) (The Quiet Archivist-DCP).cbz", "kind": "comic", "expect": {"series": "Detective Comics", "issue": "1027", "year": 2020}}
+{"input": "Action Comics 1000 (2018) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Action Comics", "issue": "1000", "year": 2018}}
+{"input": "Action Comics 1000.cbz", "kind": "comic", "expect": {"series": "Action Comics", "issue": "1000"}}
+{"input": "The Amazing Spider-Man 001 (2022) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "The Amazing Spider-Man", "issue": "1", "year": 2022}}
+{"input": "Saga 054 (2018) (Digital) (Zone-Empire).cbr", "kind": "comic", "expect": {"series": "Saga", "issue": "54", "year": 2018}}
+{"input": "The Walking Dead 193 (2019) (Digital) (Zone-Empire).cbr", "kind": "comic", "expect": {"series": "The Walking Dead", "issue": "193", "year": 2019}}
+{"input": "Invincible 144 (2018) (digital) (Son of Ultron-Empire).cbr", "kind": "comic", "expect": {"series": "Invincible", "issue": "144", "year": 2018}}
+{"input": "Monstress 001 (2015) (Digital-Empire).cbr", "kind": "comic", "expect": {"series": "Monstress", "issue": "1", "year": 2015}}
+{"input": "Paper Girls 030 (2019) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Paper Girls", "issue": "30", "year": 2019}}
+{"input": "Immortal X-Men 001 (2022) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Immortal X-Men", "issue": "1", "year": 2022}}
+{"input": "X-Men '92 001 (2016) (Digital).cbz", "kind": "comic", "expect": {"series": "X-Men '92", "issue": "1", "year": 2016}}
+{"input": "Spider-Man 2099 001 (2014) (Digital) (Zone-Empire).cbr", "kind": "comic", "expect": {"series": "Spider-Man 2099", "issue": "1", "year": 2014}}
+{"input": "2000 AD 2350 (2023) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "2000 AD", "issue": "2350", "year": 2023}}
+{"input": "2000 AD Prog 2350 (2023).cbz", "kind": "comic", "expect": {"series": "2000 AD Prog", "issue": "2350", "year": 2023}}
+{"input": "100 Bullets 001 (1999).cbz", "kind": "comic", "expect": {"series": "100 Bullets", "issue": "1", "year": 1999}}
+{"input": "100 Bullets 100 (2009).cbz", "kind": "comic", "expect": {"series": "100 Bullets", "issue": "100", "year": 2009}}
+{"input": "52 001 (2006) (Digital).cbz", "kind": "comic", "expect": {"series": "52", "issue": "1", "year": 2006}}
+{"input": "Batman Beyond 2.0 001 (2013) (Digital).cbr", "kind": "comic", "expect": {"series": "Batman Beyond 2.0", "issue": "1", "year": 2013}}
+{"input": "Batman Beyond 2.0 030 (2014).cbr", "kind": "comic", "expect": {"series": "Batman Beyond 2.0", "issue": "30", "year": 2014}}
+{"input": "Hawkeye 001 (2012) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Hawkeye", "issue": "1", "year": 2012}}
+{"input": "Daredevil 600 (2018) (Digital) (Zone-Empire).cbr", "kind": "comic", "expect": {"series": "Daredevil", "issue": "600", "year": 2018}}
+{"input": "Superman 000 (1994).cbz", "kind": "comic", "expect": {"series": "Superman", "issue": "0", "year": 1994}}
+{"input": "Batman -1 (1998).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "-1", "year": 1998}}
+{"input": "Batman -001 (1998).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "-1", "year": 1998}}
+{"input": "Invincible 013.5 (2004).cbz", "kind": "comic", "expect": {"series": "Invincible", "issue": "13.5", "year": 2004}}
+{"input": "Invincible 013½ (2004).cbz", "kind": "comic", "expect": {"series": "Invincible", "issue": "13.5", "year": 2004}}
+{"input": "Fables 050.5 (2006).cbz", "kind": "comic", "expect": {"series": "Fables", "issue": "50.5", "year": 2006}}
+{"input": "Avengers 001.MU (2017).cbz", "kind": "comic", "expect": {"series": "Avengers", "issue": "1.MU", "year": 2017}}
+{"input": "Wolverine 1.NOW (2013).cbz", "kind": "comic", "expect": {"series": "Wolverine", "issue": "1.NOW", "year": 2013}}
+{"input": "X-Men #1.MU.cbz", "kind": "comic", "expect": {"series": "X-Men", "issue": "1.MU"}}
+{"input": "East of West 045 (2019).cbz", "kind": "comic", "expect": {"series": "East of West", "issue": "45", "year": 2019}}
+{"input": "Sex Criminals 069 (2020).cbz", "kind": "comic", "expect": {"series": "Sex Criminals", "issue": "69", "year": 2020}}
+{"input": "Batman 001.cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1"}}
+{"input": "Batman 1.cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1"}}
+{"input": "Batman 12.cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "12"}}
+{"input": "Batman #12.cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "12"}}
+{"input": "Batman # 12.cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "12"}}
+{"input": "Batman #012 (2016).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "12", "year": 2016}}
+{"input": "Batman v2 #012 (of 12) (2016).cbz", "kind": "comic", "expect": {"series": "Batman", "volume": "2", "issue": "12", "issue_count": 12, "year": 2016}}
+{"input": "Batman v3 012 (2016) (Digital).cbz", "kind": "comic", "expect": {"series": "Batman", "volume": "3", "issue": "12", "year": 2016}}
+{"input": "Batman Vol. 3 #12 (2016).cbz", "kind": "comic", "expect": {"series": "Batman", "volume": "3", "issue": "12", "year": 2016}}
+{"input": "Batman Vol 3 012.cbz", "kind": "comic", "expect": {"series": "Batman", "volume": "3", "issue": "12"}}
+{"input": "Batman (2016) 001.cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "series_year": 2016}}
+{"input": "Batman (2016) #001 (Digital).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "series_year": 2016}}
+{"input": "Batman (2011) 001 (2011).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "series_year": 2011, "year": 2011}}
+{"input": "Batman 001 - The Court of Owls Part 1 (2011).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "title": "The Court of Owls Part 1", "year": 2011}}
+{"input": "Batman 001 - Rebirth (2016).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "title": "Rebirth", "year": 2016}}
+{"input": "Batman - 001 - The Court of Owls (2011).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "title": "The Court of Owls", "year": 2011}}
+{"input": "Batman 001 - 2099 Unlimited (2016).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "title": "2099 Unlimited", "year": 2016}}
+{"input": "Watchmen 01 of 12 (1986).cbz", "kind": "comic", "expect": {"series": "Watchmen", "issue": "1", "issue_count": 12, "year": 1986}}
+{"input": "Watchmen 001 (of 012) (1986).cbz", "kind": "comic", "expect": {"series": "Watchmen", "issue": "1", "issue_count": 12, "year": 1986}}
+{"input": "Silent Tides 001 (of 009) (2015) (Digital) (Zone-Empire).cbr", "kind": "comic", "expect": {"series": "Silent Tides", "issue": "1", "issue_count": 9, "year": 2015}}
+{"input": "Batman #01 (of 03).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "issue_count": 3}}
+{"input": "Batman.012.2016.cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "12", "year": 2016}}
+{"input": "Batman.v2.012.(2016).cbz", "kind": "comic", "expect": {"series": "Batman", "volume": "2", "issue": "12", "year": 2016}}
+{"input": "Batman.Beyond.2.0.001.cbz", "kind": "comic", "expect": {"series": "Batman Beyond 2.0", "issue": "1"}}
+{"input": "Batman_012_(2016).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "12", "year": 2016}}
+{"input": "The_Walking_Dead_100.cbz", "kind": "comic", "expect": {"series": "The Walking Dead", "issue": "100"}}
+{"input": "Y The Last Man 060 (2008).cbz", "kind": "comic", "expect": {"series": "Y The Last Man", "issue": "60", "year": 2008}}
+{"input": "Y - The Last Man 060 (2008).cbz", "kind": "comic", "expect": {"series": "Y - The Last Man", "issue": "60", "year": 2008}}
+{"input": "Lady Death - Scorched Earth 001 (2020).cbz", "kind": "comic", "expect": {"series": "Lady Death - Scorched Earth", "issue": "1", "year": 2020}}
+{"input": "Star Wars - Darth Vader 001 (2020).cbz", "kind": "comic", "expect": {"series": "Star Wars - Darth Vader", "issue": "1", "year": 2020}}
+{"input": "Star Wars Darth Vader 001 (2020).cbz", "kind": "comic", "expect": {"series": "Star Wars Darth Vader", "issue": "1", "year": 2020}}
+{"input": "Batman & Robin 001 (2011).cbz", "kind": "comic", "expect": {"series": "Batman & Robin", "issue": "1", "year": 2011}}
+{"input": "Batman and Robin 001 (2011).cbz", "kind": "comic", "expect": {"series": "Batman and Robin", "issue": "1", "year": 2011}}
+{"input": "Kill or Be Killed 001 (2016).cbz", "kind": "comic", "expect": {"series": "Kill or Be Killed", "issue": "1", "year": 2016}}
+{"input": "Ms. Marvel 001 (2014).cbz", "kind": "comic", "expect": {"series": "Ms. Marvel", "issue": "1", "year": 2014}}
+{"input": "Dr. Strange 001 (2015).cbz", "kind": "comic", "expect": {"series": "Dr. Strange", "issue": "1", "year": 2015}}
+{"input": "G.I. Joe 001 (2019).cbz", "kind": "comic", "expect": {"series": "G.I. Joe", "issue": "1", "year": 2019}}
+{"input": "The Sandman 001 (1989).cbz", "kind": "comic", "expect": {"series": "The Sandman", "issue": "1", "year": 1989}}
+{"input": "Sandman 01.cbz", "kind": "comic", "expect": {"series": "Sandman", "issue": "1"}}
+{"input": "Usagi Yojimbo 001 (2019).cbz", "kind": "comic", "expect": {"series": "Usagi Yojimbo", "issue": "1", "year": 2019}}
+{"input": "Teenage Mutant Ninja Turtles 100 (2019).cbz", "kind": "comic", "expect": {"series": "Teenage Mutant Ninja Turtles", "issue": "100", "year": 2019}}
+{"input": "TMNT 100 (2019).cbz", "kind": "comic", "expect": {"series": "TMNT", "issue": "100", "year": 2019}}
+{"input": "Bone 001 (1991).cbz", "kind": "comic", "expect": {"series": "Bone", "issue": "1", "year": 1991}}
+{"input": "Something is Killing the Children 001 (2019).cbz", "kind": "comic", "expect": {"series": "Something is Killing the Children", "issue": "1", "year": 2019}}
+{"input": "The Department of Truth 001 (2020).cbz", "kind": "comic", "expect": {"series": "The Department of Truth", "issue": "1", "year": 2020}}
+{"input": "Batman 404 (1987).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "404", "year": 1987}}
+{"input": "Batman 001 (1940).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 1940}}
+{"input": "Superman 1 (1939).cbz", "kind": "comic", "expect": {"series": "Superman", "issue": "1", "year": 1939}}
+{"input": "Batman 001 (2016) (c2c).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2016, "extra_tags": ["c2c"]}}
+{"input": "Batman 001 (2016)(Digital).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2016, "extra_tags": ["Digital"]}}
+{"input": "Batman 001(2016).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2016}}
+{"input": "Batman 001 [2016].cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2016}}
+{"input": "Batman 001 {2016}.cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2016}}
+{"input": "Batman 001 (Jan 2016).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2016}}
+{"input": "Batman 001 (2016-01).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2016}}
+{"input": "Batman 001 (2016-2017).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2016}}
+{"input": "The Mighty Thor 700 (2017) (Digital).cbz", "kind": "comic", "expect": {"series": "The Mighty Thor", "issue": "700", "year": 2017}}
+{"input": "Uncanny X-Men 266 (1990).cbz", "kind": "comic", "expect": {"series": "Uncanny X-Men", "issue": "266", "year": 1990}}
+{"input": "Giant-Size X-Men 001 (1975).cbz", "kind": "comic", "expect": {"series": "Giant-Size X-Men", "issue": "1", "year": 1975}}
+{"input": "Absolute Corvid 012 (2025).cbz", "kind": "comic", "expect": {"series": "Absolute Corvid", "issue": "12", "year": 2025}}
+{"input": "Batman Black and White 001 (1996).cbz", "kind": "comic", "expect": {"series": "Batman Black and White", "issue": "1", "year": 1996}}
+{"input": "Batman 001 (2016) [Zone].cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2016, "extra_tags": ["Zone"]}}
+{"input": "[Zone] Batman 001 (2016).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2016, "scan_group": "Zone"}}
+{"input": "Batman 001 (2016) (Digital) (Zone-Empire) [cv-12345].cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2016, "extra_tags": ["Digital", "Zone-Empire", "cv-12345"]}}
+{"input": "Batman 001.CBZ", "kind": "comic", "expect": {"series": "Batman", "issue": "1"}}
+{"input": "Batman 001 (2016).zip", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2016}}
+{"input": "  Batman   001  .cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1"}}
+{"input": "The Walking Dead 193 -- extra junk.cbz", "kind": "comic", "expect": {"series": "The Walking Dead", "issue": "193"}}
+{"input": "The Walking Dead 193 __ extra junk.cbz", "kind": "comic", "expect": {"series": "The Walking Dead", "issue": "193"}}
+{"input": "Batman 001 (2016) (French).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2016, "language": "fr"}}
+{"input": "Batman 001 (2016) [SPA].cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2016, "language": "es"}}
+{"input": "Fantomen 2023-01.cbz", "kind": "comic", "expect": {"series": "Fantomen", "issue": "1", "year": 2023}, "xfail": "Swedish magazine numbering year-issue is not supported yet"}
+{"input": "Kalle Anka & C:o 2016 12.cbz", "kind": "comic", "expect": {"series": "Kalle Anka & C:o", "issue": "12", "year": 2016}, "xfail": "Swedish magazine numbering year-issue is not supported yet"}
+{"input": "Batman Annual 001 (2017).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2017, "format": "annual"}}
+{"input": "Batman Annual 01 (2021).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2021, "format": "annual"}}
+{"input": "Batman Annual 2021.cbz", "kind": "comic", "expect": {"series": "Batman", "year": 2021, "format": "annual"}}
+{"input": "Batman 2021 Annual.cbz", "kind": "comic", "expect": {"series": "Batman", "year": 2021, "format": "annual"}}
+{"input": "Batman 2021 Annual 001.cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2021, "format": "annual"}}
+{"input": "Batman Annual 2016 001.cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2016, "format": "annual"}}
+{"input": "Detective Comics Annual 003 (2020) (Digital).cbz", "kind": "comic", "expect": {"series": "Detective Comics", "issue": "3", "year": 2020, "format": "annual"}}
+{"input": "The Amazing Spider-Man Annual 001 (2018).cbz", "kind": "comic", "expect": {"series": "The Amazing Spider-Man", "issue": "1", "year": 2018, "format": "annual"}}
+{"input": "Batman (2016) Annual 001.cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "series_year": 2016, "format": "annual"}}
+{"input": "Batman Special 001 (1984).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 1984, "format": "special"}}
+{"input": "Batman SP01.cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "format": "special"}}
+{"input": "Batman - SP01 (2019).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2019, "format": "special"}}
+{"input": "Spawn FCBD 2019.cbz", "kind": "comic", "expect": {"series": "Spawn", "year": 2019, "format": "special", "edition": "FCBD"}}
+{"input": "Batman One-Shot (2020).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2020, "format": "one_shot", "series_year": 2020}}
+{"input": "Batman - One Shot (2020).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2020, "format": "one_shot", "series_year": 2020}}
+{"input": "Batman (One-Shot) (2020).cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2020, "series_year": 2020, "format": "one_shot"}}
+{"input": "Batman - The Killing Joke (1988).cbz", "kind": "comic", "expect": {"series": "Batman - The Killing Joke", "year": 1988, "series_year": 1988}}
+{"input": "Saga Vol. 01 (2012) (Digital).cbz", "kind": "comic", "expect": {"series": "Saga", "volume": "1", "year": 2012, "format": "collected"}}
+{"input": "Saga v01 (2012) (Digital) (F) (Zone-Empire).cbr", "kind": "comic", "expect": {"series": "Saga", "volume": "1", "year": 2012, "format": "collected"}}
+{"input": "Saga Volume 1 (2012).cbz", "kind": "comic", "expect": {"series": "Saga", "volume": "1", "year": 2012, "format": "collected"}}
+{"input": "Saga TPB Vol 01 (2012).cbz", "kind": "comic", "expect": {"series": "Saga", "volume": "1", "year": 2012, "format": "collected", "edition": "TPB"}}
+{"input": "Saga Vol. 01 - Volume One (2012) (TPB).cbz", "kind": "comic", "expect": {"series": "Saga", "volume": "1", "title": "Volume One", "year": 2012, "format": "collected", "edition": "TPB"}}
+{"input": "Batman - The Court of Owls (2012) (TPB).cbz", "kind": "comic", "expect": {"series": "Batman - The Court of Owls", "year": 2012, "series_year": 2012, "format": "collected", "edition": "TPB"}}
+{"input": "Watchmen (1987) (TPB).cbz", "kind": "comic", "expect": {"series": "Watchmen", "year": 1987, "series_year": 1987, "format": "collected", "edition": "TPB"}}
+{"input": "Absolute Watchmen (2005).cbz", "kind": "comic", "expect": {"series": "Absolute Watchmen", "year": 2005, "series_year": 2005}}
+{"input": "Watchmen (Absolute Edition) (2005).cbz", "kind": "comic", "expect": {"series": "Watchmen", "year": 2005, "series_year": 2005, "format": "collected", "edition": "Absolute"}}
+{"input": "Saga Deluxe Edition Vol. 01 (2014).cbz", "kind": "comic", "expect": {"series": "Saga", "volume": "1", "year": 2014, "format": "collected", "edition": "Deluxe"}}
+{"input": "Saga Deluxe Edition (2014).cbz", "kind": "comic", "expect": {"series": "Saga", "year": 2014, "series_year": 2014, "format": "collected", "edition": "Deluxe"}}
+{"input": "The Walking Dead Compendium 001 (2009).cbz", "kind": "comic", "expect": {"series": "The Walking Dead", "volume": "1", "year": 2009, "format": "collected", "edition": "Compendium"}}
+{"input": "Spider-Man Omnibus Vol. 1 (2007).cbz", "kind": "comic", "expect": {"series": "Spider-Man", "volume": "1", "year": 2007, "format": "collected", "edition": "Omnibus"}}
+{"input": "Ultimate Spider-Man Omnibus (2023).cbz", "kind": "comic", "expect": {"series": "Ultimate Spider-Man", "year": 2023, "series_year": 2023, "format": "collected", "edition": "Omnibus"}}
+{"input": "Batman HC (2018).cbz", "kind": "comic", "expect": {"series": "Batman", "year": 2018, "format": "collected", "edition": "HC", "series_year": 2018}}
+{"input": "Batman Vol. 01 - I Am Gotham (2017) (Digital) (TPB).cbz", "kind": "comic", "expect": {"series": "Batman", "volume": "1", "title": "I Am Gotham", "year": 2017, "format": "collected", "edition": "TPB"}}
+{"input": "Batman v01 - I Am Gotham (2017).cbz", "kind": "comic", "expect": {"series": "Batman", "volume": "1", "title": "I Am Gotham", "year": 2017, "format": "collected"}}
+{"input": "Ms. Marvel Vol. 01 - No Normal (2014).cbz", "kind": "comic", "expect": {"series": "Ms. Marvel", "volume": "1", "title": "No Normal", "year": 2014, "format": "collected"}}
+{"input": "Invincible Ultimate Collection Vol. 01 (2005).cbz", "kind": "comic", "expect": {"series": "Invincible Ultimate Collection", "volume": "1", "year": 2005, "format": "collected"}}
+{"input": "Batman Vol. 2 (2016).cbz", "kind": "comic", "expect": {"series": "Batman", "volume": "2", "year": 2016, "format": "collected"}}
+{"input": "Hellboy Library Edition v01 (2008).cbz", "kind": "comic", "expect": {"series": "Hellboy", "volume": "1", "year": 2008, "format": "collected", "edition": "Library"}}
+{"input": "Bone One Volume Edition (2004).cbz", "kind": "comic", "expect": {"series": "Bone One Volume Edition", "year": 2004, "series_year": 2004}}
+{"input": "Batman 1989.cbz", "kind": "comic", "expect": {"series": "Batman", "year": 1989, "ambiguous": true}}
+{"input": "52.cbz", "kind": "comic", "expect": {"series": "52", "ambiguous": true}}
+{"input": "2000 AD (2020).cbz", "kind": "comic", "expect": {"series": "2000 AD", "year": 2020, "series_year": 2020}}
+{"input": "Batman 001 2016.cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "year": 2016}}
+{"input": "Avengers 2018 001.cbz", "kind": "comic", "expect": {"series": "Avengers 2018", "issue": "1", "ambiguous": true}}
+{"input": "Blade Runner 2019 001 (2019).cbz", "kind": "comic", "expect": {"series": "Blade Runner 2019", "issue": "1", "year": 2019, "ambiguous": true}}
+{"input": "Batman 001-003.cbz", "kind": "comic", "expect": {"series": "Batman", "issue": "1", "ambiguous": true}}
+{"input": "Spider-Man 2099 (2014).cbz", "kind": "comic", "expect": {"series": "Spider-Man 2099", "year": 2014, "series_year": 2014}, "xfail": "a series name ending in a number reads as the issue without a series hint"}
+{"input": "Spider-Man 2099 001 (2014).cbz", "kind": "comic", "expect": {"series": "Spider-Man 2099", "issue": "1", "year": 2014}, "series_hint": "Spider-Man 2099 (2014)"}
+{"input": "Spider-Man 2099 (2014).cbz", "kind": "comic", "expect": {"series": "Spider-Man 2099", "year": 2014, "series_year": 2014}, "series_hint": "Spider-Man 2099"}
+{"input": "Batman Beyond 2.0 001.cbz", "kind": "comic", "expect": {"series": "Batman Beyond 2.0", "issue": "1"}, "series_hint": "Batman Beyond 2.0"}
+{"input": "Avengers 1959 001.cbz", "kind": "comic", "expect": {"series": "Avengers 1959", "issue": "1"}, "series_hint": "Avengers 1959 (2011)"}
+{"input": "X-Men 2099 (1993) 001.cbz", "kind": "comic", "expect": {"series": "X-Men 2099", "issue": "1", "series_year": 1993}}
+{"input": "Batman 1 1 (2016).cbz", "kind": "comic", "expect": {"series": "Batman", "volume": "1", "issue": "1", "year": 2016}, "xfail": "two bare numbers without a marker"}
+{"input": "One Piece v01 (2003) (Digital).cbz", "kind": "manga", "expect": {"series": "One Piece", "volume": "1", "year": 2003}}
+{"input": "One Piece v001.cbz", "kind": "manga", "expect": {"series": "One Piece", "volume": "1"}}
+{"input": "One Piece Vol. 1.cbz", "kind": "manga", "expect": {"series": "One Piece", "volume": "1"}}
+{"input": "One Piece Volume 001.cbz", "kind": "manga", "expect": {"series": "One Piece", "volume": "1"}}
+{"input": "One Piece - Volume 1.cbz", "kind": "manga", "expect": {"series": "One Piece", "volume": "1"}}
+{"input": "One Piece v03 c012.cbz", "kind": "manga", "expect": {"series": "One Piece", "volume": "3", "chapter": "12"}}
+{"input": "One Piece c012.cbz", "kind": "manga", "expect": {"series": "One Piece", "chapter": "12"}}
+{"input": "One Piece ch012.cbz", "kind": "manga", "expect": {"series": "One Piece", "chapter": "12"}}
+{"input": "One Piece Ch. 12.cbz", "kind": "manga", "expect": {"series": "One Piece", "chapter": "12"}}
+{"input": "One Piece Ch.12.cbz", "kind": "manga", "expect": {"series": "One Piece", "chapter": "12"}}
+{"input": "One Piece Chapter 12.cbz", "kind": "manga", "expect": {"series": "One Piece", "chapter": "12"}}
+{"input": "One Piece - Chapter 12 - The Title.cbz", "kind": "manga", "expect": {"series": "One Piece", "chapter": "12", "title": "The Title"}}
+{"input": "One Piece 012.cbz", "kind": "manga", "expect": {"series": "One Piece", "chapter": "12"}}
+{"input": "One Piece 1012.cbz", "kind": "manga", "expect": {"series": "One Piece", "chapter": "1012"}}
+{"input": "[Lumen Scans] Hoshi no Uta - c012 (v03) [Digital].cbz", "kind": "manga", "expect": {"series": "Hoshi no Uta", "volume": "3", "chapter": "12", "scan_group": "Lumen Scans", "extra_tags": ["Digital"]}}
+{"input": "[Group] Title - c012 (v03) [HQ].cbz", "kind": "manga", "expect": {"series": "Title", "volume": "3", "chapter": "12", "scan_group": "Group", "extra_tags": ["HQ"]}}
+{"input": "[Some-Scans] Bramble - c001 [en].cbz", "kind": "manga", "expect": {"series": "Bramble", "chapter": "1", "scan_group": "Some-Scans", "language": "en"}}
+{"input": "Bramble v01 c001-010.cbz", "kind": "manga", "expect": {"series": "Bramble", "volume": "1", "chapter": "1", "chapter_end": "10"}}
+{"input": "Fullmetal Alchemist c010-012.cbz", "kind": "manga", "expect": {"series": "Fullmetal Alchemist", "chapter": "10", "chapter_end": "12"}}
+{"input": "Fullmetal Alchemist Ch. 010-012.cbz", "kind": "manga", "expect": {"series": "Fullmetal Alchemist", "chapter": "10", "chapter_end": "12"}}
+{"input": "Naruto_v01_c001.cbz", "kind": "manga", "expect": {"series": "Naruto", "volume": "1", "chapter": "1"}}
+{"input": "Naruto v01 c001 (2003).cbz", "kind": "manga", "expect": {"series": "Naruto", "volume": "1", "chapter": "1", "year": 2003}}
+{"input": "Kaguya-sama wa Kokurasetai c153b.cbz", "kind": "manga", "expect": {"series": "Kaguya-sama wa Kokurasetai", "chapter": "153.5"}}
+{"input": "Kaguya-sama c153.5.cbz", "kind": "manga", "expect": {"series": "Kaguya-sama", "chapter": "153.5"}}
+{"input": "Chainsaw Man c097.5.cbz", "kind": "manga", "expect": {"series": "Chainsaw Man", "chapter": "97.5"}}
+{"input": "Chainsaw Man Ch.97.5 - Extra.cbz", "kind": "manga", "expect": {"series": "Chainsaw Man", "chapter": "97.5", "title": "Extra"}}
+{"input": "Chainsaw Man Vol.11 Ch.97.cbz", "kind": "manga", "expect": {"series": "Chainsaw Man", "volume": "11", "chapter": "97"}}
+{"input": "Jujutsu Kaisen v01-03.cbz", "kind": "manga", "expect": {"series": "Jujutsu Kaisen", "volume": "1", "volume_end": "3"}}
+{"input": "Jujutsu Kaisen Vol 1-3.cbz", "kind": "manga", "expect": {"series": "Jujutsu Kaisen", "volume": "1", "volume_end": "3"}}
+{"input": "Attack on Titan 001-010.cbz", "kind": "manga", "expect": {"series": "Attack on Titan", "chapter": "1", "chapter_end": "10"}}
+{"input": "Attack on Titan Episode 12.cbz", "kind": "manga", "expect": {"series": "Attack on Titan", "chapter": "12"}}
+{"input": "Shingeki no Kyojin Ep. 12.cbz", "kind": "manga", "expect": {"series": "Shingeki no Kyojin", "chapter": "12"}}
+{"input": "Yotsuba&! v01.cbz", "kind": "manga", "expect": {"series": "Yotsuba&!", "volume": "1"}}
+{"input": "Yotsuba to! v01.cbz", "kind": "manga", "expect": {"series": "Yotsuba to!", "volume": "1"}}
+{"input": "Rent-a-Girlfriend v01.cbz", "kind": "manga", "expect": {"series": "Rent-a-Girlfriend", "volume": "1"}}
+{"input": "rent-a-(really shy)-girlfriend v01.cbz", "kind": "manga", "expect": {"series": "rent-a-(really shy)-girlfriend", "volume": "1"}}
+{"input": "Kanojo, Okarishimasu v01.cbz", "kind": "manga", "expect": {"series": "Kanojo, Okarishimasu", "volume": "1"}}
+{"input": "Komi-san wa, Comyushou desu. v01.cbz", "kind": "manga", "expect": {"series": "Komi-san wa, Comyushou desu", "volume": "1"}}
+{"input": "Mob Psycho 100 v01.cbz", "kind": "manga", "expect": {"series": "Mob Psycho 100", "volume": "1"}}
+{"input": "Mob Psycho 100 c012.cbz", "kind": "manga", "expect": {"series": "Mob Psycho 100", "chapter": "12"}}
+{"input": "Mob Psycho 100 012.cbz", "kind": "manga", "expect": {"series": "Mob Psycho 100", "chapter": "12"}}
+{"input": "7 Seeds v01.cbz", "kind": "manga", "expect": {"series": "7 Seeds", "volume": "1"}}
+{"input": "20th Century Boys v01.cbz", "kind": "manga", "expect": {"series": "20th Century Boys", "volume": "1"}}
+{"input": "Hunter x Hunter v01.cbz", "kind": "manga", "expect": {"series": "Hunter x Hunter", "volume": "1"}}
+{"input": "Hunter X Hunter 390.cbz", "kind": "manga", "expect": {"series": "Hunter X Hunter", "chapter": "390"}}
+{"input": "Dragon Ball Super 012.cbz", "kind": "manga", "expect": {"series": "Dragon Ball Super", "chapter": "12"}}
+{"input": "Vagabond v37 (2015).cbz", "kind": "manga", "expect": {"series": "Vagabond", "volume": "37", "year": 2015}}
+{"input": "ワンピース 第3巻.cbz", "kind": "manga", "expect": {"series": "ワンピース", "volume": "3"}}
+{"input": "ワンピース 第1012話.cbz", "kind": "manga", "expect": {"series": "ワンピース", "chapter": "1012"}}
+{"input": "ワンピース 第12话.cbz", "kind": "manga", "expect": {"series": "ワンピース", "chapter": "12"}}
+{"input": "進撃の巨人 第1巻.cbz", "kind": "manga", "expect": {"series": "進撃の巨人", "volume": "1"}}
+{"input": "進撃の巨人 1巻.cbz", "kind": "manga", "expect": {"series": "進撃の巨人", "volume": "1"}}
+{"input": "鬼滅の刃 第12話 (2016).cbz", "kind": "manga", "expect": {"series": "鬼滅の刃", "chapter": "12", "year": 2016}}
+{"input": "鬼滅の刃 第3巻 第12話.cbz", "kind": "manga", "expect": {"series": "鬼滅の刃", "volume": "3", "chapter": "12"}}
+{"input": "나 혼자만 레벨업 제3권.cbz", "kind": "manga", "expect": {"series": "나 혼자만 레벨업", "volume": "3"}}
+{"input": "나 혼자만 레벨업 12화.cbz", "kind": "manga", "expect": {"series": "나 혼자만 레벨업", "chapter": "12"}}
+{"input": "나 혼자만 레벨업 제12화.cbz", "kind": "manga", "expect": {"series": "나 혼자만 레벨업", "chapter": "12"}}
+{"input": "Берсерк Том 3 Глава 12.cbz", "kind": "manga", "expect": {"series": "Берсерк", "volume": "3", "chapter": "12"}}
+{"input": "Берсерк Том 3.cbz", "kind": "manga", "expect": {"series": "Берсерк", "volume": "3"}}
+{"input": "Берсерк Глава 12.cbz", "kind": "manga", "expect": {"series": "Берсерк", "chapter": "12"}}
+{"input": "Ван-Пис т. 3 гл. 12.cbz", "kind": "manga", "expect": {"series": "Ван-Пис", "volume": "3", "chapter": "12"}}
+{"input": "One Piece T03.cbz", "kind": "manga", "expect": {"series": "One Piece", "volume": "3"}}
+{"input": "One Piece Tome 3.cbz", "kind": "manga", "expect": {"series": "One Piece", "volume": "3"}}
+{"input": "One Piece Tome 03 (FR).cbz", "kind": "manga", "expect": {"series": "One Piece", "volume": "3", "language": "fr"}}
+{"input": "Naruto S01.cbz", "kind": "manga", "expect": {"series": "Naruto", "volume": "1"}}
+{"input": "One Piece v03 c012 v04.cbz", "kind": "manga", "expect": {"series": "One Piece", "volume": "3", "chapter": "12"}}
+{"input": "One Piece c012 c013.cbz", "kind": "manga", "expect": {"series": "One Piece", "chapter": "12"}}
+{"input": "Dr. Stone v01.cbz", "kind": "manga", "expect": {"series": "Dr. Stone", "volume": "1"}}
+{"input": "Dr.Stone.v01.c001.cbz", "kind": "manga", "expect": {"series": "Dr Stone", "volume": "1", "chapter": "1"}}
+{"input": "Gintama 001 [English].cbz", "kind": "manga", "expect": {"series": "Gintama", "chapter": "1", "language": "en"}}
+{"input": "Gintama 001 [Raw].cbz", "kind": "manga", "expect": {"series": "Gintama", "chapter": "1", "language": "ja"}}
+{"input": "One Punch Man 150 (Webcomic).cbz", "kind": "manga", "expect": {"series": "One Punch Man", "chapter": "150", "extra_tags": ["Webcomic"]}}
+{"input": "Oyasumi Punpun v01 (2007) (Digital) (danke-Empire).cbz", "kind": "manga", "expect": {"series": "Oyasumi Punpun", "volume": "1", "year": 2007}}
+{"input": "Akira v01 (1988).cbz", "kind": "manga", "expect": {"series": "Akira", "volume": "1", "year": 1988}}
+{"input": "Akira Vol. 1 (1988).cbz", "kind": "manga", "expect": {"series": "Akira", "volume": "1", "year": 1988}}
+{"input": "Akira 35th Anniversary Edition v01.cbz", "kind": "manga", "expect": {"series": "Akira 35th Anniversary Edition", "volume": "1"}}
+{"input": "Witch Hat Atelier 060.cbz", "kind": "manga", "expect": {"series": "Witch Hat Atelier", "chapter": "60"}}
+{"input": "Witch Hat Atelier v10 (2022).cbz", "kind": "manga", "expect": {"series": "Witch Hat Atelier", "volume": "10", "year": 2022}}
+{"input": "Spy x Family c001.cbz", "kind": "manga", "expect": {"series": "Spy x Family", "chapter": "1"}}
+{"input": "SPY×FAMILY 第1巻.cbz", "kind": "manga", "expect": {"series": "SPY×FAMILY", "volume": "1"}}
+{"input": "Uzumaki (2013) (Digital).cbz", "kind": "manga", "expect": {"series": "Uzumaki", "year": 2013, "series_year": 2013}}
+{"input": "Gantz.v01.cbz", "kind": "manga", "expect": {"series": "Gantz", "volume": "1"}}
+{"input": "Bleach - c686 - Death and Strawberry.cbz", "kind": "manga", "expect": {"series": "Bleach", "chapter": "686", "title": "Death and Strawberry"}}
+{"input": "Bleach v74 c686.cbz", "kind": "manga", "expect": {"series": "Bleach", "volume": "74", "chapter": "686"}}
+{"input": "Tokyo Ghoul re c001.cbz", "kind": "manga", "expect": {"series": "Tokyo Ghoul re", "chapter": "1"}}
+{"input": "Tokyo Ghoul;re c001.cbz", "kind": "manga", "expect": {"series": "Tokyo Ghoul;re", "chapter": "1"}}
+{"input": "Vinland Saga 200.5.cbz", "kind": "manga", "expect": {"series": "Vinland Saga", "chapter": "200.5"}}
+{"input": "Monster - Perfect Edition v01.cbz", "kind": "manga", "expect": {"series": "Monster - Perfect Edition", "volume": "1"}}
+{"input": "Blame! v01.cbz", "kind": "manga", "expect": {"series": "Blame!", "volume": "1"}}
+{"input": "Ajin c001 (Kitsune TL).cbz", "kind": "manga", "expect": {"series": "Ajin", "chapter": "1", "extra_tags": ["Kitsune TL"]}}
+{"input": "Sakamoto Days c100 [Viz].cbz", "kind": "manga", "expect": {"series": "Sakamoto Days", "chapter": "100", "extra_tags": ["Viz"]}}
+{"input": "Frieren 120.cbz", "kind": "manga", "expect": {"series": "Frieren", "chapter": "120"}}
+{"input": "Sousou no Frieren v12.cbz", "kind": "manga", "expect": {"series": "Sousou no Frieren", "volume": "12"}}
+{"input": "Kingdom 2025.cbz", "kind": "manga", "expect": {"series": "Kingdom", "chapter": "2025"}, "xfail": "a four-digit chapter in the year range reads as a year"}
+{"input": "Leviathan Wakes (The Expanse #1).epub", "kind": "book", "expect": {"series": "The Expanse", "issue": "1", "title": "Leviathan Wakes"}}
+{"input": "Leviathan Wakes (The Expanse, Book 1).epub", "kind": "book", "expect": {"series": "The Expanse", "issue": "1", "title": "Leviathan Wakes"}}
+{"input": "Caliban's War (The Expanse #2) (2012).epub", "kind": "book", "expect": {"series": "The Expanse", "issue": "2", "title": "Caliban's War", "year": 2012}}
+{"input": "The Expanse 01 - Leviathan Wakes.epub", "kind": "book", "expect": {"series": "The Expanse", "issue": "1", "title": "Leviathan Wakes"}}
+{"input": "Discworld 01 - The Colour of Magic (1983).epub", "kind": "book", "expect": {"series": "Discworld", "issue": "1", "title": "The Colour of Magic", "year": 1983}}
+{"input": "Harry Potter 3 - Harry Potter and the Prisoner of Azkaban.epub", "kind": "book", "expect": {"series": "Harry Potter", "issue": "3", "title": "Harry Potter and the Prisoner of Azkaban"}}
+{"input": "Dune (1965).epub", "kind": "book", "expect": {"title": "Dune", "year": 1965}}
+{"input": "Pride and Prejudice.epub", "kind": "book", "expect": {"title": "Pride and Prejudice"}}
+{"input": "Röda rummet.epub", "kind": "book", "expect": {"title": "Röda rummet"}}
+{"input": "Millennium 1 - Män som hatar kvinnor.epub", "kind": "book", "expect": {"series": "Millennium", "issue": "1", "title": "Män som hatar kvinnor"}}
+{"input": "Män som hatar kvinnor (Millennium #1).epub", "kind": "book", "expect": {"series": "Millennium", "issue": "1", "title": "Män som hatar kvinnor"}}
+{"input": "Mördare utan ansikte (Wallander, bok 1).epub", "kind": "book", "expect": {"series": "Wallander", "issue": "1", "title": "Mördare utan ansikte"}}
+{"input": "The Fellowship of the Ring (The Lord of the Rings #1).pdf", "kind": "book", "expect": {"series": "The Lord of the Rings", "issue": "1", "title": "The Fellowship of the Ring"}}
+{"input": "Foundation (Foundation #1) (1951).epub", "kind": "book", "expect": {"series": "Foundation", "issue": "1", "title": "Foundation", "year": 1951}}
+{"input": "1984.epub", "kind": "book", "expect": {"title": "1984", "ambiguous": true}}
+{"input": "Fahrenheit 451.epub", "kind": "book", "expect": {"title": "Fahrenheit 451"}, "xfail": "a number at the end of a book title reads as a series index"}
+{"input": "Catch-22 (1961).epub", "kind": "book", "expect": {"title": "Catch-22", "year": 1961}}
+{"input": "Venom 001 (2000) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Venom", "issue": "1", "year": 2000}}
+{"input": "Venom (2000) #1.cbz", "kind": "comic", "expect": {"series": "Venom", "issue": "1", "series_year": 2000}}
+{"input": "Nightwing 008 (2001) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Nightwing", "issue": "8", "year": 2001}}
+{"input": "Nightwing (2001) #8.cbz", "kind": "comic", "expect": {"series": "Nightwing", "issue": "8", "series_year": 2001}}
+{"input": "Wonder Woman 015 (2002) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Wonder Woman", "issue": "15", "year": 2002}}
+{"input": "Wonder Woman (2002) #15.cbz", "kind": "comic", "expect": {"series": "Wonder Woman", "issue": "15", "series_year": 2002}}
+{"input": "Green Lantern 022 (2003) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Green Lantern", "issue": "22", "year": 2003}}
+{"input": "Green Lantern (2003) #22.cbz", "kind": "comic", "expect": {"series": "Green Lantern", "issue": "22", "series_year": 2003}}
+{"input": "The Flash 029 (2004) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "The Flash", "issue": "29", "year": 2004}}
+{"input": "The Flash (2004) #29.cbz", "kind": "comic", "expect": {"series": "The Flash", "issue": "29", "series_year": 2004}}
+{"input": "Aquaman 036 (2005) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Aquaman", "issue": "36", "year": 2005}}
+{"input": "Aquaman (2005) #36.cbz", "kind": "comic", "expect": {"series": "Aquaman", "issue": "36", "series_year": 2005}}
+{"input": "Harley Quinn 043 (2006) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Harley Quinn", "issue": "43", "year": 2006}}
+{"input": "Harley Quinn (2006) #43.cbz", "kind": "comic", "expect": {"series": "Harley Quinn", "issue": "43", "series_year": 2006}}
+{"input": "Nightfox 050 (2007) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Nightfox", "issue": "50", "year": 2007}}
+{"input": "Nightfox (2007) #50.cbz", "kind": "comic", "expect": {"series": "Nightfox", "issue": "50", "series_year": 2007}}
+{"input": "Black Panther 057 (2008) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Black Panther", "issue": "57", "year": 2008}}
+{"input": "Black Panther (2008) #57.cbz", "kind": "comic", "expect": {"series": "Black Panther", "issue": "57", "series_year": 2008}}
+{"input": "Captain America 004 (2009) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Captain America", "issue": "4", "year": 2009}}
+{"input": "Captain America (2009) #4.cbz", "kind": "comic", "expect": {"series": "Captain America", "issue": "4", "series_year": 2009}}
+{"input": "Iron Man 011 (2010) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Iron Man", "issue": "11", "year": 2010}}
+{"input": "Iron Man (2010) #11.cbz", "kind": "comic", "expect": {"series": "Iron Man", "issue": "11", "series_year": 2010}}
+{"input": "Fantastic Four 018 (2011) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Fantastic Four", "issue": "18", "year": 2011}}
+{"input": "Fantastic Four (2011) #18.cbz", "kind": "comic", "expect": {"series": "Fantastic Four", "issue": "18", "series_year": 2011}}
+{"input": "Moon Knight 025 (2012) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Moon Knight", "issue": "25", "year": 2012}}
+{"input": "Moon Knight (2012) #25.cbz", "kind": "comic", "expect": {"series": "Moon Knight", "issue": "25", "series_year": 2012}}
+{"input": "She-Hulk 032 (2013) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "She-Hulk", "issue": "32", "year": 2013}}
+{"input": "She-Hulk (2013) #32.cbz", "kind": "comic", "expect": {"series": "She-Hulk", "issue": "32", "series_year": 2013}}
+{"input": "Doctor Strange 039 (2014) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Doctor Strange", "issue": "39", "year": 2014}}
+{"input": "Doctor Strange (2014) #39.cbz", "kind": "comic", "expect": {"series": "Doctor Strange", "issue": "39", "series_year": 2014}}
+{"input": "Ghost Rider 046 (2015) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Ghost Rider", "issue": "46", "year": 2015}}
+{"input": "Ghost Rider (2015) #46.cbz", "kind": "comic", "expect": {"series": "Ghost Rider", "issue": "46", "series_year": 2015}}
+{"input": "Deadpool 053 (2016) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Deadpool", "issue": "53", "year": 2016}}
+{"input": "Deadpool (2016) #53.cbz", "kind": "comic", "expect": {"series": "Deadpool", "issue": "53", "series_year": 2016}}
+{"input": "Wolverine 060 (2017) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Wolverine", "issue": "60", "year": 2017}}
+{"input": "Wolverine (2017) #60.cbz", "kind": "comic", "expect": {"series": "Wolverine", "issue": "60", "series_year": 2017}}
+{"input": "Hellboy 007 (2018) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Hellboy", "issue": "7", "year": 2018}}
+{"input": "Hellboy (2018) #7.cbz", "kind": "comic", "expect": {"series": "Hellboy", "issue": "7", "series_year": 2018}}
+{"input": "Spawn 014 (2019) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Spawn", "issue": "14", "year": 2019}}
+{"input": "Spawn (2019) #14.cbz", "kind": "comic", "expect": {"series": "Spawn", "issue": "14", "series_year": 2019}}
+{"input": "The Boys 021 (2020) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "The Boys", "issue": "21", "year": 2020}}
+{"input": "The Boys (2020) #21.cbz", "kind": "comic", "expect": {"series": "The Boys", "issue": "21", "series_year": 2020}}
+{"input": "Locke & Key 028 (2021) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Locke & Key", "issue": "28", "year": 2021}}
+{"input": "Locke & Key (2021) #28.cbz", "kind": "comic", "expect": {"series": "Locke & Key", "issue": "28", "series_year": 2021}}
+{"input": "Lazarus 035 (2022) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Lazarus", "issue": "35", "year": 2022}}
+{"input": "Lazarus (2022) #35.cbz", "kind": "comic", "expect": {"series": "Lazarus", "issue": "35", "series_year": 2022}}
+{"input": "Descender 042 (2023) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Descender", "issue": "42", "year": 2023}}
+{"input": "Descender (2023) #42.cbz", "kind": "comic", "expect": {"series": "Descender", "issue": "42", "series_year": 2023}}
+{"input": "Black Science 049 (2024) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Black Science", "issue": "49", "year": 2024}}
+{"input": "Black Science (2024) #49.cbz", "kind": "comic", "expect": {"series": "Black Science", "issue": "49", "series_year": 2024}}
+{"input": "Rat Queens 056 (2000) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Rat Queens", "issue": "56", "year": 2000}}
+{"input": "Rat Queens (2000) #56.cbz", "kind": "comic", "expect": {"series": "Rat Queens", "issue": "56", "series_year": 2000}}
+{"input": "Wicked + The Divine 003 (2001) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Wicked + The Divine", "issue": "3", "year": 2001}}
+{"input": "Wicked + The Divine (2001) #3.cbz", "kind": "comic", "expect": {"series": "Wicked + The Divine", "issue": "3", "series_year": 2001}}
+{"input": "Criminal 010 (2002) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Criminal", "issue": "10", "year": 2002}}
+{"input": "Criminal (2002) #10.cbz", "kind": "comic", "expect": {"series": "Criminal", "issue": "10", "series_year": 2002}}
+{"input": "Fatale 017 (2003) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Fatale", "issue": "17", "year": 2003}}
+{"input": "Fatale (2003) #17.cbz", "kind": "comic", "expect": {"series": "Fatale", "issue": "17", "series_year": 2003}}
+{"input": "Southern Bastards 024 (2004) (Digital) (Zone-Empire).cbz", "kind": "comic", "expect": {"series": "Southern Bastards", "issue": "24", "year": 2004}}
+{"input": "Southern Bastards (2004) #24.cbz", "kind": "comic", "expect": {"series": "Southern Bastards", "issue": "24", "series_year": 2004}}
+{"input": "Blue Lock v01 c003.cbz", "kind": "manga", "expect": {"series": "Blue Lock", "volume": "1", "chapter": "3"}}
+{"input": "Blue Lock Vol. 1.cbz", "kind": "manga", "expect": {"series": "Blue Lock", "volume": "1"}}
+{"input": "Kaiju No. 8 v02 c012.cbz", "kind": "manga", "expect": {"series": "Kaiju No. 8", "volume": "2", "chapter": "12"}}
+{"input": "Kaiju No. 8 Vol. 2.cbz", "kind": "manga", "expect": {"series": "Kaiju No. 8", "volume": "2"}}
+{"input": "Dandadan v03 c021.cbz", "kind": "manga", "expect": {"series": "Dandadan", "volume": "3", "chapter": "21"}}
+{"input": "Dandadan Vol. 3.cbz", "kind": "manga", "expect": {"series": "Dandadan", "volume": "3"}}
+{"input": "Oshi no Ko v04 c030.cbz", "kind": "manga", "expect": {"series": "Oshi no Ko", "volume": "4", "chapter": "30"}}
+{"input": "Oshi no Ko Vol. 4.cbz", "kind": "manga", "expect": {"series": "Oshi no Ko", "volume": "4"}}
+{"input": "Tokyo Revengers v05 c039.cbz", "kind": "manga", "expect": {"series": "Tokyo Revengers", "volume": "5", "chapter": "39"}}
+{"input": "Tokyo Revengers Vol. 5.cbz", "kind": "manga", "expect": {"series": "Tokyo Revengers", "volume": "5"}}
+{"input": "Haikyuu!! v06 c048.cbz", "kind": "manga", "expect": {"series": "Haikyuu!!", "volume": "6", "chapter": "48"}}
+{"input": "Haikyuu!! Vol. 6.cbz", "kind": "manga", "expect": {"series": "Haikyuu!!", "volume": "6"}}
+{"input": "My Hero Academia v07 c057.cbz", "kind": "manga", "expect": {"series": "My Hero Academia", "volume": "7", "chapter": "57"}}
+{"input": "My Hero Academia Vol. 7.cbz", "kind": "manga", "expect": {"series": "My Hero Academia", "volume": "7"}}
+{"input": "Demon Slayer v08 c066.cbz", "kind": "manga", "expect": {"series": "Demon Slayer", "volume": "8", "chapter": "66"}}
+{"input": "Demon Slayer Vol. 8.cbz", "kind": "manga", "expect": {"series": "Demon Slayer", "volume": "8"}}
+{"input": "Black Clover v09 c075.cbz", "kind": "manga", "expect": {"series": "Black Clover", "volume": "9", "chapter": "75"}}
+{"input": "Black Clover Vol. 9.cbz", "kind": "manga", "expect": {"series": "Black Clover", "volume": "9"}}
+{"input": "Fire Force v10 c084.cbz", "kind": "manga", "expect": {"series": "Fire Force", "volume": "10", "chapter": "84"}}
+{"input": "Fire Force Vol. 10.cbz", "kind": "manga", "expect": {"series": "Fire Force", "volume": "10"}}
+{"input": "Dorohedoro v11 c093.cbz", "kind": "manga", "expect": {"series": "Dorohedoro", "volume": "11", "chapter": "93"}}
+{"input": "Dorohedoro Vol. 11.cbz", "kind": "manga", "expect": {"series": "Dorohedoro", "volume": "11"}}
+{"input": "Pluto v12 c102.cbz", "kind": "manga", "expect": {"series": "Pluto", "volume": "12", "chapter": "102"}}
+{"input": "Pluto Vol. 12.cbz", "kind": "manga", "expect": {"series": "Pluto", "volume": "12"}}
+{"input": "20th Century Boys v01 c111.cbz", "kind": "manga", "expect": {"series": "20th Century Boys", "volume": "1", "chapter": "111"}}
+{"input": "20th Century Boys Vol. 1.cbz", "kind": "manga", "expect": {"series": "20th Century Boys", "volume": "1"}}
+{"input": "Slam Dunk v02 c120.cbz", "kind": "manga", "expect": {"series": "Slam Dunk", "volume": "2", "chapter": "120"}}
+{"input": "Slam Dunk Vol. 2.cbz", "kind": "manga", "expect": {"series": "Slam Dunk", "volume": "2"}}
+{"input": "Ranma 1-2 v03 c129.cbz", "kind": "manga", "expect": {"series": "Ranma 1-2", "volume": "3", "chapter": "129"}}
+{"input": "Ranma 1-2 Vol. 3.cbz", "kind": "manga", "expect": {"series": "Ranma 1-2", "volume": "3"}}
+{"input": "Inuyasha v04 c138.cbz", "kind": "manga", "expect": {"series": "Inuyasha", "volume": "4", "chapter": "138"}}
+{"input": "Inuyasha Vol. 4.cbz", "kind": "manga", "expect": {"series": "Inuyasha", "volume": "4"}}
+{"input": "Bakuman v05 c147.cbz", "kind": "manga", "expect": {"series": "Bakuman", "volume": "5", "chapter": "147"}}
+{"input": "Bakuman Vol. 5.cbz", "kind": "manga", "expect": {"series": "Bakuman", "volume": "5"}}
+{"input": "Death Note v06 c156.cbz", "kind": "manga", "expect": {"series": "Death Note", "volume": "6", "chapter": "156"}}
+{"input": "Death Note Vol. 6.cbz", "kind": "manga", "expect": {"series": "Death Note", "volume": "6"}}
+{"input": "Yu Yu Hakusho v07 c165.cbz", "kind": "manga", "expect": {"series": "Yu Yu Hakusho", "volume": "7", "chapter": "165"}}
+{"input": "Yu Yu Hakusho Vol. 7.cbz", "kind": "manga", "expect": {"series": "Yu Yu Hakusho", "volume": "7"}}
+{"input": "Golden Kamuy v08 c174.cbz", "kind": "manga", "expect": {"series": "Golden Kamuy", "volume": "8", "chapter": "174"}}
+{"input": "Golden Kamuy Vol. 8.cbz", "kind": "manga", "expect": {"series": "Golden Kamuy", "volume": "8"}}
+{"input": "Quiet Coast Book 02 (2019) (Digital).cbz", "kind": "comic", "expect": {"series": "Quiet Coast", "issue": "2", "year": 2019}}
+{"input": "Harbour Lights 004 (2019) somesite.info.cbr", "kind": "comic", "expect": {"series": "Harbour Lights", "issue": "4", "year": 2019}}
+{"input": "Harbour Lights (TPB) (2016) example.com.cbr", "kind": "comic", "expect": {"series": "Harbour Lights", "format": "collected", "year": 2016, "series_year": 2016}}

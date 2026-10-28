@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!-- Kodex on Unraid: kodex.xml (the web client and the API) and
+     kodex-worker.xml (background jobs), beside a PostgreSQL 18 container of
+     your choice. docs/install.md, "On a NAS". -->
+<Container version="2">
+  <Name>kodex</Name>
+  <Repository>ghcr.io/demacish/kodex:latest</Repository>
+  <Registry>https://github.com/Demacish/kodex/pkgs/container/kodex</Registry>
+  <Network>bridge</Network>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/Demacish/kodex/issues</Support>
+  <Project>https://github.com/Demacish/kodex</Project>
+  <Overview>Kodex, a library server and reader for comics, manga and e-books: the web client and the API. Needs the kodex-worker container for scans and other background jobs, and a PostgreSQL 18 container.</Overview>
+  <Category>MediaServer:Books</Category>
+  <WebUI>http://[IP]:[PORT:8000]/</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/Demacish/kodex/main/deploy/unraid/kodex.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/Demacish/kodex/main/web/public/icon-512.png</Icon>
+  <ExtraParams>--read-only --tmpfs /tmp --security-opt no-new-privileges</ExtraParams>
+  <PostArgs>api</PostArgs>
+  <Config Name="Web UI" Target="8000" Default="8000" Mode="tcp" Description="The web client and the API. Put a reverse proxy with TLS in front." Type="Port" Display="always" Required="true" Mask="false">8000</Config>
+  <Config Name="Libraries" Target="/libraries" Default="/mnt/user/books" Mode="rw" Description="The folder with your libraries, one subfolder per library." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/books</Config>
+  <Config Name="Sorted" Target="/libraries/_sorterat" Default="/mnt/user/books-sorted" Mode="rw" Description="A separate, empty folder, where the sorting assistant puts what it sorts." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/books-sorted</Config>
+  <Config Name="Covers" Target="/data/covers" Default="/mnt/user/appdata/kodex/covers" Mode="rw" Description="" Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/kodex/covers</Config>
+  <Config Name="Downloads" Target="/data/downloads" Default="/mnt/user/appdata/kodex/downloads" Mode="rw" Description="" Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/kodex/downloads</Config>
+  <Config Name="Backups" Target="/data/backups" Default="/mnt/user/appdata/kodex/backups" Mode="rw" Description="Nightly database dumps." Type="Path" Display="advanced" Required="true" Mask="false">/mnt/user/appdata/kodex/backups</Config>
+  <Config Name="Database" Target="DATABASE_URL" Default="postgresql+psycopg://kodex:PASSWORD@UNRAID-IP:5432/kodex" Mode="" Description="Your PostgreSQL 18 container, with a database and user kodex. The same in both Kodex containers." Type="Variable" Display="always" Required="true" Mask="true">postgresql+psycopg://kodex:PASSWORD@UNRAID-IP:5432/kodex</Config>
+  <Config Name="PUID" Target="PUID" Default="99" Mode="" Description="Who Kodex runs as: the owner of your books (99 is nobody)." Type="Variable" Display="always" Required="true" Mask="false">99</Config>
+  <Config Name="PGID" Target="PGID" Default="100" Mode="" Description="Its group (100 is users)." Type="Variable" Display="always" Required="true" Mask="false">100</Config>
+  <Config Name="Secret key" Target="SECRET_KEY" Default="" Mode="" Description="Encrypts two-step login secrets and tracker tokens: a long random string, set once and never changed. The same in both Kodex containers." Type="Variable" Display="always" Required="false" Mask="true"></Config>
+  <Config Name="Public address" Target="PUBLIC_APP_URL" Default="" Mode="" Description="The address people use, e.g. https://kodex.example.org." Type="Variable" Display="always" Required="false" Mask="false"></Config>
+  <Config Name="Reverse proxy" Target="FORWARDED_ALLOW_IPS" Default="127.0.0.1" Mode="" Description="The reverse proxy's address, so Kodex sees the clients' real addresses." Type="Variable" Display="advanced" Required="false" Mask="false">127.0.0.1</Config>
+</Container>

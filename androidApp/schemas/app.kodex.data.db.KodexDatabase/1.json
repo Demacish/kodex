@@ -1,0 +1,539 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "1bcebc8a27c76076bfe79fa0b2b9b991",
+    "entities": [
+      {
+        "tableName": "libraries",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `libraryType` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "libraryType",
+            "columnName": "libraryType",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "series",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `libraryId` INTEGER NOT NULL, `title` TEXT NOT NULL, `startYear` INTEGER, `publisher` TEXT, `summary` TEXT, `bookCount` INTEGER NOT NULL, `following` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "libraryId",
+            "columnName": "libraryId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startYear",
+            "columnName": "startYear",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "publisher",
+            "columnName": "publisher",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "summary",
+            "columnName": "summary",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "bookCount",
+            "columnName": "bookCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "following",
+            "columnName": "following",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_series_libraryId",
+            "unique": false,
+            "columnNames": [
+              "libraryId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_series_libraryId` ON `${TABLE_NAME}` (`libraryId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "books",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `libraryId` INTEGER NOT NULL, `seriesId` INTEGER, `title` TEXT NOT NULL, `sortTitle` TEXT NOT NULL, `number` REAL, `format` TEXT NOT NULL, `fileSize` INTEGER NOT NULL, `pageCount` INTEGER, `editionType` TEXT NOT NULL, `authors` TEXT NOT NULL, `summary` TEXT, `publishedYear` INTEGER, `language` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "libraryId",
+            "columnName": "libraryId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "seriesId",
+            "columnName": "seriesId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sortTitle",
+            "columnName": "sortTitle",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "number",
+            "columnName": "number",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "format",
+            "columnName": "format",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fileSize",
+            "columnName": "fileSize",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pageCount",
+            "columnName": "pageCount",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "editionType",
+            "columnName": "editionType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "authors",
+            "columnName": "authors",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "summary",
+            "columnName": "summary",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "publishedYear",
+            "columnName": "publishedYear",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "language",
+            "columnName": "language",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_books_seriesId",
+            "unique": false,
+            "columnNames": [
+              "seriesId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_books_seriesId` ON `${TABLE_NAME}` (`seriesId`)"
+          },
+          {
+            "name": "index_books_libraryId",
+            "unique": false,
+            "columnNames": [
+              "libraryId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_books_libraryId` ON `${TABLE_NAME}` (`libraryId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "collections",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `collectionType` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "collectionType",
+            "columnName": "collectionType",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "collection_books",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`collectionId` INTEGER NOT NULL, `position` INTEGER NOT NULL, `bookId` INTEGER NOT NULL, PRIMARY KEY(`collectionId`, `position`))",
+        "fields": [
+          {
+            "fieldPath": "collectionId",
+            "columnName": "collectionId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bookId",
+            "columnName": "bookId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "collectionId",
+            "position"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_collection_books_bookId",
+            "unique": false,
+            "columnNames": [
+              "bookId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_collection_books_bookId` ON `${TABLE_NAME}` (`bookId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "progress",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bookId` INTEGER NOT NULL, `position` TEXT, `locatorKind` TEXT, `percent` REAL NOT NULL, `finished` INTEGER NOT NULL, `chapter` TEXT, `readAt` TEXT NOT NULL, `deviceName` TEXT, PRIMARY KEY(`bookId`))",
+        "fields": [
+          {
+            "fieldPath": "bookId",
+            "columnName": "bookId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "locatorKind",
+            "columnName": "locatorKind",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "percent",
+            "columnName": "percent",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "finished",
+            "columnName": "finished",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chapter",
+            "columnName": "chapter",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "readAt",
+            "columnName": "readAt",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceName",
+            "columnName": "deviceName",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "bookId"
+          ]
+        }
+      },
+      {
+        "tableName": "outbox",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bookId` INTEGER NOT NULL, `position` TEXT, `locatorKind` TEXT, `percent` REAL NOT NULL, `finished` INTEGER NOT NULL, `chapter` TEXT, `seq` INTEGER NOT NULL, `at` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bookId",
+            "columnName": "bookId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "locatorKind",
+            "columnName": "locatorKind",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "percent",
+            "columnName": "percent",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "finished",
+            "columnName": "finished",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chapter",
+            "columnName": "chapter",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "seq",
+            "columnName": "seq",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "at",
+            "columnName": "at",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_outbox_bookId",
+            "unique": false,
+            "columnNames": [
+              "bookId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_outbox_bookId` ON `${TABLE_NAME}` (`bookId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "sync_state",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `catalogCursor` INTEGER NOT NULL, `progressCursor` INTEGER NOT NULL, `owner` TEXT NOT NULL, `syncedAt` INTEGER, `lastSeq` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "catalogCursor",
+            "columnName": "catalogCursor",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "progressCursor",
+            "columnName": "progressCursor",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "owner",
+            "columnName": "owner",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "syncedAt",
+            "columnName": "syncedAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastSeq",
+            "columnName": "lastSeq",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "downloads",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bookId` INTEGER NOT NULL, `state` TEXT NOT NULL, `kind` TEXT NOT NULL, `bytes` INTEGER NOT NULL, `total` INTEGER NOT NULL, `sha256` TEXT, `error` TEXT, `automatic` INTEGER NOT NULL, `requestedAt` INTEGER NOT NULL, `pageSizes` TEXT, PRIMARY KEY(`bookId`))",
+        "fields": [
+          {
+            "fieldPath": "bookId",
+            "columnName": "bookId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "state",
+            "columnName": "state",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bytes",
+            "columnName": "bytes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "total",
+            "columnName": "total",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sha256",
+            "columnName": "sha256",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "error",
+            "columnName": "error",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "automatic",
+            "columnName": "automatic",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requestedAt",
+            "columnName": "requestedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pageSizes",
+            "columnName": "pageSizes",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "bookId"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1bcebc8a27c76076bfe79fa0b2b9b991')"
+    ]
+  }
+}

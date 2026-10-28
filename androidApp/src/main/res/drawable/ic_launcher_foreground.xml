@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- An open book on the 108 dp adaptive-icon canvas (safe zone 66 dp). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="@color/launcher_foreground"
+        android:pathData="M30,38 C38,35 46,35 52,39 L52,73 C46,69 38,69 30,72 Z" />
+    <path
+        android:fillColor="@color/launcher_foreground"
+        android:pathData="M56,39 C62,35 70,35 78,38 L78,72 C70,69 62,69 56,73 Z" />
+</vector>

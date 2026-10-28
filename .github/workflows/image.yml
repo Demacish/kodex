@@ -1,0 +1,137 @@
+name: Image
+
+# Builds the server image (api and worker, with the web client) for amd64
+# and arm64, checks that it starts, and that rootless Podman runs it, and
+# publishes it to GitHub's container registry:
+#   ghcr.io/<owner>/kodex:edge           the newest commit on main
+#   ghcr.io/<owner>/kodex:sha-<12>       every commit published
+#   ghcr.io/<owner>/kodex:2.1.0, 2.1, 2, latest   a release tag v2.1.0
+# A pull request builds and checks it without publishing anything.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: image-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PUBLISH: ${{ github.event_name != 'pull_request' }}
+
+jobs:
+  image:
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+      # The registry wants the name in lower case.
+      - run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/kodex" >> "$GITHUB_ENV"
+      - uses: docker/setup-buildx-action@v4
+      - name: Build
+        run: |
+          docker buildx build --platform "linux/${{ matrix.arch }}" --load \
+            --build-context webapp=web -t "kodex:${GITHUB_SHA::12}" backend
+      - name: The image starts and knows its architecture
+        run: |
+          docker run --rm --entrypoint python "kodex:${GITHUB_SHA::12}" \
+            -c "import platform, sys; print(platform.machine()); import app.main"
+          docker run --rm --entrypoint pg_dump "kodex:${GITHUB_SHA::12}" --version
+      - name: Rootless Podman runs it (read-only, with a database in the same pod)
+        if: matrix.arch == 'amd64'
+        run: |
+          docker save "kodex:${GITHUB_SHA::12}" | podman load
+          podman pod create --name kodex -p 127.0.0.1:18000:8000
+          podman run -d --pod kodex --name db -e POSTGRES_USER=kodex -e POSTGRES_PASSWORD=pw -e POSTGRES_DB=kodex docker.io/library/postgres:18
+          mkdir -p "$RUNNER_TEMP/libraries"
+          podman run -d --pod kodex --name api --read-only --tmpfs /tmp --security-opt no-new-privileges \
+            -e DATABASE_URL=postgresql+psycopg://kodex:pw@127.0.0.1:5432/kodex \
+            -v covers:/data/covers -v downloads:/data/downloads -v backups:/data/backups \
+            -v "$RUNNER_TEMP/libraries:/libraries:Z" "docker.io/library/kodex:${GITHUB_SHA::12}"
+          for _ in $(seq 60); do curl -fsS http://127.0.0.1:18000/readyz && break; sleep 2; done
+          curl -fsS http://127.0.0.1:18000/readyz | grep -q '"ready"'
+          podman exec api stat -c %u /proc/1 | grep -qx 1000
+          podman pod rm -f kodex
+      - name: Podman logs
+        if: failure() && matrix.arch == 'amd64'
+        run: podman logs api 2>&1 | tail -100; podman logs db 2>&1 | tail -30
+      - uses: docker/login-action@v4
+        if: env.PUBLISH == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # The same build again (from the cache), pushed without a tag: the
+      # publish job below names both architectures' images together.
+      - name: Push by digest
+        if: env.PUBLISH == 'true'
+        run: |
+          docker buildx build --platform "linux/${{ matrix.arch }}" --build-context webapp=web \
+            --label "org.opencontainers.image.source=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
+            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+            --label "org.opencontainers.image.licenses=MIT" \
+            --output "type=image,name=${IMAGE},push-by-digest=true,name-canonical=true,push=true" \
+            --metadata-file "$RUNNER_TEMP/metadata.json" backend
+          mkdir -p "$RUNNER_TEMP/digests"
+          digest=$(jq -r '."containerimage.digest"' "$RUNNER_TEMP/metadata.json")
+          touch "$RUNNER_TEMP/digests/${digest#sha256:}"
+      - uses: actions/upload-artifact@v7
+        if: env.PUBLISH == 'true'
+        with:
+          name: digest-${{ matrix.arch }}
+          path: ${{ runner.temp }}/digests/*
+          retention-days: 1
+
+  publish:
+    needs: image
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    env:
+      DOCKER_METADATA_SHORT_SHA_LENGTH: 12
+    steps:
+      - run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/kodex" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: digest-*
+          merge-multiple: true
+          path: ${{ runner.temp }}/digests
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=edge,enable={{is_default_branch}}
+            type=sha,prefix=sha-
+      - name: Both architectures under the tags
+        working-directory: ${{ runner.temp }}/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf "${IMAGE}@sha256:%s " *)
+          docker buildx imagetools inspect "${IMAGE}:sha-${GITHUB_SHA::12}"

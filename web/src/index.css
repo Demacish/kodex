@@ -1,0 +1,153 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/inter";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+  Kodex's look from v1: dark first, a near-black zinc background that leaves
+  the covers to bring the colour, and a warm coral accent for actions, the
+  active page and progress. Light mode is the same system on a warm
+  off-white. Every text pair meets WCAG AA. Names follow shadcn/ui, so its
+  components need no changes.
+*/
+:root {
+  --background: hsl(240 20% 99%);
+  --foreground: hsl(240 10% 10%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(240 10% 10%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(240 10% 10%);
+  --primary: hsl(16 88% 54%);
+  --primary-foreground: hsl(20 45% 9%);
+  /* The accent as text on light surfaces: --primary itself is too light
+     for 4.5:1 (WCAG AA) on white. */
+  --primary-text: hsl(16 85% 36%);
+  --secondary: hsl(240 12% 95%);
+  --secondary-foreground: hsl(240 10% 15%);
+  --muted: hsl(240 12% 95%);
+  --muted-foreground: hsl(240 5% 42%);
+  --accent: hsl(16 90% 95%);
+  --accent-foreground: hsl(16 70% 30%);
+  --destructive: hsl(0 72% 51%);
+  --border: hsl(240 10% 88%);
+  --input: hsl(240 10% 88%);
+  --ring: hsl(16 88% 54%);
+  --radius: 0.75rem;
+  /* Categorical chart colours, chosen for colour-blind separation, not
+     the accent: keep the order. */
+  --chart-1: #2a78d6;
+  --chart-2: #eb6834;
+  --chart-3: #1baf7a;
+  --chart-4: #eda100;
+  --chart-5: #e87ba4;
+  --sidebar: hsl(240 15% 97%);
+  --sidebar-foreground: hsl(240 10% 15%);
+  --sidebar-primary: hsl(16 88% 54%);
+  --sidebar-primary-foreground: hsl(20 45% 9%);
+  --sidebar-accent: hsl(240 10% 93%);
+  --sidebar-accent-foreground: hsl(240 10% 15%);
+  --sidebar-border: hsl(240 10% 88%);
+  --sidebar-ring: hsl(16 88% 54%);
+  --reader: #000;
+}
+
+.dark {
+  --background: hsl(240 10% 5%);
+  --foreground: hsl(240 10% 96%);
+  --card: hsl(240 9% 8%);
+  --card-foreground: hsl(240 10% 96%);
+  --popover: hsl(240 9% 9%);
+  --popover-foreground: hsl(240 10% 96%);
+  --primary: hsl(16 90% 58%);
+  --primary-foreground: hsl(20 45% 9%);
+  --primary-text: hsl(16 90% 62%);
+  --secondary: hsl(240 8% 14%);
+  --secondary-foreground: hsl(240 10% 92%);
+  --muted: hsl(240 8% 14%);
+  --muted-foreground: hsl(240 5% 62%);
+  --accent: hsl(16 55% 18%);
+  --accent-foreground: hsl(16 90% 78%);
+  --destructive: hsl(0 70% 55%);
+  --border: hsl(240 8% 17%);
+  --input: hsl(240 8% 17%);
+  --ring: hsl(16 90% 58%);
+  --chart-1: #3987e5;
+  --chart-2: #d95926;
+  --chart-3: #199e70;
+  --chart-4: #c98500;
+  --chart-5: #d55181;
+  --sidebar: hsl(240 10% 7%);
+  --sidebar-foreground: hsl(240 10% 92%);
+  --sidebar-primary: hsl(16 90% 58%);
+  --sidebar-primary-foreground: hsl(20 45% 9%);
+  --sidebar-accent: hsl(240 8% 14%);
+  --sidebar-accent-foreground: hsl(240 10% 92%);
+  --sidebar-border: hsl(240 8% 14%);
+  --sidebar-ring: hsl(16 90% 58%);
+}
+
+@theme inline {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-text: var(--primary-text);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-reader: var(--reader);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans antialiased;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  /* One visible focus ring everywhere: the keyboard is a first-class way
+     through the app. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background-color: color-mix(in oklab, var(--ring) 30%, transparent);
+  }
+}

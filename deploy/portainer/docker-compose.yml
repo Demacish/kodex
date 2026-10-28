@@ -1,0 +1,97 @@
+# Kodex for Portainer and Synology's Container Manager: docker-compose.yml
+# from the repository without the build, so it needs no checkout. CI checks
+# that the two say the same.
+#
+# Portainer: Stacks › Add stack › Web editor, paste this file, and add the
+# settings from .env.example under Environment variables, with
+# KODEX_ENV_FILE=stack.env (where Portainer keeps them for the containers).
+# Synology Container Manager: Project › Create, a folder holding this file
+# as docker-compose.yml and a .env made from .env.example.
+#
+# At least POSTGRES_PASSWORD, LIBRARIES_HOST_PATH (e.g. /volume1/books) and
+# SORTED_LIBRARY_HOST_PATH; and PUID/PGID, the user that owns the books.
+# docs/install.md has the rest.
+services:
+  db:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: kodex
+      POSTGRES_USER: kodex
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      # Postgres 18 images keep their data under /var/lib/postgresql/18/.
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kodex -d kodex"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    # The published image, for amd64 and arm64.
+    image: ${KODEX_IMAGE:-ghcr.io/demacish/kodex:latest}
+    restart: unless-stopped
+    env_file: ${KODEX_ENV_FILE:-.env}
+    environment: &backend-env
+      DATABASE_URL: postgresql+psycopg://kodex:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/kodex
+      # Who the server runs as (the owner of the files it writes); see .env.example.
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+    depends_on: &backend-deps
+      db:
+        condition: service_healthy
+    volumes: &backend-volumes
+      # The libraries root. Read-write only because the sorting assistant
+      # moves files from the intake library into the sorted libraries.
+      - ${LIBRARIES_HOST_PATH:?set LIBRARIES_HOST_PATH in .env}:/libraries:rw
+      # Where sorting moves files to: a separate host path mounted inside
+      # /libraries, so the app keeps a single libraries root while a sorting
+      # bug can't recurse into the intake folder.
+      - ${SORTED_LIBRARY_HOST_PATH:?set SORTED_LIBRARY_HOST_PATH in .env}:/libraries/_sorterat:rw
+      - covers-data:/data/covers
+      - downloads-data:/data/downloads
+      - backups:/data/backups
+    # Nothing in the image is written to: everything is in the volumes above, or /tmp.
+    read_only: true
+    tmpfs: &backend-tmpfs
+      - /tmp
+    security_opt: &backend-security
+      - no-new-privileges:true
+    # Requests in flight finish before it stops.
+    stop_grace_period: 30s
+    # The web client and the API. Put a reverse proxy with TLS in front.
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+
+  worker:
+    image: ${KODEX_IMAGE:-ghcr.io/demacish/kodex:latest}
+    restart: unless-stopped
+    command: ["worker"]
+    env_file: ${KODEX_ENV_FILE:-.env}
+    environment: *backend-env
+    depends_on:
+      # The api container runs the migrations; the worker waits for them.
+      api:
+        condition: service_healthy
+    volumes: *backend-volumes
+    read_only: true
+    tmpfs: *backend-tmpfs
+    security_opt: *backend-security
+    # A running job (a scan, a download's import) gets a minute to finish.
+    stop_grace_period: 60s
+    # Healthy while a worker's heartbeat is fresh in the database (the
+    # image's default healthcheck probes the api's HTTP port instead).
+    healthcheck:
+      test: ["CMD", "python", "-m", "kodex.jobs.worker", "--check"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+
+volumes:
+  db-data:
+  covers-data:
+  downloads-data:
+  # Nightly database dumps (kodex.core.backup; BACKUP_KEEP). Copy them off the machine too.
+  backups:

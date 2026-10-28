@@ -1,0 +1,48 @@
+Kodex
+Copyright (c) 2026 Kodex contributors
+Licensed under the MIT License (see LICENSE).
+
+This file records material in this repository that comes from elsewhere,
+and the licenses of notable runtime dependencies. Ideas borrowed from other
+projects (listed in docs/plan.sv.md, "Vad vi bör låna") are credited there;
+no code from them is included unless listed below.
+
+Included files
+--------------
+
+backend/tests/fixtures/cbr/rar3_solid_from_rarfile.rar
+    From the test suite of rarfile 4.5, https://github.com/markokr/rarfile
+    Copyright (c) 2005-2024 Marko Kreen. ISC License.
+
+backend/kodex/core/migrations/versions/procrastinate_3_10_0_schema.sql
+    The database schema of Procrastinate 3.10.0,
+    https://github.com/procrastinate-org/procrastinate
+    Copyright (c) 2019-2025 PeopleDoc and the Procrastinate contributors.
+    MIT License.
+
+web/src/vendor/foliate-js/
+    foliate-js at commit 78914aef4466eb960965702401634c2cb348e9b1,
+    https://github.com/johnfactotum/foliate-js (its pdf.js replaced by a
+    stub, see the README there). Copyright (c) 2022 John Factotum.
+    MIT License. Includes zip.js (Copyright (c) 2022 Gildas Lormeau,
+    BSD 3-Clause) and fflate (Copyright (c) 2023 Arjun Barrett, MIT) as
+    bundled by foliate-js in vendor/.
+
+Fetched at test time, not included
+----------------------------------
+
+Public-domain e-books from Project Gutenberg (tools/fixtures/gutenberg.json),
+https://www.gutenberg.org. Downloaded into a local cache by
+tools/fixtures/fetch_gutenberg.py.
+
+Runtime dependencies with non-permissive or notable licenses
+------------------------------------------------------------
+
+psycopg (LGPL-3.0)         used as an unmodified library
+pikepdf (MPL-2.0)          used as an unmodified library
+py7zr (LGPL-2.1+)          used as an unmodified library
+pypdfium2 (Apache-2.0 / BSD-3-Clause; bundles PDFium, BSD-3-Clause)
+Pillow (MIT-CMU)
+unar (LGPL-2.1) and bsdtar/libarchive (BSD-2-Clause)
+                           separate programs installed in the container image,
+                           invoked as subprocesses

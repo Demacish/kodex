@@ -1,0 +1,2 @@
+# tools/ and other Python outside backend/ share the backend settings.
+extend = "backend/pyproject.toml"

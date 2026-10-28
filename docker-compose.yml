@@ -22,7 +22,7 @@ services:
     # The published image (amd64 or arm64), pulled on the first start. Without
     # one, or with `up --build`, it is built from this checkout instead.
     image: ${KODEX_IMAGE:-ghcr.io/demacish/kodex:latest}
-    build: &backend-build
+    build:
       context: ./backend
       additional_contexts:
         webapp: ./web
@@ -60,8 +60,8 @@ services:
       - "127.0.0.1:${API_PORT:-8000}:8000"
 
   worker:
+    # The api's image; with `up --build` the api builds it, once, for both.
     image: ${KODEX_IMAGE:-ghcr.io/demacish/kodex:latest}
-    build: *backend-build
     restart: unless-stopped
     command: ["worker"]
     env_file: ${KODEX_ENV_FILE:-.env}

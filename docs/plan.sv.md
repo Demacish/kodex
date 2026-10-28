@@ -531,6 +531,23 @@ Gate: en utomstående kan installera och köra Kodex från dokumentationen utan 
 
 Status 2026‑10‑28: i CI följer compose‑röktestet install.md från `.env.example` och klarar hela webbflödet. Repot är publikt och avbilden går att hämta utan inloggning. Kvar för gaten: någon utomstående som provar.
 
+### Fas 8 — Surfplatta (tillägg 2026‑10‑28)
+
+Planen nämnde inte att appen oftast kommer att användas på en surfplatta. Grunden anpassar sig redan:
+- navigeringen blir en sidomeny;
+- serier och böcker visas sida vid sida;
+- biblioteksrutnätet får fler kolumner;
+- bildläsaren visar uppslag i liggande läge.
+
+Men inget har provats eller finslipats på en platta.
+
+- [ ] Skärmbilder av appens skärmar i plattstorlek (stående och liggande) och telefonstorlek i CI, med Robolectric utan emulator, att granska och jämföra.
+- [ ] Bibliotek och serier som omslagsrutnät, hemskärmens hyllor med större omslag på breda skärmar, läsbar bredd för inställningar och bokdetaljer.
+- [ ] Läsarna: två spalter i EPUB i liggande läge, läsarens kontroller och tryckzoner i plattstorlek, bläddring med tangentbord och mus.
+- [ ] Webbklienten på en platta: navigeringen och läsarna med touch, i båda orienteringarna.
+
+Gate: läsning, bläddring i biblioteket och nedladdning fungerar bekvämt på en 11‑tumsplatta i båda orienteringarna, och skärmbilderna i CI visar det.
+
 ## Acceptanskriterier, tester och risker
 
 En uppgift räknas som klar först när kriterierna nedan är uppfyllda och verifierade i CI, inte när koden är skriven. Fasernas gates i Genomförandeplanen är de bindande milstolparna; tabellen här är de löpande kraven som gäller i alla faser.
@@ -546,6 +563,7 @@ En uppgift räknas som klar först när kriterierna nedan är uppfyllda och veri
 | Synk | `/sync/changes` levererar tombstones och en monoton sekvenscursor; en klient som varit offline en vecka kommer ikapp utan full omladdning |
 | Läsare webb | Alla lägen på 380 px mobil och 1 440 px desktop; sidbyte < 100 ms med förladdning; tangentbord och touch; WCAG AA‑kontrast |
 | Läsare Android | Alla lägen; 60 fps vid sidbyte på mellanklassenhet; offline‑läsning av CBZ/CBR/EPUB/PDF |
+| Surfplatta | Appen är byggd för surfplatta, där den mest används: 10–13 tum, stående och liggande, i delad skärm och med tangentbord. Bibliotek, serier och hemskärm fyller skärmen med omslag; text håller läsbar bredd; uppslag i bildläsaren och två spalter i EPUB när plattan ligger. Skärmbilder i plattstorlek i CI. Webbklienten fungerar likadant på en platta |
 | API | OpenAPI validerar; genererade klienter kompilerar; brytande ändring kräver versionsbump; kontraktstest per PR |
 | Säkerhet | Inga hemligheter i repo; sökvägar kan inte lämna biblioteksroten; zip‑slip och dekompressionsbomber stoppas; uppladdning begränsad till kända format; SSRF‑skydd på admin‑URL:er; argon2id; CSRF för kaksessioner; rate limit på publika endpoints; LLM‑funktioner avstängda som standard och dokumenterade |
 | Docker | Serverdelen körs helt i containrar utan verktyg på värden; samma avbild för api och worker på amd64 och arm64; konfiguration via miljövariabler och `_FILE`‑hemligheter; tillstånd bara i volymer; icke‑root med `PUID`/`PGID`; `HEALTHCHECK` och migrationer vid start; compose‑röktest i CI per PR |

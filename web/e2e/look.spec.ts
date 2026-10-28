@@ -25,8 +25,8 @@ async function settle(page: Page) {
 
 async function expectToFit(page: Page, what: string) {
   const fit = await page.evaluate(() => {
-    const texts = [...document.querySelectorAll("main *")].filter((element) =>
-      [...element.childNodes].some((node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim()),
+    const texts = Array.from(document.querySelectorAll("main *")).filter((element) =>
+      Array.from(element.childNodes).some((node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim()),
     );
     return {
       width: document.documentElement.scrollWidth,

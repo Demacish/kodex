@@ -508,28 +508,28 @@ Status 2026‑10‑27: gate uppfylld i CI med låtsade tjänster. `tests/test_ac
   Status 2026‑10‑27: avbilden har PGDG:s `postgresql-client` för `POSTGRES_MAJOR` (18). `python -m kodex.core.backup` har `dump`, `list`, `verify` och `restore`; en dump görs varje natt kl. 03.30 och `BACKUP_KEEP` (7) sparas. `verify` är återställningsövningen: den lägger den senaste dumpen i en egen databas och jämför antalen med den levande. Compose‑röktestet kör `dump` och `verify`. Majoruppgradering och återställning står i docs/operations.md. `/readyz` svarar när databasen svarar och schemat är aktuellt, och det är avbildens healthcheck.
 - [x] Dokumentation på engelska: installation, konfiguration, migrering från v1, API, bidrag, "varför Postgres".
   Status 2026‑10‑27: docs/install.md, configuration.md, operations.md, security.md, migrating-from-v1.md, api.md, why-postgres.md, README och CONTRIBUTING. `.env.example` är också på engelska. Compose‑röktestet utgår från `.env.example` och sätter bara det install.md säger, så den dokumenterade vägen är den testade.
-- [ ] Docker‑härdning: `PUID`/`PGID`, `<NAMN>_FILE`‑hemligheter, skrivskyddat rotfilsystem, `/readyz`, ren nedstängning vid SIGTERM, multi‑arch‑avbild publicerad från CI, NAS‑mallar (Unraid, Synology/Portainer) och verifiering med rootless Podman.
-  Status 2026‑10‑27: allt utom publiceringen och NAS‑mallarna.
+- [x] Docker‑härdning: `PUID`/`PGID`, `<NAMN>_FILE`‑hemligheter, skrivskyddat rotfilsystem, `/readyz`, ren nedstängning vid SIGTERM, multi‑arch‑avbild publicerad från CI, NAS‑mallar (Unraid, Synology/Portainer) och verifiering med rootless Podman.
+  Status 2026‑10‑28: allt.
   - `PUID`/`PGID` (1000 som standard; 0 behåller root): containern startar som root bara för att ge `/data` till användaren, och byter sedan.
   - `NAMN_FILE` för alla inställningar.
   - `read_only`, tmpfs för `/tmp` och no‑new‑privileges i compose.
   - `/readyz`, och uvicorn ger pågående anrop 25 s vid SIGTERM.
-  - Avbilden byggs för amd64 och arm64, men publiceras inte än.
+  - Avbilden publiceras från `image.yml` som `ghcr.io/demacish/kodex`, byggd för amd64 och arm64 på var sin maskin, utan emulering. Taggar: `edge` och `sha-<12>` från main, och versionerna och `latest` från en tagg `v*`. Compose hämtar den och bygger bara med `--build`.
   - Rootless Podman kör den i CI: skrivskyddad, i en pod med PostgreSQL. `podman compose` är inte testat.
 
-  NAS‑mallarna behöver en publicerad avbild att peka på.
+  NAS‑mallarna ligger i `deploy/`: en compose‑fil för Portainer och Synology, och två Unraid‑mallar. `tools/check-deploy-templates.sh` jämför dem med `docker-compose.yml` i CI. De är inte provade på en riktig NAS. Servern väntar upp till två minuter på databasen, för miljöer där inget ordnar containrarna.
 - [ ] Publik release med versionerade containrar och APK.
-  Väntar på beslut: var avbilderna publiceras (GHCR?), versionsnummer och om repot blir publikt.
+  Status 2026‑10‑28: avbilderna publiceras (GHCR) och repot är publikt. Väntar på beslut: versionsnummer och när den första taggen sätts. Release‑APK:n signeras när nyckeln finns som secrets i det publika repot.
 - [x] En automatisk tillgänglighetskontroll (axe) i Playwright‑flödena. (Generiska `OIDC_*`‑namn och ingen förvald grupp gjordes redan efter fas 3, ADR 0020.)
   Status 2026‑10‑27: `e2e/gate.spec.ts` kontrollerar första besöket och sju sidor mot WCAG 2.1 A/AA, med allvarliga och kritiska fel som stopp. Två fel rättades: accentfärgad text hade för låg kontrast (ny token `--primary-text`), och väljare saknade namn.
 - [x] TOTP‑hemligheterna krypterade i vila med en servernyckel (`<NAMN>_FILE`), tillsammans med övriga hemligheter.
   Status 2026‑10‑27: `kodex.core.sealed` krypterar med en nyckel härledd ur `SECRET_KEY` per ändamål, med tvåstegshemligheterna och trackernas token. Hemligheter som sparats före `SECRET_KEY` krypteras vid nästa migrering (0017 breddar kolumnen).
-- [ ] Innan repot blir publikt: sök igenom hela historiken efter instansdata (filnamn, titlar, sökvägar, domäner) och skriv om den vid behov. GitHub behåller commits som en stängd PR pekar på (`refs/pull/N/head`, i dag Renovates PR #1 från före omskrivningen 2026‑10‑25), så publicera från ett nyskapat repo eller be GitHub Support ta bort dem.
-  Status 2026‑10‑27: genomsökt. Inga domäner, e‑postadresser, sökvägar eller användarnamn från driften. En verklig boktitel fanns i en test sedan v1‑importen; den är ersatt i HEAD men finns kvar i historiken. Väntar på beslut: ett nytt publikt repo med ny historik, eller omskrivning plus GitHub Support för `refs/pull/1`.
+- [x] Innan repot blir publikt: sök igenom hela historiken efter instansdata (filnamn, titlar, sökvägar, domäner) och skriv om den vid behov. GitHub behåller commits som en stängd PR pekar på (`refs/pull/N/head`, i dag Renovates PR #1 från före omskrivningen 2026‑10‑25), så publicera från ett nyskapat repo eller be GitHub Support ta bort dem.
+  Status 2026‑10‑28: det publika repot `Demacish/kodex` börjar med en enda commit med ny historik, så varken historiken eller `refs/pull/1` följde med. Det privata repot finns kvar som arkiv, och v1:s repo heter nu `kodex-v1`. Före publiceringen söktes trädet igenom mot driftens bibliotek, serier och titlar. Fem verkliga titlar i tester och kommentarer byttes mot påhittade.
 
 Gate: en utomstående kan installera och köra Kodex från dokumentationen utan hjälp.
 
-Status 2026‑10‑27: i CI följer compose‑röktestet install.md från `.env.example` och klarar hela webbflödet. Kvar för gaten: en publicerad avbild eller ett publikt repo att klona (install.md:s `git clone` pekar på `<you>`), och någon utomstående som provar.
+Status 2026‑10‑28: i CI följer compose‑röktestet install.md från `.env.example` och klarar hela webbflödet. Repot är publikt och avbilden går att hämta utan inloggning. Kvar för gaten: någon utomstående som provar.
 
 ## Acceptanskriterier, tester och risker
 

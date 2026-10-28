@@ -5,14 +5,17 @@ hand-run ALTER TABLEs."""
 
 from __future__ import annotations
 
+import time
+
 import pytest
 from alembic import command
 from alembic.script import ScriptDirectory
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.engine import make_url
+from sqlalchemy.exc import OperationalError
 
 from app.database import engine
-from kodex.core.migrate import alembic_config, schema_differences, upgrade_database
+from kodex.core.migrate import alembic_config, schema_differences, upgrade_database, wait_for_database
 
 
 @pytest.fixture
@@ -128,3 +131,16 @@ def test_downgrade_to_base_and_back(scratch_engine):
     _run(scratch_engine, command.downgrade, "base")
     assert set(inspect(scratch_engine).get_table_names()) == {"alembic_version"}
     assert upgrade_database(scratch_engine) == []
+
+
+def test_waiting_for_a_database_that_answers_returns_at_once():
+    started = time.monotonic()
+    wait_for_database(engine, timeout=5)
+    assert time.monotonic() - started < 2
+
+
+def test_waiting_for_a_database_that_never_answers_gives_up():
+    # Nothing listens on port 1; the connection is refused at once.
+    nowhere = create_engine(make_url(engine.url).set(port=1), connect_args={"connect_timeout": 1})
+    with pytest.raises(OperationalError):
+        wait_for_database(nowhere, timeout=0.5)

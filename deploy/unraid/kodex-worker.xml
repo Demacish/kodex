@@ -15,7 +15,7 @@
   <WebUI/>
   <TemplateURL>https://raw.githubusercontent.com/Demacish/kodex/main/deploy/unraid/kodex-worker.xml</TemplateURL>
   <Icon>https://raw.githubusercontent.com/Demacish/kodex/main/web/public/icon-512.png</Icon>
-  <ExtraParams>--read-only --tmpfs /tmp --security-opt no-new-privileges --health-cmd "python -m kodex.jobs.worker --check" --health-start-period 30s</ExtraParams>
+  <ExtraParams>--restart unless-stopped --read-only --tmpfs /tmp --security-opt no-new-privileges --health-cmd "python -m kodex.jobs.worker --check" --health-start-period 30s</ExtraParams>
   <PostArgs>worker</PostArgs>
   <Config Name="Libraries" Target="/libraries" Default="/mnt/user/books" Mode="rw" Description="The folder with your libraries, one subfolder per library." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/books</Config>
   <Config Name="Sorted" Target="/libraries/_sorterat" Default="/mnt/user/books-sorted" Mode="rw" Description="A separate, empty folder, where the sorting assistant puts what it sorts." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/books-sorted</Config>

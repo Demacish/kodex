@@ -15,7 +15,7 @@
   <WebUI>http://[IP]:[PORT:8000]/</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/Demacish/kodex/main/deploy/unraid/kodex.xml</TemplateURL>
   <Icon>https://raw.githubusercontent.com/Demacish/kodex/main/web/public/icon-512.png</Icon>
-  <ExtraParams>--read-only --tmpfs /tmp --security-opt no-new-privileges</ExtraParams>
+  <ExtraParams>--restart unless-stopped --read-only --tmpfs /tmp --security-opt no-new-privileges</ExtraParams>
   <PostArgs>api</PostArgs>
   <Config Name="Web UI" Target="8000" Default="8000" Mode="tcp" Description="The web client and the API. Put a reverse proxy with TLS in front." Type="Port" Display="always" Required="true" Mask="false">8000</Config>
   <Config Name="Libraries" Target="/libraries" Default="/mnt/user/books" Mode="rw" Description="The folder with your libraries, one subfolder per library." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/books</Config>

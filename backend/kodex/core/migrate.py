@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import logging
 import sys
+import time
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -23,6 +24,7 @@ from alembic.autogenerate import compare_metadata
 from alembic.config import Config
 from alembic.runtime.migration import MigrationContext
 from sqlalchemy import Connection, Engine, inspect, text
+from sqlalchemy.exc import OperationalError
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +55,26 @@ def schema_differences(connection: Connection) -> list[Any]:
     context = MigrationContext.configure(connection, opts={"compare_type": True, "include_name": include_name})
     differences: list[Any] = compare_metadata(context, Base.metadata)
     return differences
+
+
+def wait_for_database(engine: Engine, timeout: float = 120.0) -> None:
+    """Returns once the database answers. Where nothing orders the containers
+    (an Unraid template, a plain `podman run`), Kodex can start while the
+    database is still starting, the first time even initialising itself."""
+    deadline = time.monotonic() + timeout
+    waiting = False
+    while True:
+        try:
+            with engine.connect() as connection:
+                connection.execute(text("SELECT 1"))
+            return
+        except OperationalError as exc:
+            if time.monotonic() >= deadline:
+                raise
+            if not waiting:
+                logger.info("Waiting for the database: %s", str(exc.orig).splitlines()[0])
+                waiting = True
+            time.sleep(2)
 
 
 def upgrade_database(engine: Engine | None = None) -> list[Any]:
@@ -124,7 +146,10 @@ def main(argv: list[str]) -> int:
         for difference in differences:
             print(difference)
         return 1 if differences else 0
-    upgrade_database()
+    from kodex.core.db import engine
+
+    wait_for_database(engine)
+    upgrade_database(engine)
     return 0
 
 

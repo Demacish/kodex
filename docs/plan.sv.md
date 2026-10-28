@@ -518,8 +518,8 @@ Status 2026‑10‑27: gate uppfylld i CI med låtsade tjänster. `tests/test_ac
   - Rootless Podman kör den i CI: skrivskyddad, i en pod med PostgreSQL. `podman compose` är inte testat.
 
   NAS‑mallarna ligger i `deploy/`: en compose‑fil för Portainer och Synology, och två Unraid‑mallar. `tools/check-deploy-templates.sh` jämför dem med `docker-compose.yml` i CI. De är inte provade på en riktig NAS. Servern väntar upp till två minuter på databasen, för miljöer där inget ordnar containrarna.
-- [ ] Publik release med versionerade containrar och APK.
-  Status 2026‑10‑28: avbilderna publiceras (GHCR) och repot är publikt. Väntar på beslut: versionsnummer och när den första taggen sätts. Release‑APK:n signeras när nyckeln finns som secrets i det publika repot.
+- [x] Publik release med versionerade containrar och APK.
+  Status 2026‑10‑28: [Kodex 2.0.0](https://github.com/Demacish/kodex/releases/tag/v2.0.0). Avbilden är `ghcr.io/demacish/kodex:2.0.0`, även som `2.0`, `2` och `latest`. Releasen har `kodex-2.0.0.apk` med sin SHA‑256. En tagg `v*` gör releasen i `android.yml`, som stoppar om APK:n inte är signerad med projektets certifikat.
 - [x] En automatisk tillgänglighetskontroll (axe) i Playwright‑flödena. (Generiska `OIDC_*`‑namn och ingen förvald grupp gjordes redan efter fas 3, ADR 0020.)
   Status 2026‑10‑27: `e2e/gate.spec.ts` kontrollerar första besöket och sju sidor mot WCAG 2.1 A/AA, med allvarliga och kritiska fel som stopp. Två fel rättades: accentfärgad text hade för låg kontrast (ny token `--primary-text`), och väljare saknade namn.
 - [x] TOTP‑hemligheterna krypterade i vila med en servernyckel (`<NAMN>_FILE`), tillsammans med övriga hemligheter.

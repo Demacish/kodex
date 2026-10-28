@@ -25,6 +25,9 @@ class UserSession(Base):
     created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     last_seen_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     expires_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True))
+    # "Remember me on this device": false keeps the cookie for the browser's
+    # session only, and the session for a day while used.
+    remember: Mapped[bool] = mapped_column(Boolean, default=True, server_default=text("true"))
 
 
 class ApiKey(Base):

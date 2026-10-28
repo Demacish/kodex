@@ -30,6 +30,7 @@ router = APIRouter(tags=["auth"])
 Role = Literal["admin", "user", "guest"]
 Purpose = Literal["app", "opds", "kosync", "kobo"]
 _SETUP_LOCK = 0x6B6F646578  # pg_advisory_xact_lock key for creating the first admin
+_FORGET = "forget"  # a second-step ticket's label: the login isn't to be remembered
 
 
 class AuthConfig(BaseModel):
@@ -49,6 +50,7 @@ class AuthConfig(BaseModel):
 class LoginIn(BaseModel):
     username: str = Field(min_length=1, max_length=255)
     password: str = Field(min_length=1, max_length=1024)
+    remember: bool = Field(default=True, description="Keep the login after the browser closes.")
 
 
 class SetupIn(LoginIn):
@@ -189,23 +191,26 @@ def _admin_view(db: Session, user: User) -> UserAdminOut:
                         created_at=user.created_at, last_login_at=user.last_login_at)  # fmt: skip
 
 
-def log_in(db: Session, user: User, request: Request, response: Response) -> AccountOut:
+def log_in(db: Session, user: User, request: Request, response: Response, *, remember: bool = True) -> AccountOut:
     """Starts a session for ``user`` (whose login is complete)."""
     sessions.forget(db, request)
-    session = sessions.start(db, user, request, response)
+    session = sessions.start(db, user, request, response, remember=remember)
     db.commit()
     request.state.auth_method = "session"
     return account_view(db, user, request, session.csrf_token)
 
 
-def _after_password(db: Session, user: User, request: Request, response: Response) -> LoginOut:
-    """The password was right: logged in, or on to the second step."""
+def _after_password(db: Session, user: User, request: Request, response: Response, *,
+                    remember: bool = True) -> LoginOut:  # fmt: skip
+    """The password was right: logged in, or on to the second step (whose
+    ticket keeps ``remember`` in its label)."""
     if not factors.enabled(user):
-        return LoginOut(account=log_in(db, user, request, response))
+        return LoginOut(account=log_in(db, user, request, response, remember=remember))
     methods: list[Literal["totp", "recovery", "passkey"]] = ["totp", "recovery"]
     if get_settings().passkeys_enabled and _passkey_count(db, user.id):
         methods.append("passkey")
     ticket = factors.new_ticket(db, "second_factor", user.id)
+    ticket.label = None if remember else _FORGET
     db.commit()
     return LoginOut(second_step=SecondStepOut(ticket=ticket.ticket, methods=methods))
 
@@ -285,7 +290,7 @@ def setup(body: SetupIn, request: Request, response: Response, db: Session = Dep
     set_role(user, "admin")
     db.flush()
     first_admin.forget_code()
-    session = sessions.start(db, user, request, response)
+    session = sessions.start(db, user, request, response, remember=body.remember)
     db.commit()
     request.state.auth_method = "session"
     return account_view(db, user, request, session.csrf_token)
@@ -310,7 +315,7 @@ def login(body: LoginIn, request: Request, response: Response, db: Session = Dep
     if passwords.needs_rehash(user.password_hash or ""):
         user.password_hash = passwords.hash_password(body.password)
     throttle.clear(db, body.username)
-    return _after_password(db, user, request, response)
+    return _after_password(db, user, request, response, remember=body.remember)
 
 
 @router.post("/auth/login/second-step", response_model=AccountOut)
@@ -334,9 +339,10 @@ def second_step(body: SecondStepIn, request: Request, response: Response, db: Se
         db.commit()
         throttle.record_failure(db, user.username, _ip(request))
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Wrong code")
+    remember = ticket.label != _FORGET
     db.delete(ticket)
     throttle.clear(db, user.username)
-    return log_in(db, user, request, response)
+    return log_in(db, user, request, response, remember=remember)
 
 
 @router.post("/auth/logout", status_code=status.HTTP_204_NO_CONTENT)

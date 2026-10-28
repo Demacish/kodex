@@ -107,6 +107,14 @@ jobs:
           name: playwright-report
           path: web/playwright-report
           retention-days: 7
+      # The pages before login, photographed by e2e/look.spec.ts.
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: screenshots
+          path: web/screenshots
+          retention-days: 7
+          if-no-files-found: ignore
 
   commits:
     if: github.event_name == 'pull_request'

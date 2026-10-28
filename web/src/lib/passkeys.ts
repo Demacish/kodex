@@ -52,7 +52,7 @@ export async function addPasskey(name: string): Promise<Schemas["PasskeyOut"]> {
  * person to pick one in the username field's suggestions instead of
  * opening a dialog.
  */
-export async function loginWithPasskey({ ticket, autofill = false }: { ticket?: string; autofill?: boolean } = {}): Promise<Account> {
+export async function loginWithPasskey({ ticket, autofill = false, remember = true }: { ticket?: string; autofill?: boolean; remember?: boolean } = {}): Promise<Account> {
   const ceremony = await fetchClient.POST("/api/auth/passkeys/login/options", { body: { ticket: ticket ?? null } });
   if (!ceremony.data) throw new PasskeyFailed(detail(ceremony.error));
   const credential = await startAuthentication({
@@ -60,7 +60,7 @@ export async function loginWithPasskey({ ticket, autofill = false }: { ticket?: 
     useBrowserAutofill: autofill,
   });
   const done = await fetchClient.POST("/api/auth/passkeys/login", {
-    body: { ticket: ceremony.data.ticket, credential: credential as unknown as Record<string, unknown> },
+    body: { ticket: ceremony.data.ticket, credential: credential as unknown as Record<string, unknown>, remember },
   });
   if (!done.data) throw new PasskeyFailed(detail(done.error));
   return done.data;

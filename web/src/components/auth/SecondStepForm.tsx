@@ -5,12 +5,10 @@ import { useTranslation } from "react-i18next";
 import { fetchClient, type Schemas } from "@/api/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import type { Account } from "@/lib/account";
 import { loginWithPasskey, passkeysSupported, wasCancelled } from "@/lib/passkeys";
 
-import { OrDivider } from "./AuthLayout";
+import { AuthField, AuthInput, AuthSecondary, AuthSubmit, OrDivider } from "./AuthLayout";
 
 const EXPIRED = "The login took too long; start again";
 
@@ -18,7 +16,7 @@ const EXPIRED = "The login took too long; start again";
  * The second step of a password login: the authenticator app's code, a
  * recovery code, or one of the account's passkeys.
  */
-export function SecondStepForm({ step, onDone, onRestart }: { step: Schemas["SecondStepOut"]; onDone: (account: Account) => void; onRestart: () => void }) {
+export function SecondStepForm({ step, remember = true, onDone, onRestart }: { step: Schemas["SecondStepOut"]; remember?: boolean; onDone: (account: Account) => void; onRestart: () => void }) {
   const { t } = useTranslation();
   const [recovery, setRecovery] = useState(false);
   const [error, setError] = useState<string>();
@@ -44,7 +42,7 @@ export function SecondStepForm({ step, onDone, onRestart }: { step: Schemas["Sec
   const withPasskey = async () => {
     setError(undefined);
     try {
-      onDone(await loginWithPasskey({ ticket: step.ticket }));
+      onDone(await loginWithPasskey({ ticket: step.ticket, remember }));
     } catch (failure) {
       if (!wasCancelled(failure)) setError(t("auth.passkeyFailed"));
     }
@@ -52,26 +50,29 @@ export function SecondStepForm({ step, onDone, onRestart }: { step: Schemas["Sec
 
   if (expired) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-5">
         <Alert variant="destructive">
           <AlertDescription>{t("auth.secondStep.expired")}</AlertDescription>
         </Alert>
-        <Button className="w-full" onClick={onRestart}>{t("auth.secondStep.restart")}</Button>
+        <AuthSubmit onClick={onRestart}>{t("auth.secondStep.restart")}</AuthSubmit>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      <form className="space-y-4" onSubmit={submit}>
-        <div className="space-y-1.5">
-          <Label htmlFor="code">{recovery ? t("auth.secondStep.recoveryLabel") : t("auth.secondStep.codeLabel")}</Label>
-          <Input
+      <form className="space-y-5" onSubmit={submit}>
+        <AuthField
+          id="code"
+          label={recovery ? t("auth.secondStep.recoveryLabel") : t("auth.secondStep.codeLabel")}
+          hint={recovery ? t("auth.secondStep.recoveryHint") : t("auth.secondStep.codeHint")}
+        >
+          <AuthInput
             key={recovery ? "recovery" : "code"}
             id="code"
             name="code"
@@ -82,14 +83,12 @@ export function SecondStepForm({ step, onDone, onRestart }: { step: Schemas["Sec
             pattern={recovery ? undefined : "[0-9 ]{6,7}"}
             placeholder={recovery ? "xxxxx-xxxxx" : "123 456"}
             aria-describedby="code-hint"
+            className="font-mono tracking-widest"
           />
-          <p id="code-hint" className="text-xs text-muted-foreground">
-            {recovery ? t("auth.secondStep.recoveryHint") : t("auth.secondStep.codeHint")}
-          </p>
-        </div>
-        <Button type="submit" className="w-full" disabled={busy}>
+        </AuthField>
+        <AuthSubmit type="submit" disabled={busy}>
           {busy ? t("auth.loggingIn") : t("auth.secondStep.submit")}
-        </Button>
+        </AuthSubmit>
       </form>
       <Button variant="link" size="sm" className="h-auto w-full p-0" onClick={() => setRecovery(!recovery)}>
         {recovery ? t("auth.secondStep.useApp") : t("auth.secondStep.useRecovery")}
@@ -97,10 +96,10 @@ export function SecondStepForm({ step, onDone, onRestart }: { step: Schemas["Sec
       {passkey && (
         <>
           <OrDivider label={t("auth.or")} />
-          <Button variant="outline" className="w-full" onClick={() => void withPasskey()}>
+          <AuthSecondary onClick={() => void withPasskey()}>
             <Fingerprint aria-hidden />
             {t("auth.secondStep.usePasskey")}
-          </Button>
+          </AuthSecondary>
         </>
       )}
     </div>

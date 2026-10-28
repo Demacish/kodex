@@ -5,12 +5,10 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 
 import { api, fetchClient, type Schemas } from "@/api/client";
-import { AuthLayout, OrDivider } from "@/components/auth/AuthLayout";
+import { AuthField, AuthInput, AuthLayout, AuthSecondary, AuthSubmit, OrDivider, PasswordInput } from "@/components/auth/AuthLayout";
 import { SecondStepForm } from "@/components/auth/SecondStepForm";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { accountQuery, safeNext, type Account } from "@/lib/account";
 import { browserSupportsWebAuthnAutofill, cancelPasskeyPrompt, loginWithPasskey, passkeysSupported, wasCancelled } from "@/lib/passkeys";
@@ -41,6 +39,9 @@ function LoginPage() {
   const [error, setError] = useState<string | undefined>(search.error);
   const [busy, setBusy] = useState(false);
   const [secondStep, setSecondStep] = useState<Schemas["SecondStepOut"]>();
+  // "Remember me on this device": without it the login ends with the browser.
+  const [remember, setRemember] = useState(true);
+  const [forgotShown, setForgotShown] = useState(false);
   const setup = config.data?.setup_required ?? false;
   // The server has accounts (from v1, say) but no admin who can log in.
   const claim = setup && (config.data?.setup_code_required ?? false);
@@ -59,7 +60,7 @@ function LoginPage() {
     let active = true;
     void browserSupportsWebAuthnAutofill().then((supported) => {
       if (!supported || !active) return;
-      loginWithPasskey({ autofill: true }).then(finish, (failure: unknown) => {
+      loginWithPasskey({ autofill: true, remember }).then(finish, (failure: unknown) => {
         if (active && !wasCancelled(failure)) setError(t("auth.passkeyFailed"));
       });
     });
@@ -86,7 +87,7 @@ function LoginPage() {
       if (result.data) return finish(result.data);
       response = result.response;
     } else {
-      const result = await fetchClient.POST("/api/auth/login", { body: { username, password } });
+      const result = await fetchClient.POST("/api/auth/login", { body: { username, password, remember } });
       setBusy(false);
       if (result.data?.second_step) return setSecondStep(result.data.second_step);
       if (result.data?.account) return finish(result.data.account);
@@ -104,7 +105,7 @@ function LoginPage() {
   const passkeyLogin = async () => {
     setError(undefined);
     try {
-      await finish(await loginWithPasskey());
+      await finish(await loginWithPasskey({ remember }));
     } catch (failure) {
       if (!wasCancelled(failure)) setError(t("auth.passkeyFailed"));
     }
@@ -116,7 +117,7 @@ function LoginPage() {
   if (secondStep) {
     return (
       <AuthLayout title={t("auth.secondStep.title")} intro={t("auth.secondStep.intro")}>
-        <SecondStepForm step={secondStep} onDone={(account) => void finish(account)} onRestart={() => setSecondStep(undefined)} />
+        <SecondStepForm step={secondStep} remember={remember} onDone={(account) => void finish(account)} onRestart={() => setSecondStep(undefined)} />
       </AuthLayout>
     );
   }
@@ -125,6 +126,7 @@ function LoginPage() {
     <AuthLayout
       title={setup ? t("auth.setupTitle") : t("auth.loginTitle")}
       intro={claim ? t("auth.setupClaimIntro") : setup ? t("auth.setupIntro") : t("auth.loginIntro")}
+      footer={setup ? undefined : t("auth.noAccount")}
     >
       {error && (
         <Alert variant="destructive">
@@ -132,18 +134,18 @@ function LoginPage() {
         </Alert>
       )}
       {config.isPending ? (
-        <div className="space-y-3">
-          <Skeleton className="h-9 w-full" />
-          <Skeleton className="h-9 w-full" />
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full rounded-xl" />
+          <Skeleton className="h-12 w-full rounded-xl" />
+          <Skeleton className="h-12 w-full rounded-xl" />
         </div>
       ) : (
         <>
           {(config.data?.local_login || setup) && (
-            <form className="space-y-4" onSubmit={submit}>
+            <form className="space-y-5" onSubmit={submit}>
               {claim && (
-                <div className="space-y-1.5">
-                  <Label htmlFor="code">{t("auth.setupCode")}</Label>
-                  <Input
+                <AuthField id="code" label={t("auth.setupCode")} hint={t("auth.setupCodeHint")}>
+                  <AuthInput
                     id="code"
                     name="code"
                     autoComplete="one-time-code"
@@ -153,56 +155,81 @@ function LoginPage() {
                     required
                     autoFocus
                     aria-describedby="code-hint"
+                    className="font-mono tracking-widest uppercase"
                   />
-                  <p id="code-hint" className="text-xs text-muted-foreground">
-                    {t("auth.setupCodeHint")}
-                  </p>
-                </div>
+                </AuthField>
               )}
-              <div className="space-y-1.5">
-                <Label htmlFor="username">{t("auth.username")}</Label>
-                <Input id="username" name="username" autoComplete={passkeys ? "username webauthn" : "username"} required autoFocus={!claim} />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="password">{t("auth.password")}</Label>
-                <Input
+              <AuthField id="username" label={t("auth.username")}>
+                <AuthInput
+                  id="username"
+                  name="username"
+                  autoComplete={passkeys ? "username webauthn" : "username"}
+                  placeholder={t("auth.usernamePlaceholder")}
+                  required
+                  autoFocus={!claim}
+                />
+              </AuthField>
+              <AuthField
+                id="password"
+                label={t("auth.password")}
+                hint={setup ? t("auth.passwordHint") : undefined}
+                aside={
+                  !setup && (
+                    <button
+                      type="button"
+                      aria-expanded={forgotShown}
+                      aria-controls="forgot"
+                      onClick={() => setForgotShown((shown) => !shown)}
+                      className="rounded text-xs font-medium text-primary-text transition-colors outline-none hover:underline focus-visible:ring-2 focus-visible:ring-primary/40"
+                    >
+                      {t("auth.forgot")}
+                    </button>
+                  )
+                }
+              >
+                <PasswordInput
                   id="password"
                   name="password"
-                  type="password"
                   autoComplete={setup ? "new-password" : "current-password"}
                   minLength={setup ? 8 : undefined}
+                  placeholder="••••••••••••"
                   required
-                  aria-describedby={setup ? "password-hint" : undefined}
+                  aria-describedby={setup ? "password-hint" : forgotShown ? "forgot" : undefined}
                 />
-                {setup && (
-                  <p id="password-hint" className="text-xs text-muted-foreground">
-                    {t("auth.passwordHint")}
-                  </p>
-                )}
-              </div>
-              {setup && (
-                <div className="space-y-1.5">
-                  <Label htmlFor="email">{t("auth.email")}</Label>
-                  <Input id="email" name="email" type="email" autoComplete="email" />
-                </div>
+              </AuthField>
+              {!setup && forgotShown && (
+                <p id="forgot" role="status" className="-mt-2 rounded-xl bg-muted/60 px-3.5 py-2.5 text-xs text-muted-foreground dark:bg-[#1a1e2b]/70 dark:text-slate-300">
+                  {t("auth.forgotHint")}
+                </p>
               )}
-              <Button type="submit" className="w-full" disabled={busy}>
+              {setup && (
+                <AuthField id="email" label={t("auth.email")}>
+                  <AuthInput id="email" name="email" type="email" autoComplete="email" />
+                </AuthField>
+              )}
+              {!setup && (
+                <label className="flex w-fit cursor-pointer items-center gap-2.5 text-xs text-muted-foreground select-none dark:text-slate-400">
+                  <Checkbox checked={remember} onCheckedChange={(checked) => setRemember(checked === true)} aria-label={t("auth.remember")} />
+                  {t("auth.remember")}
+                </label>
+              )}
+              <AuthSubmit type="submit" disabled={busy}>
                 {busy ? t("auth.loggingIn") : claim ? t("auth.setupClaimSubmit") : setup ? t("auth.setupSubmit") : t("auth.login")}
-              </Button>
+              </AuthSubmit>
             </form>
           )}
           {(passkeys || (config.data?.oidc && !setup)) && config.data?.local_login && <OrDivider label={t("auth.or")} />}
           {passkeys && (
-            <Button variant="outline" className="w-full" onClick={() => void passkeyLogin()}>
+            <AuthSecondary onClick={() => void passkeyLogin()}>
               <Fingerprint aria-hidden />
               {t("auth.passkeyLogin")}
-            </Button>
+            </AuthSecondary>
           )}
           {config.data?.oidc && !setup && (
-            <Button variant="outline" className="w-full" render={<a href={oidcHref} />}>
+            <AuthSecondary render={<a href={oidcHref} />}>
               <KeyRound aria-hidden />
               {t("auth.oidc", { name: oidcName })}
-            </Button>
+            </AuthSecondary>
           )}
           {config.data && !config.data.local_login && !config.data.oidc && !setup && (
             <p className="text-sm text-muted-foreground">{t("auth.noMethod")}</p>

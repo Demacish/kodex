@@ -53,6 +53,7 @@ class PasskeyLoginOptionsIn(BaseModel):
 class PasskeyLoginIn(BaseModel):
     ticket: str = Field(min_length=1, max_length=64)
     credential: dict[str, Any]
+    remember: bool = Field(default=True, description="Keep the login after the browser closes.")
 
 
 class TotpSetupOut(BaseModel):
@@ -176,7 +177,7 @@ def passkey_login(body: PasskeyLoginIn, request: Request, response: Response,
     if user.disabled:
         db.commit()
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This account is disabled")
-    return log_in(db, user, request, response)
+    return log_in(db, user, request, response, remember=body.remember)
 
 
 @router.post("/auth/totp", response_model=TotpSetupOut)

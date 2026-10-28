@@ -3116,6 +3116,12 @@
             "title": "Password",
             "type": "string"
           },
+          "remember": {
+            "default": true,
+            "description": "Keep the login after the browser closes.",
+            "title": "Remember",
+            "type": "boolean"
+          },
           "username": {
             "maxLength": 255,
             "minLength": 1,
@@ -3818,6 +3824,12 @@
             "additionalProperties": true,
             "title": "Credential",
             "type": "object"
+          },
+          "remember": {
+            "default": true,
+            "description": "Keep the login after the browser closes.",
+            "title": "Remember",
+            "type": "boolean"
           },
           "ticket": {
             "maxLength": 64,
@@ -5656,6 +5668,12 @@
             "minLength": 1,
             "title": "Password",
             "type": "string"
+          },
+          "remember": {
+            "default": true,
+            "description": "Keep the login after the browser closes.",
+            "title": "Remember",
+            "type": "boolean"
           },
           "username": {
             "maxLength": 255,

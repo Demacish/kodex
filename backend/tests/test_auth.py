@@ -157,6 +157,22 @@ def test_password_login_and_logout(client):
     assert client.get("/api/auth/me").status_code == 401
 
 
+def test_a_login_not_remembered_lasts_for_the_browser_session(client):
+    from kodex.core.auth.models import UserSession
+
+    _make_user("anna")
+    remembered = _login(client, "anna").headers["set-cookie"]
+    assert "Max-Age=" in remembered
+    client.cookies.clear()
+    once = client.post("/api/auth/login", json={"username": "anna", "password": PASSWORD, "remember": False})
+    assert once.status_code == 200
+    assert "Max-Age=" not in once.headers["set-cookie"] and "expires=" not in once.headers["set-cookie"].lower()
+    assert client.get("/api/auth/me").json()["username"] == "anna"
+    with SessionLocal() as db:
+        kept = {s.remember: s.expires_at - s.created_at for s in db.query(UserSession).all()}
+    assert kept[False].days < 2 and kept[True].days >= 29
+
+
 def test_unsafe_requests_need_the_csrf_token(client):
     _make_user("anna")
     _login(client, "anna")

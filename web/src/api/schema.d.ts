@@ -5071,6 +5071,12 @@ export interface components {
         LoginIn: {
             /** Password */
             password: string;
+            /**
+             * Remember
+             * @description Keep the login after the browser closes.
+             * @default true
+             */
+            remember: boolean;
             /** Username */
             username: string;
         };
@@ -5327,6 +5333,12 @@ export interface components {
             credential: {
                 [key: string]: unknown;
             };
+            /**
+             * Remember
+             * @description Keep the login after the browser closes.
+             * @default true
+             */
+            remember: boolean;
             /** Ticket */
             ticket: string;
         };
@@ -5964,6 +5976,12 @@ export interface components {
             email?: string | null;
             /** Password */
             password: string;
+            /**
+             * Remember
+             * @description Keep the login after the browser closes.
+             * @default true
+             */
+            remember: boolean;
             /** Username */
             username: string;
         };

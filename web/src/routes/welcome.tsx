@@ -4,12 +4,9 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 
 import { fetchClient, type Schemas } from "@/api/client";
-import { AuthLayout } from "@/components/auth/AuthLayout";
+import { AuthField, AuthLayout, AuthSubmit, PasswordInput } from "@/components/auth/AuthLayout";
 import { SecondStepForm } from "@/components/auth/SecondStepForm";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { accountQuery, type Account } from "@/lib/account";
 
@@ -71,7 +68,7 @@ function Welcome() {
   if (username === null) {
     return (
       <AuthLayout title={t("welcome.invalidTitle")} intro={t("welcome.invalidIntro")}>
-        <Button className="w-full" render={<Link to="/login" />}>{t("auth.login")}</Button>
+        <AuthSubmit render={<Link to="/login" />}>{t("auth.login")}</AuthSubmit>
       </AuthLayout>
     );
   }
@@ -83,20 +80,19 @@ function Welcome() {
         </Alert>
       )}
       {username === undefined ? (
-        <Skeleton className="h-36 w-full" />
+        <Skeleton className="h-40 w-full rounded-xl" />
       ) : (
-        <form className="space-y-4" onSubmit={submit}>
+        <form className="space-y-5" onSubmit={submit}>
           <input type="text" name="username" autoComplete="username" value={username} readOnly hidden />
-          <div className="space-y-1.5">
-            <Label htmlFor="password">{t("settings.newPassword")}</Label>
-            <Input id="password" name="password" type="password" autoComplete="new-password" minLength={8} required autoFocus aria-describedby="password-hint" />
-            <p id="password-hint" className="text-xs text-muted-foreground">{t("auth.passwordHint")}</p>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="again">{t("settings.againPassword")}</Label>
-            <Input id="again" name="again" type="password" autoComplete="new-password" minLength={8} required />
-          </div>
-          <Button type="submit" className="w-full" disabled={busy}>{t("welcome.submit")}</Button>
+          <AuthField id="password" label={t("settings.newPassword")} hint={t("auth.passwordHint")}>
+            <PasswordInput id="password" name="password" autoComplete="new-password" minLength={8} required autoFocus aria-describedby="password-hint" />
+          </AuthField>
+          <AuthField id="again" label={t("settings.againPassword")}>
+            <PasswordInput id="again" name="again" autoComplete="new-password" minLength={8} required />
+          </AuthField>
+          <AuthSubmit type="submit" disabled={busy}>
+            {t("welcome.submit")}
+          </AuthSubmit>
         </form>
       )}
     </AuthLayout>

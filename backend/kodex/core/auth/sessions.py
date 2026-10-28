@@ -23,6 +23,8 @@ CSRF_COOKIE = "kodex_csrf"
 CSRF_HEADER = "x-csrf-token"
 _SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
 _TOUCH_EVERY = dt.timedelta(minutes=5)
+# A session not remembered on its device lasts this long after its last use.
+FORGET_AFTER = dt.timedelta(days=1)
 
 
 def _hash(token: str) -> str:
@@ -37,18 +39,23 @@ def _secure(request: Request) -> bool:
     return proto.split(",")[0].strip() == "https"
 
 
-def start(db: Session, user: User, request: Request, response: Response) -> UserSession:
-    """Logs ``user`` in: a new session, its cookies set on ``response``."""
+def _lifetime(remember: bool) -> dt.timedelta:
+    return dt.timedelta(days=get_settings().session_days) if remember else FORGET_AFTER
+
+
+def start(db: Session, user: User, request: Request, response: Response, *, remember: bool = True) -> UserSession:
+    """Logs ``user`` in: a new session, its cookies set on ``response``.
+    Without ``remember``, the cookies go when the browser closes."""
     token, csrf = secrets.token_urlsafe(32), secrets.token_urlsafe(24)
-    days = get_settings().session_days
     now = dt.datetime.now(dt.UTC)
     session = UserSession(user_id=user.id, token_hash=_hash(token), csrf_token=csrf,
                           user_agent=(request.headers.get("user-agent") or "")[:255] or None,
-                          expires_at=now + dt.timedelta(days=days), last_seen_at=now)  # fmt: skip
+                          expires_at=now + _lifetime(remember), last_seen_at=now, remember=remember)  # fmt: skip
     db.add(session)
     user.last_login_at = now
     db.flush()
-    secure, max_age = _secure(request), days * 86400
+    secure = _secure(request)
+    max_age = get_settings().session_days * 86400 if remember else None
     response.set_cookie(SESSION_COOKIE, token, max_age=max_age, httponly=True, samesite="lax", secure=secure, path="/")
     response.set_cookie(CSRF_COOKIE, csrf, max_age=max_age, httponly=False, samesite="lax", secure=secure, path="/")
     return session
@@ -86,8 +93,7 @@ def current(db: Session, request: Request) -> tuple[UserSession, User] | None:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="CSRF token missing or wrong")
     if now - session.last_seen_at > _TOUCH_EVERY:
         session.last_seen_at = now
-        days = get_settings().session_days
-        session.expires_at = max(session.expires_at, now + dt.timedelta(days=days))
+        session.expires_at = max(session.expires_at, now + _lifetime(session.remember))
         db.commit()
     return session, user
 

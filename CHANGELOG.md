@@ -6,7 +6,17 @@ All notable changes to Kodex are listed here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The pages before login have a new look: a dark backdrop with the accent's
+  glow, a card with larger fields, a button that shows the password, and the
+  same layout from a phone to a desktop. Light mode follows it.
+
 ### Added
+
+- "Remember me on this device" when logging in: without it, the login ends
+  when the browser closes (and lasts a day while used). "Forgot your
+  password?" says how to get a new one.
 
 - A server with accounts but no admin who can log in (one adopted from
   v1, whose users only logged in through Authentik) is set up on its first

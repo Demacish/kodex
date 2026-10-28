@@ -4,9 +4,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { fetchClient } from "@/api/client";
-import { AuthLayout } from "@/components/auth/AuthLayout";
+import { AuthLayout, AuthSecondary, AuthSubmit } from "@/components/auth/AuthLayout";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { useAccount } from "@/lib/account";
 
 interface AppLoginSearch {
@@ -54,12 +53,15 @@ function AppLogin() {
       {!valid ? (
         <Alert variant="destructive"><AlertDescription>{t("appLogin.invalid")}</AlertDescription></Alert>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-5">
           {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
-          <p className="flex items-center gap-2 rounded-lg border p-3 text-sm"><Smartphone className="size-4 shrink-0" aria-hidden />{device}</p>
-          <p className="text-sm text-muted-foreground">{t("appLogin.what")}</p>
-          <Button className="w-full" disabled={busy} onClick={() => void approve()}>{t("appLogin.approve")}</Button>
-          <Button variant="ghost" className="w-full" render={<Link to="/" />}>{t("common.cancel")}</Button>
+          <p className="flex items-center gap-3 rounded-xl border bg-muted/50 px-4 py-3.5 text-sm font-medium dark:border-white/[0.12] dark:bg-[#1a1e2b]/80">
+            <Smartphone className="size-4 shrink-0 text-primary-text" aria-hidden />
+            {device}
+          </p>
+          <p className="text-sm text-muted-foreground dark:text-slate-400">{t("appLogin.what")}</p>
+          <AuthSubmit disabled={busy} onClick={() => void approve()}>{t("appLogin.approve")}</AuthSubmit>
+          <AuthSecondary render={<Link to="/" />}>{t("common.cancel")}</AuthSecondary>
         </div>
       )}
     </AuthLayout>

@@ -69,7 +69,8 @@
   --muted-foreground: hsl(240 5% 62%);
   --accent: hsl(16 55% 18%);
   --accent-foreground: hsl(16 90% 78%);
-  --destructive: hsl(0 70% 55%);
+  /* At least 4.5:1 on every dark surface, cards and muted ones too. */
+  --destructive: hsl(0 80% 64%);
   --border: hsl(240 8% 17%);
   --input: hsl(240 8% 17%);
   --ring: hsl(16 90% 58%);

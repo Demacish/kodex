@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { Fingerprint, KeyRound } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 
 import { api, fetchClient, type Schemas } from "@/api/client";
@@ -41,6 +41,10 @@ function LoginPage() {
   const [secondStep, setSecondStep] = useState<Schemas["SecondStepOut"]>();
   // "Remember me on this device": without it the login ends with the browser.
   const [remember, setRemember] = useState(true);
+  const rememberNow = useRef(remember);
+  useEffect(() => {
+    rememberNow.current = remember;
+  }, [remember]);
   const [forgotShown, setForgotShown] = useState(false);
   const setup = config.data?.setup_required ?? false;
   // The server has accounts (from v1, say) but no admin who can log in.
@@ -60,9 +64,9 @@ function LoginPage() {
     let active = true;
     void browserSupportsWebAuthnAutofill().then((supported) => {
       if (!supported || !active) return;
-      loginWithPasskey({ autofill: true, remember }).then(finish, (failure: unknown) => {
-        if (active && !wasCancelled(failure)) setError(t("auth.passkeyFailed"));
-      });
+      // Nobody asked for this one, so a failure (no passkey on the device,
+      // a browser that can't) says nothing; the button below reports its own.
+      loginWithPasskey({ autofill: true, remember: () => rememberNow.current }).then(finish, () => undefined);
     });
     return () => {
       active = false;

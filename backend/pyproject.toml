@@ -1,6 +1,6 @@
 [project]
 name = "kodex"
-version = "2.1.0"
+version = "2.1.1"
 description = "Self-hosted library server and reader for comics, manga and e-books"
 license = "MIT"
 requires-python = ">=3.14"

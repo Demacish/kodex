@@ -6,6 +6,8 @@ All notable changes to Kodex are listed here. The format follows
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-10-28
+
 ### Fixed
 
 - A web client the service worker kept from before an upgrade could be
@@ -297,6 +299,7 @@ collections, OPDS and Kobo), phase 5 (the Android app), phase 6
   linked to for a series the matching engine has matched; it only fills in
   missing details.
 
-[Unreleased]: https://github.com/Demacish/kodex/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/Demacish/kodex/compare/v2.1.1...HEAD
+[2.1.1]: https://github.com/Demacish/kodex/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/Demacish/kodex/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/Demacish/kodex/releases/tag/v2.0.0

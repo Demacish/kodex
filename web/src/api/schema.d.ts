@@ -4222,7 +4222,7 @@ export interface components {
             /**
              * Version
              * @description The server's version; a web client older or newer reloads.
-             * @default 2.1.0
+             * @default 2.1.1
              */
             version: string;
         };

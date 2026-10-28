@@ -541,6 +541,8 @@ Planen nämnde inte att appen oftast kommer att användas på en surfplatta. Gru
 
 Men inget har provats eller finslipats på en platta.
 
+Målenheten är en Samsung Galaxy Tab S10+ (12,4 tum, 2800 × 1752 pixlar), i båda orienteringarna. Skärmbilderna i CI tas i dess storlek, och i en mindre 10‑tumsplatta.
+
 - [ ] Skärmbilder av appens skärmar i plattstorlek (stående och liggande) och telefonstorlek i CI, med Robolectric utan emulator, att granska och jämföra.
 - [ ] Bibliotek och serier som omslagsrutnät, hemskärmens hyllor med större omslag på breda skärmar, läsbar bredd för inställningar och bokdetaljer.
 - [ ] Läsarna: två spalter i EPUB i liggande läge, läsarens kontroller och tryckzoner i plattstorlek, bläddring med tangentbord och mus.

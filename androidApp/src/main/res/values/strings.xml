@@ -28,6 +28,9 @@
     <string name="login_unreachable">Can\'t reach the server. Check the address and the connection.</string>
     <string name="login_browser_failed">The login in the browser didn\'t come back in time. Try again.</string>
     <string name="login_refused">The server refused the login.</string>
+    <string name="login_setup_needed">This server isn\'t set up yet: no one can log in to it. Open it in the browser to choose the administrator\'s username and password, then come back here.</string>
+    <string name="login_setup_open">Open the server in the browser</string>
+    <string name="login_setup_again">It\'s set up: continue</string>
 
     <string name="home_empty">Nothing started yet. Find something in the library.</string>
     <string name="continue_reading">Continue reading</string>

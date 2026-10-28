@@ -27,6 +27,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -66,6 +67,15 @@ fun LoginScreen(vm: LoginViewModel) {
                         modifier = Modifier.fillMaxWidth().testTag("connect"),
                     ) { Text(stringResource(R.string.login_connect)) }
                     state.ticket != null -> SecondStep(vm, state.busy)
+                    // Nobody can log in yet: the admin is chosen on the server's first page.
+                    config.setupRequired -> {
+                        val uri = LocalUriHandler.current
+                        Text(stringResource(R.string.login_setup_needed), style = MaterialTheme.typography.bodyMedium)
+                        Button(onClick = { uri.openUri(state.server) }, modifier = Modifier.fillMaxWidth().testTag("setup")) {
+                            Text(stringResource(R.string.login_setup_open))
+                        }
+                        TextButton(onClick = vm::connect, enabled = !state.busy) { Text(stringResource(R.string.login_setup_again)) }
+                    }
                     else -> {
                         if (config.localLogin) Password(vm, state.busy)
                         if (config.passkeys || config.oidc || !config.localLogin) {

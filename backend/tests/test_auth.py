@@ -22,6 +22,7 @@ from app.database import SessionLocal
 from app.main import app
 from app.models.user import User
 from kodex.core.auth import oidc, passwords
+from kodex.core.auth import setup as first_admin
 from tests.db import reset_database
 
 PASSWORD = "correct horse battery"
@@ -75,6 +76,65 @@ def test_the_first_admin_is_made_once(client):
     assert client.get("/api/auth/config").json()["setup_required"] is False
     again = client.post("/api/auth/setup", json={"username": "other", "password": PASSWORD})
     assert again.status_code == 409
+
+
+def _announce() -> str | None:
+    with SessionLocal() as db:
+        return first_admin.announce(db)
+
+
+def test_a_server_whose_admins_cant_log_in_is_set_up_with_the_code(client, caplog):
+    # v1's accounts: an admin and a reader, neither with a password.
+    admin_id = _make_user("Hans", role="admin", password=None)
+    _make_user("reader", password=None)
+    config = client.get("/api/auth/config").json()
+    assert (config["setup_required"], config["setup_code_required"]) == (True, True)
+    code = _announce()
+    assert code and code in caplog.text
+
+    def setup(**fields):
+        return client.post("/api/auth/setup", json={"username": "hans", "password": PASSWORD, **fields})
+
+    assert setup().status_code == 403
+    assert setup(code="WRONG-CODE").status_code == 403
+    response = setup(code=code.lower().replace("-", " "))
+    assert response.status_code == 201
+    assert (response.json()["id"], response.json()["username"], response.json()["is_admin"]) == (admin_id, "Hans", True)
+    assert client.get("/api/auth/me").json()["username"] == "Hans"
+    assert client.get("/api/auth/config").json()["setup_required"] is False
+    # Once: the code is gone, and the server has an admin now.
+    assert setup(code=code).status_code == 409
+    assert _announce() is None
+
+
+def test_the_setup_code_never_takes_an_account_with_a_password(client):
+    _make_user("Hans", role="admin", password=None)
+    _make_user("anna")  # a reader who has a password
+    code = _announce()
+    taken = client.post("/api/auth/setup", json={"username": "anna", "password": PASSWORD, "code": code})
+    assert taken.status_code == 409
+    fresh = client.post("/api/auth/setup", json={"username": "Ny admin", "password": PASSWORD, "code": code})
+    assert fresh.status_code == 201
+    assert (fresh.json()["username"], fresh.json()["role"]) == ("Ny admin", "admin")
+
+
+def test_wrong_setup_codes_are_throttled(client, settings):
+    settings(login_max_failures=2)
+    _make_user("Hans", role="admin", password=None)
+    code = _announce()
+    for _ in range(2):
+        client.post("/api/auth/setup", json={"username": "Hans", "password": PASSWORD, "code": "AAAA-AAAA"})
+    blocked = client.post("/api/auth/setup", json={"username": "Hans", "password": PASSWORD, "code": code})
+    assert blocked.status_code == 429
+
+
+def test_an_admin_who_can_log_in_means_no_setup(client):
+    _make_user("Hans", role="admin")
+    _make_user("reader", password=None)
+    assert client.get("/api/auth/config").json()["setup_required"] is False
+    assert _announce() is None
+    refused = client.post("/api/auth/setup", json={"username": "x", "password": PASSWORD, "code": "AAAA-AAAA"})
+    assert refused.status_code == 409
 
 
 def test_setup_refuses_a_short_password(client):

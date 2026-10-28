@@ -591,7 +591,10 @@ export interface paths {
         put?: never;
         /**
          * Setup
-         * @description Creates the first admin, on a server without users.
+         * @description Sets up the first admin: on a server without users, a new account; on
+         *     one whose admins can't log in, with the setup code from the api's log,
+         *     that account (if it exists, it gets the password and stays as it is
+         *     otherwise) or a new one.
          */
         post: operations["auth_setup"];
         delete?: never;
@@ -4205,7 +4208,16 @@ export interface components {
             oidc_name: string;
             /** Passkeys */
             passkeys: boolean;
-            /** Setup Required */
+            /**
+             * Setup Code Required
+             * @description The server has accounts but no admin who can log in: setting one up takes the code the api wrote to its log when it started.
+             * @default false
+             */
+            setup_code_required: boolean;
+            /**
+             * Setup Required
+             * @description The first visit chooses the admin (POST /auth/setup).
+             */
             setup_required: boolean;
         };
         /** Body_collections_import_cbl */
@@ -5943,6 +5955,11 @@ export interface components {
         };
         /** SetupIn */
         SetupIn: {
+            /**
+             * Code
+             * @description The setup code, when the config asks for it.
+             */
+            code?: string | null;
             /** Email */
             email?: string | null;
             /** Password */

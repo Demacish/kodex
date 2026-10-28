@@ -6,6 +6,19 @@ All notable changes to Kodex are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- A server with accounts but no admin who can log in (one adopted from
+  v1, whose users only logged in through Authentik) is set up on its first
+  page too: with the setup code the api writes to its log, a username and
+  a new password. An existing account keeps everything it had. The Android
+  app says when a server isn't set up yet, and opens it in the browser.
+
+### Fixed
+
+- The api waits up to two minutes for the database before migrating, so
+  it no longer exits when it starts first.
+
 ## [2.0.0] - 2026-10-28
 
 The v2 rebuild: phase 0 (foundations), phase 1 (matching engine), phase 2

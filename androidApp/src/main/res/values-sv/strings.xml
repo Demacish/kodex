@@ -27,6 +27,9 @@
     <string name="login_unreachable">Når inte servern. Kontrollera adressen och anslutningen.</string>
     <string name="login_browser_failed">Inloggningen i webbläsaren kom inte tillbaka i tid. Försök igen.</string>
     <string name="login_refused">Servern nekade inloggningen.</string>
+    <string name="login_setup_needed">Servern är inte uppsatt än, så ingen kan logga in. Öppna den i webbläsaren och välj administratörens användarnamn och lösenord, och kom sedan tillbaka hit.</string>
+    <string name="login_setup_open">Öppna servern i webbläsaren</string>
+    <string name="login_setup_again">Den är uppsatt: fortsätt</string>
 
     <string name="home_empty">Inget påbörjat ännu. Hitta något i biblioteket.</string>
     <string name="continue_reading">Fortsätt läsa</string>

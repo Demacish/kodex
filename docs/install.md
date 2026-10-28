@@ -56,7 +56,9 @@ healthy when it is done.
 The api listens on `127.0.0.1:8000` (`API_PORT` changes the port). Open it
 in a browser (through the reverse proxy, or with an SSH tunnel). **The
 first visit creates the admin account**; choose its username and password
-there.
+there. (A database that already has accounts but no admin who can log in,
+such as one from Kodex v1, asks for a setup code from the api's log too:
+[migrating-from-v1.md](migrating-from-v1.md#4-accounts).)
 
 ## 4. Add the libraries
 

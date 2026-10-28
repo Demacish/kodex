@@ -21,6 +21,7 @@ from app.config import get_settings
 from app.database import get_db
 from app.models.user import User
 from kodex.core.auth import factors, keys, links, oidc, passwords, sessions, throttle
+from kodex.core.auth import setup as first_admin
 from kodex.core.auth.models import ApiKey, Passkey, UserSession
 from kodex.core.auth.roles import set_role
 
@@ -36,7 +37,12 @@ class AuthConfig(BaseModel):
     passkeys: bool
     oidc: bool
     oidc_name: str
-    setup_required: bool
+    setup_required: bool = Field(description="The first visit chooses the admin (POST /auth/setup).")
+    setup_code_required: bool = Field(
+        default=False,
+        description="The server has accounts but no admin who can log in: setting one up takes the code "
+        "the api wrote to its log when it started.",
+    )
     auth_disabled: bool
 
 
@@ -47,6 +53,7 @@ class LoginIn(BaseModel):
 
 class SetupIn(LoginIn):
     email: str | None = Field(default=None, max_length=255)
+    code: str | None = Field(default=None, max_length=32, description="The setup code, when the config asks for it.")
 
 
 class AccountOut(BaseModel):
@@ -233,24 +240,51 @@ def _ip(request: Request) -> str | None:
 @router.get("/auth/config", response_model=AuthConfig)
 def auth_config(db: Session = Depends(get_db)) -> AuthConfig:
     settings = get_settings()
-    no_users = db.scalars(select(User.id).limit(1)).first() is None
+    setup = first_admin.state(db)
     return AuthConfig(local_login=settings.local_login_enabled,
                       passkeys=settings.passkeys_enabled and settings.local_login_enabled, oidc=oidc.enabled(),
-                      oidc_name=settings.oidc_display_name, setup_required=no_users and not settings.auth_disabled,
-                      auth_disabled=settings.auth_disabled)  # fmt: skip
+                      oidc_name=settings.oidc_display_name, setup_required=setup != "ready",
+                      setup_code_required=setup == "claim", auth_disabled=settings.auth_disabled)  # fmt: skip
 
 
 @router.post("/auth/setup", response_model=AccountOut, status_code=status.HTTP_201_CREATED)
 def setup(body: SetupIn, request: Request, response: Response, db: Session = Depends(get_db)) -> AccountOut:
-    """Creates the first admin, on a server without users."""
+    """Sets up the first admin: on a server without users, a new account; on
+    one whose admins can't log in, with the setup code from the api's log,
+    that account (if it exists, it gets the password and stays as it is
+    otherwise) or a new one."""
     _check_password(body.password)
     db.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": _SETUP_LOCK})
-    if db.scalars(select(User.id).limit(1)).first() is not None:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This server already has users")
-    user = User(username=body.username.strip(), email=body.email, password_hash=passwords.hash_password(body.password))
+    current = first_admin.state(db)
+    if current == "ready":
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This server already has an admin")
+    username = body.username.strip()
+    user: User | None = None
+    if current == "claim":
+        wait = throttle.seconds_to_wait(db, first_admin.THROTTLE_KEY, _ip(request))
+        if wait:
+            raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Too many wrong setup codes",
+                                headers={"Retry-After": str(wait)})  # fmt: skip
+        if not first_admin.check_code(body.code or ""):
+            throttle.record_failure(db, first_admin.THROTTLE_KEY, _ip(request))
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Wrong setup code")
+        query = select(User).where(func.lower(User.username) == username.lower()).order_by(User.id)
+        user = db.scalars(query).first()
+        if user is not None and user.password_hash is not None:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT,
+                                detail="That account already has a password: log in with it")  # fmt: skip
+        if user is not None and user.disabled:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="That account is disabled")
+        throttle.clear(db, first_admin.THROTTLE_KEY)
+    if user is None:
+        user = User(username=username, email=body.email)
+        db.add(user)
+    elif body.email and not user.email:
+        user.email = body.email
+    user.password_hash = passwords.hash_password(body.password)
     set_role(user, "admin")
-    db.add(user)
     db.flush()
+    first_admin.forget_code()
     session = sessions.start(db, user, request, response)
     db.commit()
     request.state.auth_method = "session"

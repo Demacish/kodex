@@ -27,6 +27,7 @@ from app.api.routes import (
     stats,
 )
 from app.config import get_settings
+from app.database import SessionLocal
 from kodex.acquire import api as acquire_api
 from kodex.acquire import downloads, requests
 from kodex.acquire.sorting import api as sorting
@@ -35,6 +36,7 @@ from kodex.core import sync as sync_api
 from kodex.core.auth import api as auth_api
 from kodex.core.auth import apps as auth_apps
 from kodex.core.auth import factors_api
+from kodex.core.auth import setup as first_admin
 from kodex.core.headers import SecurityHeaders
 from kodex.core.legacy import V1Proxy
 from kodex.core.spa import WebClient
@@ -61,6 +63,12 @@ async def lifespan(app: FastAPI):
             "Starting with AUTH_DISABLED=true — every request is treated as an admin dev user. "
             "Do not run like this outside local development."
         )
+    # A server whose admins can't log in gets a setup code in this log.
+    try:
+        with SessionLocal() as db:
+            first_admin.announce(db)
+    except Exception:  # the api serves anyway; the next start tries again
+        logging.getLogger(__name__).exception("Couldn't check whether the server needs an admin")
 
     yield
 

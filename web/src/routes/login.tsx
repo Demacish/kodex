@@ -42,6 +42,8 @@ function LoginPage() {
   const [busy, setBusy] = useState(false);
   const [secondStep, setSecondStep] = useState<Schemas["SecondStepOut"]>();
   const setup = config.data?.setup_required ?? false;
+  // The server has accounts (from v1, say) but no admin who can log in.
+  const claim = setup && (config.data?.setup_code_required ?? false);
   const passkeys = (config.data?.passkeys ?? false) && !setup && passkeysSupported();
 
   const finish = async (account: Account) => {
@@ -78,7 +80,7 @@ function LoginPage() {
     let response: Response;
     if (setup) {
       const result = await fetchClient.POST("/api/auth/setup", {
-        body: { username, password, email: String(form.get("email") ?? "") || null },
+        body: { username, password, email: String(form.get("email") ?? "") || null, code: claim ? String(form.get("code") ?? "") : null },
       });
       setBusy(false);
       if (result.data) return finish(result.data);
@@ -92,6 +94,8 @@ function LoginPage() {
     }
     const status = response.status;
     if (status === 429) setError(t("auth.throttled", { seconds: response.headers.get("retry-after") ?? "60" }));
+    else if (status === 403 && claim) setError(t("auth.setupWrongCode"));
+    else if (status === 409 && setup) setError(t("auth.setupTaken"));
     else if (status === 403) setError(t(config.data?.local_login === false ? "auth.localOff" : "auth.disabled"));
     else if (status === 422 && setup) setError(t("auth.passwordHint"));
     else setError(t("auth.wrong"));
@@ -118,7 +122,10 @@ function LoginPage() {
   }
 
   return (
-    <AuthLayout title={setup ? t("auth.setupTitle") : t("auth.loginTitle")} intro={setup ? t("auth.setupIntro") : t("auth.loginIntro")}>
+    <AuthLayout
+      title={setup ? t("auth.setupTitle") : t("auth.loginTitle")}
+      intro={claim ? t("auth.setupClaimIntro") : setup ? t("auth.setupIntro") : t("auth.loginIntro")}
+    >
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
@@ -133,9 +140,28 @@ function LoginPage() {
         <>
           {(config.data?.local_login || setup) && (
             <form className="space-y-4" onSubmit={submit}>
+              {claim && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="code">{t("auth.setupCode")}</Label>
+                  <Input
+                    id="code"
+                    name="code"
+                    autoComplete="one-time-code"
+                    autoCapitalize="characters"
+                    spellCheck={false}
+                    placeholder="ABCD-EFGH"
+                    required
+                    autoFocus
+                    aria-describedby="code-hint"
+                  />
+                  <p id="code-hint" className="text-xs text-muted-foreground">
+                    {t("auth.setupCodeHint")}
+                  </p>
+                </div>
+              )}
               <div className="space-y-1.5">
                 <Label htmlFor="username">{t("auth.username")}</Label>
-                <Input id="username" name="username" autoComplete={passkeys ? "username webauthn" : "username"} required autoFocus />
+                <Input id="username" name="username" autoComplete={passkeys ? "username webauthn" : "username"} required autoFocus={!claim} />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="password">{t("auth.password")}</Label>
@@ -161,7 +187,7 @@ function LoginPage() {
                 </div>
               )}
               <Button type="submit" className="w-full" disabled={busy}>
-                {busy ? t("auth.loggingIn") : setup ? t("auth.setupSubmit") : t("auth.login")}
+                {busy ? t("auth.loggingIn") : claim ? t("auth.setupClaimSubmit") : setup ? t("auth.setupSubmit") : t("auth.login")}
               </Button>
             </form>
           )}

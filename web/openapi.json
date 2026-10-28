@@ -586,7 +586,14 @@
             "title": "Passkeys",
             "type": "boolean"
           },
+          "setup_code_required": {
+            "default": false,
+            "description": "The server has accounts but no admin who can log in: setting one up takes the code the api wrote to its log when it started.",
+            "title": "Setup Code Required",
+            "type": "boolean"
+          },
           "setup_required": {
+            "description": "The first visit chooses the admin (POST /auth/setup).",
             "title": "Setup Required",
             "type": "boolean"
           }
@@ -5619,6 +5626,19 @@
       },
       "SetupIn": {
         "properties": {
+          "code": {
+            "anyOf": [
+              {
+                "maxLength": 32,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The setup code, when the config asks for it.",
+            "title": "Code"
+          },
           "email": {
             "anyOf": [
               {
@@ -8283,7 +8303,7 @@
     },
     "/api/auth/setup": {
       "post": {
-        "description": "Creates the first admin, on a server without users.",
+        "description": "Sets up the first admin: on a server without users, a new account; on\none whose admins can't log in, with the setup code from the api's log,\nthat account (if it exists, it gets the password and stays as it is\notherwise) or a new one.",
         "operationId": "auth_setup",
         "requestBody": {
           "content": {

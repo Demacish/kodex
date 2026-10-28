@@ -43,13 +43,24 @@ its volume can go.
 
 ## 4. Accounts
 
-v1's users logged in through Authentik and have no password. Either:
+v1's users logged in through Authentik and have no password, so at first no
+admin can log in. Kodex then writes a setup code to the api's log:
+
+    docker compose logs api | grep "setup code"
+
+Open the server in a browser: the first page asks for that code, a username
+and a new password. With your v1 username, your account gets the password
+and becomes an admin, and keeps its collections and reading; another name
+makes a new admin. The code works once, and a restart of the api writes a
+new one.
+
+The others either:
 
 - keep logging in through the provider: set `OIDC_*` (or the `AUTHENTIK_*`
   names), and register `<PUBLIC_APP_URL>/api/auth/oidc/callback` as a
   redirect URI with it; or
-- give each person a password: make them a sign-in link, which works once
-  within 3 days, and send it to them:
+- get a password: make each of them a sign-in link (Admin › Användare, or
+  the command line), which works once within 3 days, and send it to them:
 
       docker compose exec api python -m kodex.core.auth.cli sign-in-link <username>
 

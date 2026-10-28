@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import delete, func, select, text
 from sqlalchemy.orm import Session
 
+import kodex
 from app.auth import check_claims, get_current_user, require_admin, user_from_claims
 from app.config import get_settings
 from app.database import get_db
@@ -45,6 +46,9 @@ class AuthConfig(BaseModel):
         "the api wrote to its log when it started.",
     )
     auth_disabled: bool
+    version: str = Field(
+        default=kodex.__version__, description="The server's version; a web client older or newer reloads."
+    )
 
 
 class LoginIn(BaseModel):

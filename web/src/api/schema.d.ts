@@ -4219,6 +4219,12 @@ export interface components {
              * @description The first visit chooses the admin (POST /auth/setup).
              */
             setup_required: boolean;
+            /**
+             * Version
+             * @description The server's version; a web client older or newer reloads.
+             * @default 2.1.0
+             */
+            version: string;
         };
         /** Body_collections_import_cbl */
         Body_collections_import_cbl: {

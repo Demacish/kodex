@@ -6,6 +6,17 @@ All notable changes to Kodex are listed here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- A web client the service worker kept from before an upgrade could be
+  shown for a while afterwards, and the setup form there had no field for
+  the setup code, so setting up an admin failed with "the account is
+  disabled". The client now compares its version with the server's
+  (`version` in `GET /api/auth/config`) and updates itself.
+- The pages before login are easier to read on a phone: no text under 12
+  pixels, larger buttons and checkbox. They are checked on an emulated
+  phone and tablet, both ways round, in CI.
+
 ## [2.1.0] - 2026-10-28
 
 ### Changed

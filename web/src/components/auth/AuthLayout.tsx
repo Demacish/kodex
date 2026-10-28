@@ -30,12 +30,12 @@ export function AuthLayout({ title, intro, children, footer }: { title: string; 
             K
           </span>
           <h1 className="text-[28px] leading-tight font-bold tracking-tight sm:text-3xl">{title}</h1>
-          {intro && <p className="mt-2 text-sm text-muted-foreground dark:text-slate-400">{intro}</p>}
+          {intro && <p className="mt-2 text-[15px] text-muted-foreground sm:text-sm dark:text-slate-400">{intro}</p>}
         </header>
         <div className="space-y-5 rounded-2xl border bg-card/90 p-5 shadow-xl shadow-black/5 backdrop-blur-xl sm:p-7 lg:p-9 dark:border-white/[0.07] dark:bg-[#141721]/90 dark:shadow-2xl dark:shadow-black/60">
           {children}
         </div>
-        {footer && <footer className="mt-6 text-center text-xs text-muted-foreground dark:text-slate-400">{footer}</footer>}
+        {footer && <footer className="mt-6 text-center text-[13px] text-muted-foreground sm:text-xs dark:text-slate-400">{footer}</footer>}
       </main>
     </div>
   );
@@ -46,14 +46,14 @@ export function AuthField({ id, label, aside, hint, children }: { id: string; la
   return (
     <div>
       <div className="mb-2 flex items-center justify-between gap-3">
-        <label htmlFor={id} className="text-[11px] font-semibold tracking-wider text-muted-foreground uppercase sm:text-xs dark:text-slate-300">
+        <label htmlFor={id} className="text-xs font-semibold tracking-wider text-muted-foreground uppercase dark:text-slate-300">
           {label}
         </label>
         {aside}
       </div>
       {children}
       {hint && (
-        <p id={`${id}-hint`} className="mt-1.5 text-xs text-muted-foreground dark:text-slate-400">
+        <p id={`${id}-hint`} className="mt-1.5 text-[13px] text-muted-foreground sm:text-xs dark:text-slate-400">
           {hint}
         </p>
       )}
@@ -83,7 +83,7 @@ export function PasswordInput({ className, id, ...props }: Omit<ComponentProps<t
         onClick={() => setShown((value) => !value)}
         className="absolute inset-y-0 right-0 flex items-center rounded-r-xl pr-3.5 pl-2 text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-primary/40 dark:text-slate-400 dark:hover:text-slate-200"
       >
-        {shown ? <EyeOff aria-hidden className="size-4" /> : <Eye aria-hidden className="size-4" />}
+        {shown ? <EyeOff aria-hidden className="size-5 sm:size-4" /> : <Eye aria-hidden className="size-5 sm:size-4" />}
       </button>
     </div>
   );
@@ -94,7 +94,7 @@ export function AuthSubmit({ className, ...props }: ComponentProps<typeof Button
   return (
     <Button
       className={cn(
-        "h-12 w-full rounded-xl bg-gradient-to-r from-[#c2410c] to-[#d2460c] text-sm font-semibold tracking-wide text-white shadow-lg shadow-primary/20 transition-all duration-200 hover:from-[#b23b0b] hover:to-[#c2410c] hover:shadow-primary/35 active:scale-[0.99]",
+        "h-12 w-full rounded-xl bg-gradient-to-r from-[#c2410c] to-[#d2460c] text-base font-semibold sm:text-sm tracking-wide text-white shadow-lg shadow-primary/20 transition-all duration-200 hover:from-[#b23b0b] hover:to-[#c2410c] hover:shadow-primary/35 active:scale-[0.99]",
         className,
       )}
       {...props}
@@ -108,7 +108,7 @@ export function AuthSecondary({ className, ...props }: ComponentProps<typeof But
     <Button
       variant="outline"
       className={cn(
-        "group h-12 w-full gap-2.5 rounded-xl bg-muted/60 text-sm font-medium transition-all duration-200 hover:bg-muted active:scale-[0.99] dark:border-white/[0.07] dark:bg-[#1a1e2b]/90 dark:hover:border-slate-600 dark:hover:bg-slate-800/90 [&_svg]:text-muted-foreground group-hover:[&_svg]:text-primary-text",
+        "group h-12 w-full gap-2.5 rounded-xl bg-muted/60 text-base font-medium sm:text-sm transition-all duration-200 hover:bg-muted active:scale-[0.99] dark:border-white/[0.07] dark:bg-[#1a1e2b]/90 dark:hover:border-slate-600 dark:hover:bg-slate-800/90 [&_svg]:text-muted-foreground group-hover:[&_svg]:text-primary-text",
         className,
       )}
       {...props}
@@ -118,7 +118,7 @@ export function AuthSecondary({ className, ...props }: ComponentProps<typeof But
 
 export function OrDivider({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-3 py-1 text-xs font-medium tracking-wide text-muted-foreground lowercase dark:text-slate-400">
+    <div className="flex items-center gap-3 py-1 text-[13px] font-medium tracking-wide sm:text-xs text-muted-foreground lowercase dark:text-slate-400">
       <span className="h-px flex-1 bg-border dark:bg-white/[0.08]" />
       {label}
       <span className="h-px flex-1 bg-border dark:bg-white/[0.08]" />

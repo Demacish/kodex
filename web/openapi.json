@@ -596,6 +596,12 @@
             "description": "The first visit chooses the admin (POST /auth/setup).",
             "title": "Setup Required",
             "type": "boolean"
+          },
+          "version": {
+            "default": "2.1.0",
+            "description": "The server's version; a web client older or newer reloads.",
+            "title": "Version",
+            "type": "string"
           }
         },
         "required": [

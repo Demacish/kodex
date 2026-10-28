@@ -50,4 +50,6 @@ createRoot(document.getElementById("root")!).render(
 // The service worker (vite-plugin-pwa): only in a built app, never in development.
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
   void import("virtual:pwa-register").then(({ registerSW }) => registerSW({ immediate: true }));
+  // A client kept from before the server's upgrade updates itself.
+  void import("@/lib/stale").then(({ reloadIfStale }) => reloadIfStale());
 }

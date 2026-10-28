@@ -184,7 +184,7 @@ function LoginPage() {
                       aria-expanded={forgotShown}
                       aria-controls="forgot"
                       onClick={() => setForgotShown((shown) => !shown)}
-                      className="rounded text-xs font-medium text-primary-text transition-colors outline-none hover:underline focus-visible:ring-2 focus-visible:ring-primary/40"
+                      className="rounded text-sm font-medium text-primary-text sm:text-xs transition-colors outline-none hover:underline focus-visible:ring-2 focus-visible:ring-primary/40"
                     >
                       {t("auth.forgot")}
                     </button>
@@ -202,7 +202,7 @@ function LoginPage() {
                 />
               </AuthField>
               {!setup && forgotShown && (
-                <p id="forgot" role="status" className="-mt-2 rounded-xl bg-muted/60 px-3.5 py-2.5 text-xs text-muted-foreground dark:bg-[#1a1e2b]/70 dark:text-slate-300">
+                <p id="forgot" role="status" className="-mt-2 rounded-xl bg-muted/60 px-3.5 py-2.5 text-[13px] text-muted-foreground sm:text-xs dark:bg-[#1a1e2b]/70 dark:text-slate-300">
                   {t("auth.forgotHint")}
                 </p>
               )}
@@ -212,8 +212,8 @@ function LoginPage() {
                 </AuthField>
               )}
               {!setup && (
-                <label className="flex w-fit cursor-pointer items-center gap-2.5 text-xs text-muted-foreground select-none dark:text-slate-400">
-                  <Checkbox checked={remember} onCheckedChange={(checked) => setRemember(checked === true)} aria-label={t("auth.remember")} />
+                <label className="flex w-fit cursor-pointer items-center gap-3 py-1 text-sm text-muted-foreground select-none sm:gap-2.5 sm:py-0 sm:text-xs dark:text-slate-400">
+                  <Checkbox className="size-5 sm:size-4" checked={remember} onCheckedChange={(checked) => setRemember(checked === true)} aria-label={t("auth.remember")} />
                   {t("auth.remember")}
                 </label>
               )}

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { fileURLToPath, URL } from "node:url";
 
 import tailwindcss from "@tailwindcss/vite";
@@ -9,7 +10,11 @@ import { viteStaticCopy } from "vite-plugin-static-copy";
 
 // In development the API runs separately (uvicorn on :8000, or KODEX_API);
 // in production the api serves this build (backend/kodex/core/spa.py).
+const { version } = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")) as { version: string };
+
 export default defineConfig({
+  // The build's version, compared with the server's (src/lib/stale.ts).
+  define: { __KODEX_VERSION__: JSON.stringify(version) },
   plugins: [
     tanstackRouter({ target: "react", autoCodeSplitting: true }),
     react(),

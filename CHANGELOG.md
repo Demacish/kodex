@@ -6,6 +6,38 @@ All notable changes to Kodex are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Bookmarks: a place in a book to find again on any device.
+  `GET /api/bookmarks`, `PUT` and `DELETE /api/bookmarks/{id}` (the id is
+  the client's own UUID, so sending one twice keeps one). Migration 0019
+  adds the table.
+- The Android app has Upptäck: the followed series and their new numbers,
+  what is coming, and the server's suggestions, as on the web.
+- In the app, a series can be followed, read on from where it is, and
+  downloaded whole; its books can be filtered, sorted, chosen several at
+  a time, and each has a menu of its own.
+- The app's downloads have a queue: as many at once as the setting says
+  (1, 2 or 4), in an order that can be dragged, paused and resumed, with
+  their speed and time left, retries for failed ones, and a history. Downloads
+  can go to a memory card, and finished books can be removed after a number
+  of days.
+- The app's readers keep bookmarks, fit the page whole, by width, by height
+  or at 1:1, and set the screen's brightness and black around the pages.
+- The app's reading direction is set per kind of library (manga, comics,
+  books), and its cache can be emptied from Settings.
+- A book's page shows where its file is on the server, in the app and on
+  the web, and in the app where the download is on the device.
+
+### Changed
+
+- The Android app has a new look: a charcoal canvas (or warm paper in the
+  light theme), an accent colour of the user's choice, Plus Jakarta Sans and
+  Inter, and covers that show their kind, download and progress. Hem and
+  Bibliotek are one tab, with each library a chip above the shelves.
+- CI draws the app's screens at phone and tablet sizes (Robolectric) and
+  keeps the pictures as the `app-screenshots` artifact.
+
 ## [2.2.0] - 2026-10-29
 
 ### Changed

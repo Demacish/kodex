@@ -543,8 +543,10 @@ Men inget har provats eller finslipats på en platta.
 
 Målenheten är en Samsung Galaxy Tab S10+ (12,4 tum, 2800 × 1752 pixlar), i båda orienteringarna. Skärmbilderna i CI tas i dess storlek, och i en mindre 10‑tumsplatta.
 
-- [ ] Skärmbilder av appens skärmar i plattstorlek (stående och liggande) och telefonstorlek i CI, med Robolectric utan emulator, att granska och jämföra.
-- [ ] Bibliotek och serier som omslagsrutnät, hemskärmens hyllor med större omslag på breda skärmar, läsbar bredd för inställningar och bokdetaljer.
+- [x] Skärmbilder av appens skärmar i plattstorlek (stående och liggande) och telefonstorlek i CI, med Robolectric utan emulator, att granska och jämföra.
+  - `androidApp/src/test/.../screens/Screens.kt` ritar skärmarna med påhittade böcker på telefon (mörkt och ljust), Tab S10+ åt båda hållen och en 10‑tumsplatta; CI sparar dem som artefakten `app-screenshots`.
+- [x] Bibliotek och serier som omslagsrutnät, hemskärmens hyllor med större omslag på breda skärmar, läsbar bredd för inställningar och bokdetaljer.
+  - Appens nya utseende (tillägg 2026‑10‑29, från ett koncept): Hem och Bibliotek är en flik med biblioteken som val ovanför hyllorna; Upptäck, nedladdningskön, bokmärken (server och app) och passningslägena i läsaren kom med samtidigt.
 - [ ] Läsarna: två spalter i EPUB i liggande läge, läsarens kontroller och tryckzoner i plattstorlek, bläddring med tangentbord och mus.
 - [x] Webbklienten på en platta: navigeringen och läsarna med touch, i båda orienteringarna.
   - Kontrollerna har touchstorlek vid `pointer: coarse`.

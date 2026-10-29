@@ -217,7 +217,8 @@ fun BookContent(
                         Text(
                             stringResource(
                                 when (state) {
-                                    DownloadState.DONE -> R.string.remove_download
+                                    // On a phone the short word: the bin and the line about the download say what goes.
+                                    DownloadState.DONE -> if (wide) R.string.remove_download else R.string.remove_short
                                     DownloadState.QUEUED, DownloadState.RUNNING -> R.string.pause
                                     DownloadState.FAILED -> R.string.retry
                                     DownloadState.PAUSED -> R.string.resume

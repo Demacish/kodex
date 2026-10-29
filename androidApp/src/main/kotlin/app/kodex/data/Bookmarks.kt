@@ -42,8 +42,20 @@ class Bookmarks(private val db: KodexDatabase) {
         if (bookmark.pending == BookmarkEntity.Pending.SAVE) dao.delete(id) else dao.markDeleted(id)
     }
 
-    /** Sends what was made or removed here, then takes the server's list ([pull]: on a full sync). */
+    /**
+     * Sends what was made or removed here, then takes the server's list ([pull]: on a full sync).
+     * A server from before bookmarks (it doesn't know the address) keeps them here until it does.
+     */
     suspend fun sync(api: KodexApi, pull: Boolean) {
+        try {
+            push(api)
+            if (pull) pull(api)
+        } catch (e: KodexApiException) {
+            if (e.unauthorized || e.status !in NOT_THERE) throw e
+        }
+    }
+
+    private suspend fun push(api: KodexApi) {
         for (bookmark in dao.pending()) {
             when (bookmark.pending) {
                 BookmarkEntity.Pending.DELETE -> {
@@ -58,12 +70,19 @@ class Bookmarks(private val db: KodexDatabase) {
                     )
                     dao.sent(bookmark.id)
                 } catch (e: KodexApiException) {
-                    // The book is gone, or the server can't take it: it would never go.
-                    if (e.status in 400..499 && !e.unauthorized) dao.delete(bookmark.id) else throw e
+                    when {
+                        // Its book is gone from the catalog as well: it would never go.
+                        e.status == 404 && db.catalog().bookNow(bookmark.bookId) == null -> dao.delete(bookmark.id)
+                        // The server can't take it (or another user has its id): neither would it later.
+                        e.status == 409 || e.status == 422 -> dao.delete(bookmark.id)
+                        else -> throw e
+                    }
                 }
             }
         }
-        if (!pull) return
+    }
+
+    private suspend fun pull(api: KodexApi) {
         val remote = api.bookmarks()
         db.withWriteTransaction {
             dao.clearSent()
@@ -74,5 +93,10 @@ class Bookmarks(private val db: KodexDatabase) {
                 }
             }
         }
+    }
+
+    private companion object {
+        /** What a server without bookmarks answers. */
+        val NOT_THERE = setOf(404, 405)
     }
 }

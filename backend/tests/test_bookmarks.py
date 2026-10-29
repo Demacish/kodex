@@ -92,7 +92,8 @@ def test_another_users_bookmarks_are_theirs(books):
         other = User(oidc_subject="other-sub", username="bertil")
         db.add(other)
         db.flush()
-        db.add(Bookmark(id=FIRST, user_id=other.id, book_id=book, position="3", locator_kind="page", progress_percent=30))
+        db.add(Bookmark(id=FIRST, user_id=other.id, book_id=book, position="3", locator_kind="page",
+                        progress_percent=30))  # fmt: skip
         db.commit()
     assert client.get("/api/bookmarks").json() == []
     assert client.put(f"/api/bookmarks/{FIRST}", json=_mark(book, 5)).status_code == 409

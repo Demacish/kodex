@@ -135,8 +135,8 @@ private fun Shell(app: AppViewModel) {
             entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator(), rememberViewModelStoreNavEntryDecorator()),
             sceneStrategies = listOf(listDetail),
             entryProvider = entryProvider {
-                entry<HomeKey> { HomeScreen(navigator) }
-                entry<LibrariesKey> { LibrariesScreen(navigator) }
+                entry<HomeKey> { HomeScreen(navigator, app) }
+                entry<LibrariesKey> { LibrariesScreen(navigator, app) }
                 entry<LibraryKey> { LibraryScreen(it.id, it.name, navigator) }
                 entry<SeriesKey>(metadata = ListDetailSceneStrategy.listPane()) { SeriesScreen(it.id, navigator) }
                 entry<CollectionKey>(metadata = ListDetailSceneStrategy.listPane()) { CollectionScreen(it.id, it.name, navigator) }

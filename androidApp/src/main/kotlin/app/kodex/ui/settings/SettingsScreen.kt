@@ -7,9 +7,11 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
@@ -31,10 +33,12 @@ import app.kodex.R
 import app.kodex.data.ImageMode
 import app.kodex.data.PageFilter
 import app.kodex.data.ThemeChoice
+import app.kodex.sync.SyncStatus
 import app.kodex.ui.AppViewModel
 import app.kodex.ui.LocalSession
 import app.kodex.shared.reader.TapLayout
 import app.kodex.ui.components.Bar
+import app.kodex.ui.components.message
 import java.text.DateFormat
 import java.util.Date
 
@@ -43,6 +47,7 @@ fun SettingsScreen(app: AppViewModel) {
     val settings by app.settings.collectAsStateWithLifecycle()
     val sync by app.syncState.collectAsStateWithLifecycle(initialValue = null)
     val pending by app.pending.collectAsStateWithLifecycle(initialValue = 0)
+    val status by app.syncStatus.collectAsStateWithLifecycle(initialValue = SyncStatus())
     val session = LocalSession.current
     Scaffold(topBar = { Bar(stringResource(R.string.tab_settings)) }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).testTag("settings")) {
@@ -55,15 +60,30 @@ fun SettingsScreen(app: AppViewModel) {
                 headlineContent = { Text(stringResource(R.string.settings_synced)) },
                 supportingContent = {
                     val at = sync?.syncedAt
-                    Text(
-                        listOfNotNull(
-                            at?.let { DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(it)) }
-                                ?: stringResource(R.string.settings_never_synced),
-                            if (pending > 0) pluralStringResource(R.plurals.settings_positions_waiting, pending, pending) else null,
-                        ).joinToString(" · "),
-                    )
+                    Column {
+                        Text(
+                            listOfNotNull(
+                                when {
+                                    status.running -> stringResource(R.string.sync_running)
+                                    status.waiting -> stringResource(R.string.sync_waiting)
+                                    else -> at?.let { DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(it)) }
+                                        ?: stringResource(R.string.settings_never_synced)
+                                },
+                                if (pending > 0) pluralStringResource(R.plurals.settings_positions_waiting, pending, pending) else null,
+                            ).joinToString(" · "),
+                        )
+                        val problem = status.problem
+                        if (problem != null && !status.busy) {
+                            Text(problem.message(), color = MaterialTheme.colorScheme.error, modifier = Modifier.testTag("sync-problem"))
+                        }
+                    }
                 },
-                trailingContent = { OutlinedButton(onClick = app::syncNow) { Text(stringResource(R.string.settings_sync_now)) } },
+                trailingContent = {
+                    OutlinedButton(onClick = app::syncNow, enabled = !status.busy, modifier = Modifier.testTag("sync-now")) {
+                        if (status.busy) CircularProgressIndicator(Modifier.padding(end = 8.dp).size(16.dp), strokeWidth = 2.dp)
+                        Text(stringResource(R.string.settings_sync_now))
+                    }
+                },
             )
             HorizontalDivider()
 

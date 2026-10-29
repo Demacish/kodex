@@ -9,6 +9,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
@@ -26,9 +27,13 @@ import app.kodex.shared.sync.SyncEngine
 import app.kodex.widget.ContinueReadingWidget
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.UserAgent
+import io.ktor.serialization.ContentConvertException
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.serialization.SerializationException
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -52,7 +57,8 @@ class ApiProvider(val engine: HttpClientEngine) {
 
 /**
  * Sends the reading positions read here, brings the catalog up to date, removes downloads of
- * books that are gone, and fetches the next books in the series being read.
+ * books that are gone, and fetches the next books in the series being read. When the catalog
+ * doesn't come through, the reason is kept in [SyncProblems] for the app to show.
  */
 class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params), KoinComponent {
     private val db: KodexDatabase by inject()
@@ -60,6 +66,9 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
     private val apis: ApiProvider by inject()
     private val positions: Positions by inject()
     private val downloads: Downloads by inject()
+    private val problems: SyncProblems by inject()
+
+    private val catalog: Boolean get() = !inputData.getBoolean(ONLY_POSITIONS, false)
 
     override suspend fun doWork(): Result {
         val session = accounts.current() ?: return Result.success()
@@ -67,8 +76,9 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
         return try {
             val sent = ProgressSender(api, positions, session.deviceId, session.deviceName).flush()
             if (sent.unauthorized) return signedOut()
-            if (!inputData.getBoolean(ONLY_POSITIONS, false)) {
+            if (catalog) {
                 SyncEngine(api, RoomCatalogStore(db, session.owner)).sync()
+                problems.clear()
                 downloads.prune()
                 downloads.fetchNext()
             }
@@ -77,14 +87,25 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
         } catch (e: CancellationException) {
             throw e
         } catch (e: KodexApiException) {
-            if (e.unauthorized) signedOut() else Result.retry()
+            if (e.unauthorized) signedOut() else retry(SyncProblem.Server(e.status, e.message.orEmpty()))
         } catch (e: IOException) {
-            Result.retry()
+            retry(SyncProblem.Unreachable)
+        } catch (e: ContentConvertException) {
+            retry(SyncProblem.Unreadable)
+        } catch (e: SerializationException) {
+            retry(SyncProblem.Unreadable)
         }
+    }
+
+    /** Again later (WorkManager backs off); the catalog's problem is kept for the app to show. */
+    private suspend fun retry(problem: SyncProblem): Result {
+        if (catalog) problems.record(problem)
+        return Result.retry()
     }
 
     /** The key was revoked (under Inställningar on the server): back to the login. */
     private suspend fun signedOut(): Result {
+        problems.clear()
         accounts.forget()
         return Result.failure()
     }
@@ -120,6 +141,23 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
                 .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
                 .build()
             WorkManager.getInstance(context).enqueueUniqueWork(POSITIONS, ExistingWorkPolicy.REPLACE, request)
+        }
+
+        /** Whether a sync of the catalog is running or waiting for a network, and its last problem. */
+        fun status(context: Context, problems: SyncProblems): Flow<SyncStatus> {
+            val work = WorkManager.getInstance(context)
+            return combine(
+                work.getWorkInfosForUniqueWorkFlow(NOW),
+                work.getWorkInfosForUniqueWorkFlow(PERIODIC),
+                problems.problem,
+            ) { now, periodic, problem ->
+                SyncStatus(
+                    running = (now + periodic).any { it.state == WorkInfo.State.RUNNING },
+                    // A retry after a problem waits too, but the problem says more than "waiting".
+                    waiting = now.any { it.state == WorkInfo.State.ENQUEUED && it.runAttemptCount == 0 },
+                    problem = problem,
+                )
+            }
         }
 
         fun cancel(context: Context) {

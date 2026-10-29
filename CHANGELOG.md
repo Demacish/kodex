@@ -6,6 +6,16 @@ All notable changes to Kodex are listed here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- The app's sync failed on a library brought over from v1: its books have
+  no value in a column v1 added late, and `GET /api/sync/changes` answered
+  500 instead of reading that as false.
+- The Android app said nothing when a sync failed, and "Sync" seemed to do
+  nothing. Settings now shows a sync under way and why the last one failed,
+  and an empty home or library says the same until the first sync is done,
+  with a button to try again.
+
 ## [2.1.1] - 2026-10-28
 
 ### Fixed

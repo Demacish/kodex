@@ -11,8 +11,11 @@ import app.kodex.data.SettingsStore
 import app.kodex.data.db.KodexDatabase
 import app.kodex.download.Downloads
 import app.kodex.sync.ApiProvider
+import app.kodex.sync.SyncProblems
+import app.kodex.sync.SyncStatus
 import app.kodex.sync.SyncWorker
 import app.kodex.widget.ContinueReadingWidget
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -34,6 +37,7 @@ class AppViewModel(
     private val downloads: Downloads,
     private val db: KodexDatabase,
     private val apis: ApiProvider,
+    private val problems: SyncProblems,
 ) : ViewModel() {
     val session: StateFlow<SessionState> = accounts.session
         .map { if (it == null) SessionState.LoggedOut else SessionState.LoggedIn(it) }
@@ -42,6 +46,8 @@ class AppViewModel(
     val settings: StateFlow<AppSettings> = settingsStore.settings.stateIn(viewModelScope, SharingStarted.Eagerly, AppSettings())
 
     val syncState = db.state().observe()
+
+    val syncStatus: Flow<SyncStatus> = SyncWorker.status(context, problems)
 
     val pending = db.state().pendingCount()
 
@@ -62,6 +68,7 @@ class AppViewModel(
         viewModelScope.launch {
             accounts.current()?.let { session -> runCatching { apis.api(session).logout() } }
             SyncWorker.cancel(context)
+            problems.clear()
             wipe(db, downloads)
             accounts.forget()
             ContinueReadingWidget.refresh(context)

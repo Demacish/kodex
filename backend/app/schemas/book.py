@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from app.models.enums import BookEditionType, BookFormat, MetadataSource
 from app.schemas.reading_progress import ReadingProgressOut
@@ -89,6 +89,13 @@ class BookOut(BaseModel):
     # admin list below, since every browsing list filters these out.
     missing_since: dt.datetime | None = None
     keep_visible_when_missing: bool = False
+
+    @field_validator("keep_visible_when_missing", mode="before")
+    @classmethod
+    def _null_is_false(cls, value: object) -> object:
+        """Books brought over from v1 have NULL in the column (it came late
+        there); that means the same as False."""
+        return False if value is None else value
 
 
 class MissingBookOut(BaseModel):

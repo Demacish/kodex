@@ -61,6 +61,16 @@ def test_cursor_zero_brings_everything_then_nothing(catalog):
     assert again["cursor"] == first["cursor"]
 
 
+def test_a_book_from_v1_without_the_late_column_syncs(catalog):
+    client, session_factory, ids = catalog
+    with session_factory() as db:  # v1 added keep_visible_when_missing late, as NULL
+        db.execute(text("UPDATE books SET keep_visible_when_missing = NULL"))
+        db.commit()
+    books = _changes(client)["books"]
+    assert sorted(b["id"] for b in books) == [ids["book1"], ids["book2"]]
+    assert {b["keep_visible_when_missing"] for b in books} == {False}
+
+
 def test_changes_and_deletions_come_once(catalog):
     client, session_factory, ids = catalog
     cursor = _changes(client)["cursor"]

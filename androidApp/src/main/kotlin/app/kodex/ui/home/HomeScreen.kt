@@ -24,24 +24,25 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.kodex.R
+import app.kodex.ui.AppViewModel
 import app.kodex.ui.CollectionKey
 import app.kodex.ui.Navigator
 import app.kodex.ui.components.Bar
 import app.kodex.ui.components.Cover
-import app.kodex.ui.components.Empty
+import app.kodex.ui.components.EmptyCatalog
 import app.kodex.ui.components.clickableRow
 import app.kodex.ui.library.LibraryViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Läs: where the user left off, on any device, and the collections. */
 @Composable
-fun HomeScreen(navigator: Navigator) {
+fun HomeScreen(navigator: Navigator, app: AppViewModel) {
     val library: LibraryViewModel = koinViewModel()
     val reading by library.continueReading.collectAsStateWithLifecycle(initialValue = emptyList())
     val collections by library.collections.collectAsStateWithLifecycle(initialValue = emptyList())
     Scaffold(topBar = { Bar(stringResource(R.string.tab_home)) }) { padding ->
         if (reading.isEmpty() && collections.isEmpty()) {
-            Empty(stringResource(R.string.home_empty), Modifier.padding(padding))
+            EmptyCatalog(stringResource(R.string.home_empty), app, Modifier.padding(padding))
             return@Scaffold
         }
         LazyColumn(Modifier.fillMaxSize().testTag("home"), contentPadding = padding) {

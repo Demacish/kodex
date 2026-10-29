@@ -84,6 +84,13 @@
         <item quantity="other">%1$d positioner väntar på att skickas</item>
     </plurals>
     <string name="settings_sync_now">Synka</string>
+    <string name="sync_running">Synkar…</string>
+    <string name="sync_waiting">Väntar på anslutning…</string>
+    <string name="sync_fetching">Hämtar biblioteket från servern…</string>
+    <string name="sync_unreachable">Når inte servern. Försöker igen när den svarar.</string>
+    <string name="sync_server_error">Servern svarade med ett fel (%1$d). Försöker igen om en stund.</string>
+    <string name="sync_unreadable">Serverns svar gick inte att läsa. Uppdatera appen eller servern.</string>
+    <string name="sync_try_again">Försök igen</string>
     <string name="settings_downloads">Nedladdningar</string>
     <string name="settings_wifi_only">Bara på wifi</string>
     <string name="settings_wifi_only_help">Nedladdningar väntar på ett nät utan datapott.</string>

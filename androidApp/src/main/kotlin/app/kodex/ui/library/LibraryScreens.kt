@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Column
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.kodex.R
+import app.kodex.ui.AppViewModel
 import app.kodex.ui.BookKey
 import app.kodex.ui.LibraryKey
 import app.kodex.ui.Navigator
@@ -39,12 +40,13 @@ import app.kodex.ui.components.Bar
 import app.kodex.ui.components.BookListItem
 import app.kodex.ui.components.Cover
 import app.kodex.ui.components.Empty
+import app.kodex.ui.components.EmptyCatalog
 import app.kodex.ui.components.clickableRow
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Bibliotek: the libraries, and a search over every book on the device. */
 @Composable
-fun LibrariesScreen(navigator: Navigator) {
+fun LibrariesScreen(navigator: Navigator, app: AppViewModel) {
     val vm: LibraryViewModel = koinViewModel()
     val libraries by vm.libraries.collectAsStateWithLifecycle(initialValue = emptyList())
     val query by vm.query.collectAsStateWithLifecycle()
@@ -72,7 +74,7 @@ fun LibrariesScreen(navigator: Navigator) {
                 }
             }
         }
-        if (libraries.isEmpty() && query.isBlank()) Empty(stringResource(R.string.library_empty), Modifier.padding(padding))
+        if (libraries.isEmpty() && query.isBlank()) EmptyCatalog(stringResource(R.string.library_empty), app, Modifier.padding(padding))
     }
 }
 

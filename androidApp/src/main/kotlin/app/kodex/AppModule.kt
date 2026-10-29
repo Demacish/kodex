@@ -9,6 +9,7 @@ import app.kodex.download.Downloads
 import app.kodex.download.Fetcher
 import app.kodex.reader.OpenBooks
 import app.kodex.sync.ApiProvider
+import app.kodex.sync.SyncProblems
 import app.kodex.ui.library.BookViewModel
 import app.kodex.ui.library.LibraryViewModel
 import app.kodex.ui.login.LoginViewModel
@@ -27,6 +28,7 @@ val appModule = module {
     single { AccountStore(androidContext(), KeystoreSealer()) }
     single { SettingsStore(androidContext()) }
     single { ApiProvider(get()) }
+    single { SyncProblems(androidContext()) }
     single { Positions(get()) { get<AccountStore>().deviceName } }
     single { Downloads(androidContext(), get(), get()) }
     single {
@@ -43,7 +45,7 @@ val appModule = module {
     single { OpenBooks(androidContext(), get(), get(), get(), get()) }
     single { AppScope() }
 
-    viewModel { AppViewModel(androidContext(), get(), get(), get(), get(), get()) }
+    viewModel { AppViewModel(androidContext(), get(), get(), get(), get(), get(), get()) }
     viewModel { LoginViewModel(androidContext(), get(), get(), get(), get()) }
     viewModel { LibraryViewModel(get()) }
     viewModel { params -> BookViewModel(params.get(), get(), get(), get()) }

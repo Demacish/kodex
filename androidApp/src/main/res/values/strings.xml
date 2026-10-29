@@ -85,6 +85,13 @@
         <item quantity="other">%1$d positions waiting to be sent</item>
     </plurals>
     <string name="settings_sync_now">Sync</string>
+    <string name="sync_running">Syncing…</string>
+    <string name="sync_waiting">Waiting for a connection…</string>
+    <string name="sync_fetching">Fetching the library from the server…</string>
+    <string name="sync_unreachable">Can\'t reach the server. Trying again when it answers.</string>
+    <string name="sync_server_error">The server answered with an error (%1$d). Trying again in a while.</string>
+    <string name="sync_unreadable">The server\'s answer couldn\'t be read. Update the app or the server.</string>
+    <string name="sync_try_again">Try again</string>
     <string name="settings_downloads">Downloads</string>
     <string name="settings_wifi_only">Only on Wi-Fi</string>
     <string name="settings_wifi_only_help">Downloads wait for a network that isn\'t metered.</string>

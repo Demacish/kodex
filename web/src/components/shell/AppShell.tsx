@@ -14,9 +14,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         {t("app.skipToContent")}
       </a>
       <Sidebar />
-      <div className="md:pl-60">
+      <div className="md:pl-24 lg:pl-60">
         <TopBar />
-        <main id="main" tabIndex={-1} className="mx-auto max-w-7xl px-4 py-6 pb-24 outline-none md:px-6 md:pb-10">
+        <main id="main" tabIndex={-1} className="mx-auto max-w-7xl px-4 py-6 pb-[calc(6rem+env(safe-area-inset-bottom))] outline-none md:px-6 md:pb-10">
           {children}
         </main>
       </div>

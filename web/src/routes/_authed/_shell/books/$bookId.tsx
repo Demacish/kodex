@@ -65,32 +65,31 @@ function BookPage() {
   return (
     <div>
       {b.series_id != null ? (
-        <Link to="/series/$seriesId" params={{ seriesId: b.series_id }} className="mb-4 inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
+        <Link to="/series/$seriesId" params={{ seriesId: b.series_id }} className="mb-3 inline-flex items-center py-1 text-sm text-muted-foreground hover:text-foreground">
           <ChevronLeft className="size-4" aria-hidden />
           {t("book.backToSeries")}
         </Link>
       ) : (
-        <Link to="/libraries/$libraryId" params={{ libraryId: b.library_id }} className="mb-4 inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
+        <Link to="/libraries/$libraryId" params={{ libraryId: b.library_id }} className="mb-3 inline-flex items-center py-1 text-sm text-muted-foreground hover:text-foreground">
           <ChevronLeft className="size-4" aria-hidden />
           {t("series.backToLibrary")}
         </Link>
       )}
-      <div className="flex flex-col gap-8 sm:flex-row">
-        <Cover bookId={b.id} alt={title} size="large" eager className="w-48 shrink-0 shadow-xl ring-1 ring-foreground/10 sm:w-56" />
-        <div className="min-w-0 flex-1 space-y-4">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
-              {number && <p className="text-sm font-medium text-primary-text">{number}</p>}
-              <h1 className="text-3xl font-semibold tracking-tight text-balance">{title}</h1>
-              {meta && meta.authors.length > 0 && <p className="mt-1 text-muted-foreground">{meta.authors.join(", ")}</p>}
+      {/* On a phone the cover sits beside the title and the rest runs below both; from sm the cover has a column of its own. */}
+      <div className="grid grid-cols-[7rem_minmax(0,1fr)] grid-rows-[auto_1fr] gap-x-4 gap-y-5 sm:grid-cols-[14rem_minmax(0,1fr)] sm:gap-x-8">
+        <Cover bookId={b.id} alt={title} size="large" eager className="w-full shadow-xl ring-1 ring-foreground/10 sm:row-span-2" />
+        <div className="min-w-0 self-center sm:self-start">
+          {number && <p className="text-sm font-medium text-primary-text">{number}</p>}
+          <h1 className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">{title}</h1>
+          {meta && meta.authors.length > 0 && <p className="mt-1 text-muted-foreground">{meta.authors.join(", ")}</p>}
+        </div>
+        <div className="col-span-2 min-w-0 space-y-4 sm:col-span-1 sm:col-start-2">
+          {account.is_admin && (
+            <div className="flex flex-wrap gap-2">
+              <ManualMatchDialog book={b} initialQuery={title} />
+              {meta && <MetadataEditDialog book={b} />}
             </div>
-            {account.is_admin && (
-              <div className="flex gap-2">
-                <ManualMatchDialog book={b} initialQuery={title} />
-                {meta && <MetadataEditDialog book={b} />}
-              </div>
-            )}
-          </div>
+          )}
           {b.missing_since && (
             <p className="text-sm text-destructive">{t("book.missing", { since: format.date(b.missing_since) })}</p>
           )}
@@ -118,17 +117,17 @@ function BookPage() {
             </div>
           )}
           <div className="flex flex-wrap gap-2 pt-2">
-            <Button size="lg" render={<Link to="/books/$bookId/read" params={{ bookId: b.id }} />}>
+            <Button size="lg" className="max-sm:w-full" render={<Link to="/books/$bookId/read" params={{ bookId: b.id }} />}>
               <Play className="fill-current" strokeWidth={0} aria-hidden />
               {started ? t("book.continue", { percent: Math.round(p.progress_percent) }) : p?.is_finished ? t("book.readAgain") : t("book.read")}
             </Button>
             {DOWNLOADABLE.includes(b.file_format) && (
               <>
-                <Button size="lg" variant="outline" render={<a href={`/api/books/${b.id}/file`} download />}>
+                <Button size="lg" variant="outline" className="max-sm:flex-1" render={<a href={`/api/books/${b.id}/file`} download />}>
                   <Download aria-hidden />
                   {t("book.download")}
                 </Button>
-                <Button size="lg" variant="outline" onClick={() => void sendToKindle()} disabled={kindle.isPending}>
+                <Button size="lg" variant="outline" className="max-sm:flex-1" onClick={() => void sendToKindle()} disabled={kindle.isPending}>
                   <Send aria-hidden />
                   {t("book.sendToKindle")}
                 </Button>

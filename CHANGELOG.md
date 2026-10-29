@@ -6,6 +6,30 @@ All notable changes to Kodex are listed here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The web client is built for touch on phones and tablets. On a touch
+  screen, buttons, fields, selects, tabs, menu rows and sliders are about
+  40 pixels high, and fields keep 16 pixel text.
+- On a phone, the tab bar has Mer, a sheet with the pages that don't fit,
+  instead of hiding them in the account menu.
+- Between md and lg (a tablet held upright), a rail with the names under
+  the icons takes the sidebar's place.
+- Covers come three to a row on a phone, and shelves scroll sideways
+  until the screen is wide.
+- On a phone, a book's and a series' cover sits beside the title.
+- Bibliotek is marked as the current page on a series and a book.
+- Sign-ins in Settings show the browser and system, not the whole user
+  agent.
+- The PDF reader turns the page with a sideways swipe while the whole
+  page is in view.
+
+### Fixed
+
+- Tab lists that don't fit scroll sideways instead of widening the page.
+- No text is smaller than 12 pixels: the tab bar, the months in Stats and
+  the duplicates' paths.
+
 ## [2.1.2] - 2026-10-29
 
 ### Fixed

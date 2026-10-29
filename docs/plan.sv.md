@@ -546,7 +546,14 @@ Målenheten är en Samsung Galaxy Tab S10+ (12,4 tum, 2800 × 1752 pixlar), i b�
 - [ ] Skärmbilder av appens skärmar i plattstorlek (stående och liggande) och telefonstorlek i CI, med Robolectric utan emulator, att granska och jämföra.
 - [ ] Bibliotek och serier som omslagsrutnät, hemskärmens hyllor med större omslag på breda skärmar, läsbar bredd för inställningar och bokdetaljer.
 - [ ] Läsarna: två spalter i EPUB i liggande läge, läsarens kontroller och tryckzoner i plattstorlek, bläddring med tangentbord och mus.
-- [ ] Webbklienten på en platta: navigeringen och läsarna med touch, i båda orienteringarna.
+- [x] Webbklienten på en platta: navigeringen och läsarna med touch, i båda orienteringarna.
+  - Kontrollerna har touchstorlek vid `pointer: coarse`.
+  - Navigeringen är en skena mellan md och lg och en flikrad med Mer på telefonen.
+  - Bild- och PDF-läsaren bläddrar med svep.
+  - `e2e/look.spec.ts` fotograferar varje sida på telefon, platta åt båda hållen och desktop, och kontrollerar dem:
+    - inget sidledes rullande;
+    - ingen text under 12 px;
+    - inget tryckmål under 24 px.
 
 Gate: läsning, bläddring i biblioteket och nedladdning fungerar bekvämt på en 11‑tumsplatta i båda orienteringarna, och skärmbilderna i CI visar det.
 

@@ -23,8 +23,8 @@ function Group({ books, exact }: { books: Schemas["DuplicateBookOut"][]; exact: 
               <Cover bookId={book.id} alt="" size="small" />
               <div className="mt-1 line-clamp-2 text-xs font-medium">{book.title ?? book.file_path.split("/").pop()}</div>
             </Link>
-            <div className="truncate text-[11px] text-muted-foreground" title={book.file_path}>{book.file_path}</div>
-            <div className="text-[11px] text-muted-foreground">
+            <div className="truncate text-xs text-muted-foreground" title={book.file_path}>{book.file_path}</div>
+            <div className="text-xs text-muted-foreground">
               {book.file_format.toUpperCase()} · {format.bytes(book.file_size)}
               {exact && i === 0 && ` · ${t("duplicates.original")}`}
             </div>

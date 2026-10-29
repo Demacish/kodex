@@ -22,6 +22,7 @@ import { format, LANGUAGES, setLanguage, type Language } from "@/i18n";
 import { useAccount } from "@/lib/account";
 import { useTheme, type Theme } from "@/lib/theme";
 import { HOME_SECTIONS, type HomeSection } from "@/lib/home";
+import { deviceName } from "@/readers/device";
 
 interface SettingsSearch {
   linked?: string;
@@ -137,7 +138,7 @@ function AccountSection() {
               <li key={session.id} className="flex items-center gap-3 px-3 py-2 text-sm">
                 <MonitorSmartphone className="size-4 shrink-0 text-muted-foreground" aria-hidden />
                 <div className="min-w-0 flex-1">
-                  <div className="truncate">{session.user_agent ?? t("settings.unknownDevice")}</div>
+                  <div className="truncate" title={session.user_agent ?? undefined}>{session.user_agent ? deviceName(session.user_agent) : t("settings.unknownDevice")}</div>
                   <div className="text-xs text-muted-foreground">{t("settings.lastSeen", { when: format.relative(session.last_seen_at) })}</div>
                 </div>
                 {session.current ? (

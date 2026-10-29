@@ -44,7 +44,7 @@ export function ErrorState({ error, onRetry, className }: { error?: unknown; onR
 /** Placeholder covers while a grid loads. */
 export function CoverGridSkeleton({ count = 12 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6" aria-hidden>
+    <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4 md:grid-cols-5 xl:grid-cols-6" aria-hidden>
       {Array.from({ length: count }, (_, i) => (
         <div key={i} className="space-y-2">
           <Skeleton className="aspect-[2/3] w-full rounded-lg" />

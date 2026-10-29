@@ -1,4 +1,6 @@
 import { createHmac } from "node:crypto";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import AxeBuilder from "@axe-core/playwright";
 import { expect } from "@playwright/test";
@@ -17,6 +19,9 @@ export async function expectAccessible(page: Page, what: string) {
 }
 
 export const ADMIN = { username: "admin", password: "e2e admin password" };
+
+/** gate.spec.ts turns two-step login on for the admin and leaves the secret here, for the specs after it. */
+export const ADMIN_TOTP_FILE = join(tmpdir(), "kodex-e2e-admin-totp");
 
 export async function csrf(context: BrowserContext): Promise<string> {
   const cookie = (await context.cookies()).find((c) => c.name === "kodex_csrf");

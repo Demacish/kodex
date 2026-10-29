@@ -34,7 +34,7 @@ export function TopBar() {
           aria-label={t("common.search")}
           className="pl-8"
         />
-        <kbd className="pointer-events-none absolute top-1/2 right-2 hidden -translate-y-1/2 rounded border bg-muted px-1.5 text-[10px] text-muted-foreground lg:block">
+        <kbd className="pointer-events-none absolute top-1/2 right-2 hidden -translate-y-1/2 rounded border bg-muted px-1.5 text-xs text-muted-foreground lg:pointer-fine:block">
           ⌘K
         </kbd>
       </form>

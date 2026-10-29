@@ -221,7 +221,7 @@ export function ReviewQueue({ tab, onTab }: { tab: ReviewTab; onTab: (tab: Revie
           <ul className="max-h-[70dvh] space-y-0.5 overflow-y-auto rounded-xl border bg-card p-1.5" aria-label={t("review.queue")}>
             {items.map((item, i) => (
               <li key={item.id}>
-                <div className={cn("flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm", item.id === current?.id ? "bg-accent text-accent-foreground" : "hover:bg-muted")}>
+                <div className={cn("flex items-center gap-2 rounded-lg px-2 text-sm", item.id === current?.id ? "bg-accent text-accent-foreground" : "hover:bg-muted")}>
                   {tab === "open" && (
                     <Checkbox
                       checked={selected.has(item.id)}
@@ -234,7 +234,7 @@ export function ReviewQueue({ tab, onTab }: { tab: ReviewTab; onTab: (tab: Revie
                       aria-label={t("review.select", { title: item.title })}
                     />
                   )}
-                  <button type="button" className="flex min-w-0 flex-1 items-center justify-between gap-2 text-left" onClick={() => setIndex(i)} aria-current={item.id === current?.id ? "true" : undefined}>
+                  <button type="button" className="flex min-w-0 flex-1 items-center justify-between gap-2 py-1.5 text-left pointer-coarse:py-2.5" onClick={() => setIndex(i)} aria-current={item.id === current?.id ? "true" : undefined}>
                     <span className="truncate">
                       {item.title}
                       {listHint(item, t) && <span className="ml-1 text-xs text-muted-foreground">{listHint(item, t)}</span>}
@@ -310,7 +310,7 @@ function ReviewHeader({ review }: { review: Review }) {
         <h2 className="text-xl font-semibold">{review.title}</h2>
         <Badge variant="outline">{t(`review.kinds.${review.kind as "series_match"}`)}</Badge>
         {review.series_id != null && (
-          <Link to="/series/$seriesId" params={{ seriesId: review.series_id }} className="inline-flex items-center gap-1 text-xs text-primary-text hover:underline">
+          <Link to="/series/$seriesId" params={{ seriesId: review.series_id }} className="inline-flex min-h-6 items-center gap-1 text-xs text-primary-text hover:underline pointer-coarse:min-h-9 pointer-coarse:text-sm">
             {t("review.openSeries")}
             <ExternalLink className="size-3" aria-hidden />
           </Link>

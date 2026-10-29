@@ -110,27 +110,32 @@ function SeriesPage() {
             <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background" />
           </div>
         )}
-        <Link to="/libraries/$libraryId" params={{ libraryId: s.library_id }} className="mb-4 inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
+        <Link to="/libraries/$libraryId" params={{ libraryId: s.library_id }} className="mb-3 inline-flex items-center py-1 text-sm text-muted-foreground hover:text-foreground">
           <ChevronLeft className="size-4" aria-hidden />
           {t("series.backToLibrary")}
         </Link>
-        <div className="flex flex-col gap-6 sm:flex-row">
-          <Cover bookId={coverId} alt={s.title} size="large" eager className="w-40 shrink-0 shadow-xl ring-1 ring-foreground/10 sm:w-48" />
-          <div className="min-w-0 flex-1 space-y-3">
+        {/* As on a book's page: on a phone the cover beside the title, the rest below both. */}
+        <div className="grid grid-cols-[7rem_minmax(0,1fr)] grid-rows-[auto_1fr] gap-x-4 gap-y-4 sm:grid-cols-[12rem_minmax(0,1fr)] sm:gap-x-6">
+          <Cover bookId={coverId} alt={s.title} size="large" eager className="w-full shadow-xl ring-1 ring-foreground/10 sm:row-span-2" />
+          <div className="min-w-0 space-y-3 self-center sm:self-start">
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-balance">{s.title}</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">{s.title}</h1>
               <p className="mt-1 text-sm text-muted-foreground">
                 {[s.publisher, s.start_year, s.status && t(`series.statuses.${s.status as "ongoing"}`, { defaultValue: s.status })]
                   .filter(Boolean)
                   .join(" · ")}
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              {s.new_release_available && <Badge>{t("series.newRelease")}</Badge>}
-              {account.is_admin && s.match_status && s.match_status !== "unmatched" && (
-                <Badge variant={s.match_status === "review" ? "destructive" : "secondary"}>{t(`series.match.${s.match_status as "auto"}`, { defaultValue: s.match_status })}</Badge>
-              )}
-            </div>
+            {(s.new_release_available || (account.is_admin && s.match_status && s.match_status !== "unmatched")) && (
+              <div className="flex flex-wrap items-center gap-2">
+                {s.new_release_available && <Badge>{t("series.newRelease")}</Badge>}
+                {account.is_admin && s.match_status && s.match_status !== "unmatched" && (
+                  <Badge variant={s.match_status === "review" ? "destructive" : "secondary"}>{t(`series.match.${s.match_status as "auto"}`, { defaultValue: s.match_status })}</Badge>
+                )}
+              </div>
+            )}
+          </div>
+          <div className="col-span-2 min-w-0 space-y-3 sm:col-span-1 sm:col-start-2">
             <div className="max-w-sm">
               <div className="mb-1 flex justify-between text-xs text-muted-foreground">
                 <span>{t("series.readCount", { read: s.read_count, count: s.book_count })}</span>
@@ -141,7 +146,7 @@ function SeriesPage() {
             {s.summary && <ExpandableText text={s.summary} className="max-w-3xl text-sm leading-relaxed text-muted-foreground" />}
             <div className="flex flex-wrap gap-2 pt-1">
               {next && (
-                <Button render={<Link to="/books/$bookId/read" params={{ bookId: next.id }} />}>
+                <Button className="max-sm:w-full" render={<Link to="/books/$bookId/read" params={{ bookId: next.id }} />}>
                   <Play className="fill-current" strokeWidth={0} aria-hidden />
                   {next.progress && next.progress.progress_percent > 0
                     ? t("series.continue", { what: bookNumber(t, next) ?? bookTitle(next) })

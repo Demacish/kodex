@@ -1,6 +1,8 @@
+import { writeFileSync } from "node:fs";
+
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 
-import { ADMIN, api, expectAccessible, login, scriptedEpub, totp } from "./helpers";
+import { ADMIN, ADMIN_TOTP_FILE, api, expectAccessible, login, scriptedEpub, totp } from "./helpers";
 
 // Phase 3's gate (docs/plan.sv.md): a user logs in, scans, reviews, reads
 // every format, and sees the position follow to a second browser; then
@@ -229,6 +231,7 @@ test("a passkey and two-step login", async ({ browser }) => {
   await security.getByRole("button", { name: "Slå på" }).click();
   const dialog = page.getByRole("dialog");
   const secret = (await dialog.locator("code").textContent())!.trim();
+  writeFileSync(ADMIN_TOTP_FILE, secret);
   await dialog.getByLabel("Kod från appen").fill(totp(secret));
   await dialog.getByRole("button", { name: "Slå på" }).click();
   const codes = dialog.getByRole("list", { name: "Reservkoder" }).getByRole("listitem");

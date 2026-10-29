@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { Check, LogOut, Monitor, Moon, Sun } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -16,7 +15,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LANGUAGES, setLanguage, type Language } from "@/i18n";
 import { useAccount, useLogout } from "@/lib/account";
-import { NAV_ITEMS } from "@/lib/nav";
 import { useTheme, type Theme } from "@/lib/theme";
 
 const THEMES: { value: Theme; icon: typeof Sun }[] = [
@@ -30,7 +28,6 @@ export function AccountMenu() {
   const account = useAccount();
   const logout = useLogout();
   const { theme, setTheme } = useTheme();
-  const extra = NAV_ITEMS.filter((item) => !item.mobile && (!item.adminOnly || account.is_admin));
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -46,15 +43,6 @@ export function AccountMenu() {
             <div className="truncate text-sm font-medium text-foreground">{account.username}</div>
             <div className="text-xs font-normal">{t(`account.roles.${account.role as "admin" | "user" | "guest"}`)}</div>
           </DropdownMenuLabel>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator className="md:hidden" />
-        <DropdownMenuGroup className="md:hidden">
-          {extra.map((item) => (
-            <DropdownMenuItem key={item.to} render={<Link to={item.to} />}>
-              <item.icon aria-hidden />
-              {t(`nav.${item.label}`)}
-            </DropdownMenuItem>
-          ))}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>

@@ -203,7 +203,31 @@ export function PdfReader({ book, title, subtitle, initialPage, jump, onProgress
     return () => window.removeEventListener("keydown", onKey);
   }, [mode, page, go]);
 
+  // A swipe turns the page too, while the whole page is in view (zoomed in, a swipe pans);
+  // the click that follows a swipe is not a tap.
+  const whole = mode === "single" && fit === "page" && zoom === 1;
+  const swipeStart = useRef<{ x: number; y: number; at: number } | null>(null);
+  const swiped = useRef(false);
+  const onPointerDown = (event: React.PointerEvent) => {
+    swipeStart.current = { x: event.clientX, y: event.clientY, at: Date.now() };
+    swiped.current = false;
+  };
+  const onPointerUp = (event: React.PointerEvent) => {
+    const from = swipeStart.current;
+    swipeStart.current = null;
+    if (!from || !whole) return;
+    const dx = event.clientX - from.x;
+    if (Math.abs(dx) > 50 && Math.abs(event.clientY - from.y) < 60 && Date.now() - from.at < 600) {
+      swiped.current = true;
+      go(page + (dx < 0 ? 1 : -1));
+    }
+  };
+
   const onTap = (event: React.MouseEvent) => {
+    if (swiped.current) {
+      swiped.current = false;
+      return;
+    }
     if ((event.target as HTMLElement).closest("button, a, .textLayer span")) return;
     const x = event.clientX / window.innerWidth;
     if (mode === "single" && x < 0.25) go(page - 1);
@@ -220,7 +244,13 @@ export function PdfReader({ book, title, subtitle, initialPage, jump, onProgress
       {failed ? (
         <div className="grid h-full place-items-center text-sm text-neutral-300">{t("reader.loadFailed")}</div>
       ) : mode === "single" ? (
-        <div className={cn("absolute inset-0 flex justify-center overflow-auto", fit === "page" && zoom === 1 && "items-center")} onClick={onTap}>
+        <div
+          className={cn("absolute inset-0 flex justify-center overflow-auto", whole && "items-center")}
+          style={whole ? { touchAction: "pan-y pinch-zoom" } : undefined}
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+          onClick={onTap}
+        >
           <div className="relative h-fit w-fit shadow-2xl">
             <canvas ref={canvas} className="block bg-white" />
             <div ref={textLayer} className="textLayer" />

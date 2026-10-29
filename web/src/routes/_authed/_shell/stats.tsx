@@ -6,6 +6,7 @@ import { api, type Schemas } from "@/api/client";
 import { ErrorState, PageHeader } from "@/components/common/states";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "@/i18n";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authed/_shell/stats")({
   component: Stats,
@@ -105,7 +106,10 @@ function MonthChart({ months }: { months: ReadingStats["finished_by_month"] }) {
                     <strong className="font-semibold">{month.count}</strong> <span className="text-muted-foreground">{monthLabel(month.month, "long")}</span>
                   </span>
                 )}
-                <span className="absolute top-full mt-1.5 text-[11px] text-muted-foreground" aria-hidden>{monthLabel(month.month)}</span>
+                {/* Every other month on a phone (the newest always), where twelve don't fit side by side. */}
+                <span className={cn("absolute top-full mt-1.5 text-xs text-muted-foreground", (months.length - 1 - index) % 2 === 1 && "max-sm:hidden")} aria-hidden>
+                  {monthLabel(month.month)}
+                </span>
               </li>
             ))}
           </ol>

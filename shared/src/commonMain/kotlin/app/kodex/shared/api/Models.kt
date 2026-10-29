@@ -161,3 +161,53 @@ data class PageDimensions(val dimensions: List<List<Int>?>? = null, val pending:
     val sizes: List<app.kodex.shared.reader.PageSize?>?
         get() = dimensions?.map { it?.takeIf { size -> size.size == 2 }?.let { (w, h) -> app.kodex.shared.reader.PageSize(w, h) } }
 }
+
+/** A place in a book to find again; [id] is the device's own UUID (PUT is safe to send twice). */
+@Serializable
+data class Bookmark(
+    val id: String,
+    val bookId: Int,
+    val position: String,
+    val locatorKind: String,
+    val progressPercent: Double,
+    val chapter: String? = null,
+    val note: String? = null,
+    val createdAt: String,
+)
+
+@Serializable
+data class BookmarkIn(
+    val bookId: Int,
+    val position: String,
+    val locatorKind: String,
+    val progressPercent: Double,
+    val chapter: String? = null,
+    val note: String? = null,
+    val createdAt: String? = null,
+)
+
+/** A new number in a followed series: coming (`unreleased`), out (`released`) or in the library (`owned`). */
+@Serializable
+data class ReleaseEvent(
+    val id: Int,
+    val seriesId: Int,
+    val seriesTitle: String,
+    val issueNumber: String? = null,
+    val title: String? = null,
+    val storeDate: String? = null,
+    val ownedBookId: Int? = null,
+    val status: String,
+)
+
+/** Something the server's AI suggests; wanting it makes a request (önskemål). */
+@Serializable
+data class Recommendation(
+    val id: Int,
+    val title: String,
+    val author: String? = null,
+    val reason: String? = null,
+    val coverUrl: String? = null,
+)
+
+@Serializable
+data class SwipeIn(val direction: String)

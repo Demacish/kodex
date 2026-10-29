@@ -703,6 +703,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/bookmarks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Bookmarks
+         * @description The user's bookmarks, in reading order within each book.
+         */
+        get: operations["bookmarks_list_bookmarks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bookmarks/{bookmark_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Save Bookmark
+         * @description Makes the bookmark, or changes it (its note) when it is there.
+         */
+        put: operations["bookmarks_save_bookmark"];
+        post?: never;
+        /**
+         * Delete Bookmark
+         * @description Removes the bookmark; one that isn't there (any more) is fine.
+         */
+        delete: operations["bookmarks_delete_bookmark"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/books": {
         parameters: {
             query?: never;
@@ -4401,6 +4445,51 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** BookmarkIn */
+        BookmarkIn: {
+            /** Book Id */
+            book_id: number;
+            /** Chapter */
+            chapter?: string | null;
+            /** Created At */
+            created_at?: string | null;
+            /**
+             * Locator Kind
+             * @enum {string}
+             */
+            locator_kind: "page" | "pdf" | "cfi" | "xpointer" | "kobo" | "other" | "percent";
+            /** Note */
+            note?: string | null;
+            /** Position */
+            position: string;
+            /** Progress Percent */
+            progress_percent: number;
+        };
+        /** BookmarkOut */
+        BookmarkOut: {
+            /** Book Id */
+            book_id: number;
+            /** Chapter */
+            chapter: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: string;
+            /**
+             * Locator Kind
+             * @enum {string}
+             */
+            locator_kind: "page" | "pdf" | "cfi" | "xpointer" | "kobo" | "other" | "percent";
+            /** Note */
+            note: string | null;
+            /** Position */
+            position: string;
+            /** Progress Percent */
+            progress_percent: number;
+        };
         /** BulkIn */
         BulkIn: {
             /**
@@ -7558,6 +7647,102 @@ export interface operations {
                 "application/json": components["schemas"]["CodeIn"];
             };
         };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    bookmarks_list_bookmarks: {
+        parameters: {
+            query?: {
+                /** @description Only this book's */
+                book_id?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookmarkOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    bookmarks_save_bookmark: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                bookmark_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookmarkIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookmarkOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    bookmarks_delete_bookmark: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                bookmark_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             204: {

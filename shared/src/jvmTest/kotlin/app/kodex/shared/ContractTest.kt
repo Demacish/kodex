@@ -8,17 +8,22 @@ import app.kodex.shared.api.AppSecondStepIn
 import app.kodex.shared.api.AppTokenIn
 import app.kodex.shared.api.AuthConfig
 import app.kodex.shared.api.Book
+import app.kodex.shared.api.Bookmark
+import app.kodex.shared.api.BookmarkIn
 import app.kodex.shared.api.BookMetadata
 import app.kodex.shared.api.FileDigest
 import app.kodex.shared.api.Library
 import app.kodex.shared.api.PageDimensions
 import app.kodex.shared.api.ReadingProgress
 import app.kodex.shared.api.ReadingProgressIn
+import app.kodex.shared.api.Recommendation
+import app.kodex.shared.api.ReleaseEvent
 import app.kodex.shared.api.SecondStep
 import app.kodex.shared.api.Series
 import app.kodex.shared.api.SyncChanges
 import app.kodex.shared.api.SyncCollection
 import app.kodex.shared.api.SyncDeleted
+import app.kodex.shared.api.SwipeIn
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -57,6 +62,11 @@ class ContractTest {
             "get /api/books/{book_id}/digest", "get /api/books/{book_id}/file", "get /api/books/{book_id}/cover",
             "get /api/books/{book_id}/pages/{page_index}", "get /api/books/{book_id}/pages/dimensions",
             "get /api/books/{book_id}/progress", "put /api/books/{book_id}/progress",
+            "get /api/bookmarks", "put /api/bookmarks/{bookmark_id}", "delete /api/bookmarks/{bookmark_id}",
+            "post /api/series/{series_id}/follow", "post /api/series/{series_id}/unfollow",
+            "get /api/releases", "post /api/releases/{event_id}/dismiss",
+            "get /api/ai/recommendations", "post /api/ai/recommendations/generate",
+            "post /api/ai/recommendations/{recommendation_id}/swipe",
         )
         val missing = called.filter { endpoint ->
             val (method, path) = endpoint.split(" ")
@@ -78,7 +88,8 @@ class ContractTest {
             Book.serializer() to "BookOut", ReadingProgress.serializer() to "ReadingProgressOut",
             SyncCollection.serializer() to "SyncCollectionOut", SyncDeleted.serializer() to "SyncDeletedOut",
             SyncChanges.serializer() to "SyncChangesOut", FileDigest.serializer() to "FileDigestOut",
-            PageDimensions.serializer() to "PageDimensionsOut",
+            PageDimensions.serializer() to "PageDimensionsOut", Bookmark.serializer() to "BookmarkOut",
+            ReleaseEvent.serializer() to "ReleaseEventOut", Recommendation.serializer() to "AIRecommendationOut",
         )
         val problems = read.flatMap { (serializer, name) -> readProblems(serializer, name) }
         assertTrue(problems.isEmpty(), problems.joinToString("\n"))
@@ -89,6 +100,7 @@ class ContractTest {
         val sent: List<Pair<KSerializer<*>, String>> = listOf(
             AppLoginIn.serializer() to "AppLoginIn", AppSecondStepIn.serializer() to "AppSecondStepIn",
             AppTokenIn.serializer() to "AppTokenIn", ReadingProgressIn.serializer() to "ReadingProgressIn",
+            BookmarkIn.serializer() to "BookmarkIn", SwipeIn.serializer() to "AISwipeIn",
         )
         val problems = sent.flatMap { (serializer, name) ->
             val schema = schema(name)

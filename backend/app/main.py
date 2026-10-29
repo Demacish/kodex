@@ -46,6 +46,7 @@ from kodex.delivery.opds import atom as opds_atom
 from kodex.delivery.opds import v2 as opds_v2
 from kodex.library import api as library_api
 from kodex.matching import api as matching_api
+from kodex.reading import bookmarks
 from kodex.reading.kobo import api as kobo_api
 from kodex.reading.kobo import devices as kobo_devices
 from kodex.reading.trackers import api as trackers_api
@@ -128,6 +129,7 @@ _API_ROUTERS = [
     series.router,
     books.router,
     reading_progress.router,
+    bookmarks.router,
     enrichment.router,
     jobs.router,
     me.router,

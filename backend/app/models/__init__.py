@@ -25,12 +25,13 @@ from kodex.core.sync_log import SyncLog
 from kodex.jobs.models import JobResult
 from kodex.library.models import BookFileHash
 from kodex.matching.models import MatchReview, ProviderCache, ProviderRateState, SeriesAlias, SeriesExternalId
-from kodex.reading.models import ReadingEvent
+from kodex.reading.models import Bookmark, ReadingEvent
 from kodex.reading.trackers.models import TrackerAccount, TrackerLink
 
 __all__ = [
     "AIRecommendation",
     "Book",
+    "Bookmark",
     "ApiKey",
     "BookFileHash",
     "JobResult",

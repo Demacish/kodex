@@ -10,6 +10,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.bearerAuth
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
@@ -123,6 +124,49 @@ class KodexApi(
 
     suspend fun pageDimensions(bookId: Int): PageDimensions =
         call { http.get("books/$bookId/pages/dimensions") { auth() }.body() }
+
+    /** All of the user's bookmarks, in reading order within each book. */
+    suspend fun bookmarks(): List<Bookmark> = call { http.get("bookmarks") { auth() }.body() }
+
+    suspend fun saveBookmark(id: String, bookmark: BookmarkIn): Bookmark = call {
+        http.put("bookmarks/$id") {
+            auth()
+            contentType(ContentType.Application.Json)
+            setBody(bookmark)
+        }.body()
+    }
+
+    /** Removes a bookmark; one that is already gone is fine. */
+    suspend fun deleteBookmark(id: String) {
+        call { http.delete("bookmarks/$id") { auth() } }
+    }
+
+    suspend fun follow(seriesId: Int, following: Boolean): Series =
+        call { http.post("series/$seriesId/${if (following) "follow" else "unfollow"}") { auth() }.body() }
+
+    /** New numbers in the followed series, soonest first (the hidden ones left out). */
+    suspend fun releases(): List<ReleaseEvent> = call { http.get("releases") { auth() }.body() }
+
+    suspend fun dismissRelease(eventId: Int) {
+        call { http.post("releases/$eventId/dismiss") { auth() } }
+    }
+
+    suspend fun recommendations(): List<Recommendation> = call { http.get("ai/recommendations") { auth() }.body() }
+
+    /** A new batch from the server's AI; a 400 when it has none configured. */
+    suspend fun generateRecommendations(): List<Recommendation> =
+        call { http.post("ai/recommendations/generate") { auth() }.body() }
+
+    /** Wanting one makes a request on the server; not wanting it hides it. */
+    suspend fun swipe(recommendationId: Int, want: Boolean) {
+        call {
+            http.post("ai/recommendations/$recommendationId/swipe") {
+                auth()
+                contentType(ContentType.Application.Json)
+                setBody(SwipeIn(if (want) "right" else "left"))
+            }
+        }
+    }
 
     // Addresses the app downloads from itself (with the same bearer token).
 

@@ -58,3 +58,23 @@ class KoboBook(Base):
     book_id: Mapped[int] = mapped_column(ForeignKey("books.id", ondelete="CASCADE"), primary_key=True)
     synced_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True))
     removed: Mapped[bool] = mapped_column(Boolean, default=False, server_default=text("false"))
+
+
+class Bookmark(Base):
+    """A place in a book the user wants to find again, on any device. The id
+    is the client's own (a UUID): a device makes one offline and sends it
+    when it can, as often as it has to (kodex.reading.bookmarks)."""
+
+    __tablename__ = "bookmarks"
+    __table_args__ = (Index("ix_bookmarks_user_id_book_id", "user_id", "book_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    book_id: Mapped[int] = mapped_column(ForeignKey("books.id", ondelete="CASCADE"))
+    # A locator in the kind of the reader that made it (kodex.reading.positions).
+    position: Mapped[str] = mapped_column(String(512))
+    locator_kind: Mapped[str] = mapped_column(String(16))
+    progress_percent: Mapped[float] = mapped_column(Float)
+    chapter: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    note: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

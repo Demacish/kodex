@@ -154,6 +154,7 @@
   },
   "book": {
     "volume": "Vol. {{number}}",
+    "file": "File on the server",
     "issue": "#{{number}}",
     "finished": "Read",
     "progress": "{{percent}}% read",

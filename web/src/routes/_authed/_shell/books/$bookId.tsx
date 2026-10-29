@@ -134,6 +134,10 @@ function BookPage() {
               </>
             )}
           </div>
+          <div className="pt-2 text-xs text-muted-foreground">
+            <div className="font-medium text-foreground">{t("book.file")}</div>
+            <div className="break-all font-mono select-all">{b.file_path}</div>
+          </div>
         </div>
       </div>
     </div>

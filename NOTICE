@@ -28,6 +28,19 @@ web/src/vendor/foliate-js/
     BSD 3-Clause) and fflate (Copyright (c) 2023 Arjun Barrett, MIT) as
     bundled by foliate-js in vendor/.
 
+androidApp/src/main/res/font/inter.ttf
+    Inter (variable, opsz and wght axes) from Google Fonts,
+    https://github.com/google/fonts/tree/main/ofl/inter, fetched 2026-10-29.
+    Copyright 2020 The Inter Project Authors (https://github.com/rsms/inter).
+    SIL Open Font License 1.1 (androidApp/fonts/Inter-OFL.txt).
+
+androidApp/src/main/res/font/plus_jakarta_sans.ttf
+    Plus Jakarta Sans (variable, wght axis) from Google Fonts,
+    https://github.com/google/fonts/tree/main/ofl/plusjakartasans, fetched 2026-10-29.
+    Copyright 2020 The Plus Jakarta Sans Project Authors
+    (https://github.com/tokotype/PlusJakartaSans).
+    SIL Open Font License 1.1 (androidApp/fonts/PlusJakartaSans-OFL.txt).
+
 Fetched at test time, not included
 ----------------------------------
 

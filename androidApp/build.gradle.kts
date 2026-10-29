@@ -95,7 +95,9 @@ extensions.configure<RoomExtension> {
 }
 
 tasks.withType<Test>().configureEach {
-    maxHeapSize = "1536m"
+    maxHeapSize = "2560m"
+    // Where the screenshot tests write their pictures (uploaded by CI as "app-screenshots").
+    systemProperty("kodex.screenshots", layout.buildDirectory.dir("outputs/screenshots").get().asFile.path)
     // Robolectric with SDK 36 on JDK 21 (as in Tandem).
     jvmArgs("--add-opens=java.base/jdk.internal.access=ALL-UNNAMED", "--add-opens=java.base/java.io=ALL-UNNAMED")
 }
@@ -148,6 +150,9 @@ dependencies {
     testImplementation(libs.androidx.room3.testing)
     testImplementation(libs.androidx.work.testing)
     testImplementation(libs.ktor.client.mock)
+    // The screenshots of the screens (src/test/.../screens), drawn by Robolectric.
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

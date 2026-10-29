@@ -42,6 +42,8 @@ import app.kodex.data.Position
 import app.kodex.data.db.BookEntity
 import app.kodex.data.db.ProgressEntity
 import app.kodex.reader.ReaderChrome
+import app.kodex.reader.ReaderHost
+import app.kodex.ui.theme.KodexTheme
 import app.kodex.shared.reader.PagePosition
 import java.io.File
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -59,6 +61,7 @@ fun PdfReader(
     book: BookEntity,
     file: File,
     start: ProgressEntity?,
+    host: ReaderHost,
     onPosition: (Position) -> Unit,
     onChrome: (Boolean) -> Unit,
     onClose: () -> Unit,
@@ -82,7 +85,7 @@ fun PdfReader(
         when {
             failed != null -> Text(
                 stringResource(R.string.reader_failed, failed.orEmpty()),
-                color = Color.White,
+                color = KodexTheme.colors.text,
                 modifier = Modifier.align(Alignment.Center),
             )
             opened == null -> CircularProgressIndicator(Modifier.align(Alignment.Center))
@@ -109,17 +112,26 @@ fun PdfReader(
                     }
                 }
                 if (chrome) {
+                    val first = state.firstVisiblePage
                     ReaderChrome(
-                        title = book.title,
-                        page = state.firstVisiblePage,
+                        title = host.title,
+                        page = first,
                         count = count,
                         mode = null,
                         onMode = {},
+                        fit = null,
+                        onFit = {},
+                        bookmarks = host.bookmarkControls(
+                            here = { it.locatorKind == "pdf" && it.position.toIntOrNull() == first + 1 },
+                            at = { Position((first + 1).toString(), "pdf", (first + 1) * 100.0 / count, false) },
+                            open = { mark -> mark.position.toIntOrNull()?.let { n -> scope.launch { state.scrollToPage((n - 1).coerceIn(0, count - 1)) } } },
+                        ),
+                        light = host.light,
                         onSeek = { scope.launch { state.scrollToPage(it) } },
                         onClose = onClose,
                         extra = {
                             IconButton(onClick = { chrome = false }) {
-                                Icon(Icons.Filled.Menu, contentDescription = stringResource(R.string.reader_menu), tint = Color.White)
+                                Icon(Icons.Filled.Menu, contentDescription = stringResource(R.string.reader_menu), tint = KodexTheme.colors.text)
                             }
                         },
                     )

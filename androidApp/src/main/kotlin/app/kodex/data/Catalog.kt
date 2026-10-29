@@ -1,6 +1,7 @@
 package app.kodex.data
 
 import app.kodex.data.db.BookEntity
+import app.kodex.data.db.CATALOG_VERSION
 import app.kodex.data.db.CollectionBookEntity
 import app.kodex.data.db.CollectionEntity
 import app.kodex.data.db.KodexDatabase
@@ -25,7 +26,9 @@ class RoomCatalogStore(private val db: KodexDatabase, private val owner: String)
 
     override suspend fun cursors(): Cursors {
         val saved = state.state() ?: return Cursors()
-        return if (saved.owner == owner) Cursors(saved.catalogCursor, saved.progressCursor) else Cursors()
+        if (saved.owner != owner) return Cursors()
+        // A catalog kept by an older app lacks fields this one shows: it comes again from the start.
+        return Cursors(if (saved.catalogVersion < CATALOG_VERSION) 0 else saved.catalogCursor, saved.progressCursor)
     }
 
     /** Positions read before the first sync have no account yet; that isn't another account. */
@@ -40,7 +43,8 @@ class RoomCatalogStore(private val db: KodexDatabase, private val owner: String)
             catalog.upsertLibraries(changes.libraries.map { LibraryEntity(it.id, it.name, it.libraryType) })
             catalog.upsertSeries(
                 changes.series.map {
-                    SeriesEntity(it.id, it.libraryId, it.title, it.startYear, it.publisher, it.summary, it.bookCount, it.isFollowing)
+                    SeriesEntity(it.id, it.libraryId, it.title, it.startYear, it.publisher, it.summary, it.bookCount, it.isFollowing,
+                        it.status)
                 },
             )
             catalog.upsertBooks(changes.books.map { it.toEntity() })
@@ -76,6 +80,7 @@ class RoomCatalogStore(private val db: KodexDatabase, private val owner: String)
                     owner = owner,
                     syncedAt = System.currentTimeMillis(),
                     lastSeq = saved.seq(),
+                    catalogVersion = CATALOG_VERSION,
                 ),
             )
         }
@@ -121,4 +126,6 @@ fun Book.toEntity() = BookEntity(
     summary = bookMetadata?.summary,
     publishedYear = bookMetadata?.publishedYear,
     language = bookMetadata?.language,
+    filePath = filePath,
+    genres = bookMetadata?.genres.orEmpty().joinToString(", "),
 )

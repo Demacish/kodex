@@ -2,6 +2,7 @@ package app.kodex.ui.login
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -36,6 +37,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.kodex.R
+import app.kodex.ui.components.Logo
+import app.kodex.ui.theme.KodexTheme
 
 @Composable
 fun LoginScreen(vm: LoginViewModel) {
@@ -47,8 +50,11 @@ fun LoginScreen(vm: LoginViewModel) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Column(Modifier.widthIn(max = 420.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(stringResource(R.string.app_name), style = MaterialTheme.typography.displaySmall)
-                Text(stringResource(R.string.login_intro), style = MaterialTheme.typography.bodyLarge)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Logo(size = 52.dp)
+                    Text(stringResource(R.string.app_name), style = MaterialTheme.typography.displaySmall, color = KodexTheme.colors.accentText)
+                }
+                Text(stringResource(R.string.login_intro), style = MaterialTheme.typography.bodyLarge, color = KodexTheme.colors.textMuted)
                 if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
                 OutlinedTextField(
                     value = state.server,

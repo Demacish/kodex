@@ -6,6 +6,7 @@ import app.kodex.data.db.BookEntity
 import app.kodex.data.db.DownloadKinds
 import app.kodex.data.db.DownloadState
 import app.kodex.data.db.KodexDatabase
+import app.kodex.data.db.ProgressEntity
 import app.kodex.download.Downloads
 import app.kodex.reader.epub.EpubSession
 import app.kodex.reader.image.ZipFiles
@@ -50,7 +51,8 @@ class OpenBooks(
     @Volatile var epub: EpubSession? = null
         private set
 
-    suspend fun open(book: BookEntity, screenWidth: Int, trim: Boolean = false): Opened = withContext(Dispatchers.IO) {
+    /** [start] opens it somewhere else than its position (a bookmark). */
+    suspend fun open(book: BookEntity, screenWidth: Int, trim: Boolean = false, start: ProgressEntity? = null): Opened = withContext(Dispatchers.IO) {
         val download = db.downloads().get(book.id)?.takeIf { it.state == DownloadState.DONE }
         val sizes = download?.pageSizes?.let { runCatching { KodexJson.decodeFromString(PageDimensions.serializer(), it).sizes }.getOrNull() }
         try {
@@ -63,7 +65,7 @@ class OpenBooks(
                     val pages = ZipFiles.pages(downloads.file(book.id, book.format))
                     Opened.Images(ImagePages(pages, sizes ?: emptyList(), null, offline = true))
                 }
-                download != null && book.format == "epub" -> Opened.Epub(openEpub(book, downloads.file(book.id, "epub")))
+                download != null && book.format == "epub" -> Opened.Epub(openEpub(book, downloads.file(book.id, "epub"), start))
                 download != null && book.format == "pdf" -> Opened.Pdf(downloads.file(book.id, "pdf"))
                 book.format == "epub" || book.format == "pdf" -> Opened.NeedsDownload
                 else -> remotePages(book, screenWidth, trim)
@@ -85,9 +87,9 @@ class OpenBooks(
         return Opened.Images(ImagePages(urls, if (trim) emptyList() else dimensions.sizes.orEmpty(), headers, offline = false))
     }
 
-    private suspend fun openEpub(book: BookEntity, file: File): EpubSession {
+    private suspend fun openEpub(book: BookEntity, file: File, start: ProgressEntity?): EpubSession {
         epub?.let { if (it.bookId == book.id) return it else it.close() }
-        val progress = db.catalog().progressNow(book.id)
+        val progress = start ?: db.catalog().progressNow(book.id)
         return EpubSession.open(context, book.id, file, progress).also { epub = it }
     }
 

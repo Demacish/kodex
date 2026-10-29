@@ -3,10 +3,12 @@ package app.kodex.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.DownloadForOffline
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -34,12 +36,11 @@ import androidx.navigation3.ui.NavDisplay
 import app.kodex.R
 import app.kodex.account.Session
 import app.kodex.reader.ReaderActivity
+import app.kodex.ui.discover.DiscoverScreen
 import app.kodex.ui.downloads.DownloadsScreen
-import app.kodex.ui.home.HomeScreen
 import app.kodex.ui.library.BookScreen
 import app.kodex.ui.library.CollectionScreen
-import app.kodex.ui.library.LibrariesScreen
-import app.kodex.ui.library.LibraryScreen
+import app.kodex.ui.library.LibraryHome
 import app.kodex.ui.library.SeriesScreen
 import app.kodex.ui.login.LoginScreen
 import app.kodex.ui.login.LoginViewModel
@@ -48,11 +49,7 @@ import app.kodex.ui.theme.KodexTheme
 import kotlinx.serialization.Serializable
 import org.koin.compose.viewmodel.koinViewModel
 
-@Serializable data object HomeKey : NavKey
-
-@Serializable data object LibrariesKey : NavKey
-
-@Serializable data class LibraryKey(val id: Int, val name: String) : NavKey
+@Serializable data object LibraryHomeKey : NavKey
 
 @Serializable data class SeriesKey(val id: Int) : NavKey
 
@@ -60,13 +57,15 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Serializable data class CollectionKey(val id: Int, val name: String) : NavKey
 
+@Serializable data object DiscoverKey : NavKey
+
 @Serializable data object DownloadsKey : NavKey
 
 @Serializable data object SettingsKey : NavKey
 
-private enum class Tab(val key: NavKey, val label: Int, val icon: ImageVector) {
-    HOME(HomeKey, R.string.tab_home, Icons.Filled.Home),
-    LIBRARY(LibrariesKey, R.string.tab_library, Icons.AutoMirrored.Filled.MenuBook),
+enum class Tab(val key: NavKey, val label: Int, val icon: ImageVector) {
+    LIBRARY(LibraryHomeKey, R.string.tab_library, Icons.Filled.LocalLibrary),
+    DISCOVER(DiscoverKey, R.string.tab_discover, Icons.Filled.Explore),
     DOWNLOADS(DownloadsKey, R.string.tab_downloads, Icons.Filled.DownloadForOffline),
     SETTINGS(SettingsKey, R.string.tab_settings, Icons.Filled.Settings),
 }
@@ -75,12 +74,13 @@ private enum class Tab(val key: NavKey, val label: Int, val icon: ImageVector) {
 val LocalSession = staticCompositionLocalOf<Session?> { null }
 
 /** Where the screens go: one place, so every screen navigates the same way. */
-class Navigator(private val stack: MutableList<NavKey>, private val openReader: (Int) -> Unit) {
+class Navigator(private val stack: MutableList<NavKey>, private val openReader: (Int, String?, String?) -> Unit) {
     fun open(key: NavKey) {
         stack.add(key)
     }
 
-    fun read(bookId: Int) = openReader(bookId)
+    /** The reader, at the book's position or at [position] (a bookmark's, of [kind]). */
+    fun read(bookId: Int, position: String? = null, kind: String? = null) = openReader(bookId, position, kind)
 
     fun back() {
         if (stack.size > 1) stack.removeAt(stack.lastIndex)
@@ -93,7 +93,7 @@ fun KodexAppUi(login: LoginViewModel) {
     val app: AppViewModel = koinViewModel()
     val session by app.session.collectAsStateWithLifecycle()
     val settings by app.settings.collectAsStateWithLifecycle()
-    KodexTheme(settings.theme) {
+    KodexTheme(settings.theme, settings.accent) {
         when (val state = session) {
             SessionState.Loading -> Box(Modifier.fillMaxSize()) { CircularProgressIndicator(Modifier.align(Alignment.Center)) }
             SessionState.LoggedOut -> LoginScreen(login)
@@ -102,32 +102,54 @@ fun KodexAppUi(login: LoginViewModel) {
     }
 }
 
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+/**
+ * The tabs around a screen: a bar at the foot of a phone, a rail down the side of a tablet.
+ * [badge] marks a tab (downloads on their way).
+ */
 @Composable
-private fun Shell(app: AppViewModel) {
-    val context = LocalContext.current
-    val stack = rememberNavBackStack(HomeKey)
-    val navigator = Navigator(stack) { context.startActivity(ReaderActivity.intent(context, it)) }
-    val current = stack.lastOrNull()
-    val tab = Tab.entries.lastOrNull { tab -> stack.any { it == tab.key } } ?: Tab.HOME
-    val listDetail = rememberListDetailSceneStrategy<NavKey>()
+fun ShellFrame(tab: Tab, onTab: (Tab) -> Unit, badge: (Tab) -> Boolean = { false }, content: @Composable () -> Unit) {
+    val colors = KodexTheme.colors
     NavigationSuiteScaffold(
         navigationSuiteItems = {
             Tab.entries.forEach { item ->
                 item(
                     selected = item == tab,
-                    onClick = {
-                        if (current != item.key) {
-                            stack.clear()
-                            stack.add(item.key)
+                    onClick = { onTab(item) },
+                    icon = {
+                        BadgedBox(badge = { if (badge(item)) Badge(containerColor = colors.offline) }) {
+                            Icon(item.icon, contentDescription = null)
                         }
                     },
-                    icon = { Icon(item.icon, contentDescription = null) },
                     label = { Text(stringResource(item.label)) },
                     modifier = Modifier.testTag("tab-${item.name.lowercase()}"),
                 )
             }
         },
+        containerColor = colors.background,
+    ) {
+        content()
+    }
+}
+
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@Composable
+private fun Shell(app: AppViewModel) {
+    val context = LocalContext.current
+    val stack = rememberNavBackStack(LibraryHomeKey)
+    val navigator = Navigator(stack) { id, position, kind -> context.startActivity(ReaderActivity.intent(context, id, position, kind)) }
+    val current = stack.lastOrNull()
+    val tab = Tab.entries.lastOrNull { tab -> stack.any { it == tab.key } } ?: Tab.LIBRARY
+    val listDetail = rememberListDetailSceneStrategy<NavKey>()
+    val active by app.activeDownloads.collectAsStateWithLifecycle(initialValue = 0)
+    ShellFrame(
+        tab,
+        onTab = { item ->
+            if (current != item.key) {
+                stack.clear()
+                stack.add(item.key)
+            }
+        },
+        badge = { it == Tab.DOWNLOADS && active > 0 },
     ) {
         NavDisplay(
             backStack = stack,
@@ -135,12 +157,11 @@ private fun Shell(app: AppViewModel) {
             entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator(), rememberViewModelStoreNavEntryDecorator()),
             sceneStrategies = listOf(listDetail),
             entryProvider = entryProvider {
-                entry<HomeKey> { HomeScreen(navigator, app) }
-                entry<LibrariesKey> { LibrariesScreen(navigator, app) }
-                entry<LibraryKey> { LibraryScreen(it.id, it.name, navigator) }
-                entry<SeriesKey>(metadata = ListDetailSceneStrategy.listPane()) { SeriesScreen(it.id, navigator) }
-                entry<CollectionKey>(metadata = ListDetailSceneStrategy.listPane()) { CollectionScreen(it.id, it.name, navigator) }
-                entry<BookKey>(metadata = ListDetailSceneStrategy.detailPane()) { BookScreen(it.id, navigator) }
+                entry<LibraryHomeKey> { LibraryHome(navigator, app) }
+                entry<DiscoverKey> { DiscoverScreen(navigator, app) }
+                entry<SeriesKey>(metadata = ListDetailSceneStrategy.listPane()) { SeriesScreen(it.id, navigator, app) }
+                entry<CollectionKey>(metadata = ListDetailSceneStrategy.listPane()) { CollectionScreen(it.id, it.name, navigator, app) }
+                entry<BookKey>(metadata = ListDetailSceneStrategy.detailPane()) { BookScreen(it.id, navigator, app) }
                 entry<DownloadsKey> { DownloadsScreen(app, navigator) }
                 entry<SettingsKey> { SettingsScreen(app) }
             },

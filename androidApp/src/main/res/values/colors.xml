@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="background">#FFFBF8F3</color>
-    <color name="launcher_background">#FF1F3A5F</color>
-    <color name="launcher_foreground">#FFF4E9D8</color>
+    <!-- The app's backgrounds before Compose draws (ui/theme/Theme.kt), and the launcher icon. -->
+    <color name="background">#FFF7F5F2</color>
+    <color name="launcher_background">#FF121214</color>
+    <color name="launcher_foreground">#FFF59E0B</color>
 </resources>

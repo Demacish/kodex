@@ -16,6 +16,7 @@ import androidx.work.workDataOf
 import app.kodex.BuildConfig
 import app.kodex.account.AccountStore
 import app.kodex.account.Session
+import app.kodex.data.Bookmarks
 import app.kodex.data.Positions
 import app.kodex.data.RoomCatalogStore
 import app.kodex.data.db.KodexDatabase
@@ -57,7 +58,8 @@ class ApiProvider(val engine: HttpClientEngine) {
 
 /**
  * Sends the reading positions read here, brings the catalog up to date, removes downloads of
- * books that are gone, and fetches the next books in the series being read. When the catalog
+ * books that are gone (and of finished ones, when the setting says so), fetches the next books
+ * in the series being read, and sends and fetches the bookmarks. When the catalog
  * doesn't come through, the reason is kept in [SyncProblems] for the app to show.
  */
 class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params), KoinComponent {
@@ -67,6 +69,7 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
     private val positions: Positions by inject()
     private val downloads: Downloads by inject()
     private val problems: SyncProblems by inject()
+    private val bookmarks: Bookmarks by inject()
 
     private val catalog: Boolean get() = !inputData.getBoolean(ONLY_POSITIONS, false)
 
@@ -80,8 +83,10 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
                 SyncEngine(api, RoomCatalogStore(db, session.owner)).sync()
                 problems.clear()
                 downloads.prune()
+                downloads.cleanUp()
                 downloads.fetchNext()
             }
+            bookmarks.sync(api, pull = catalog)
             ContinueReadingWidget.refresh(applicationContext)
             if (sent.left > 0) Result.retry() else Result.success()
         } catch (e: CancellationException) {
@@ -132,7 +137,7 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
             WorkManager.getInstance(context).enqueueUniqueWork(NOW, ExistingWorkPolicy.REPLACE, request)
         }
 
-        /** Sends the positions soon after reading (once there is a network). */
+        /** Sends the positions and bookmarks soon after reading (once there is a network). */
         fun sendPositions(context: Context) {
             val request = OneTimeWorkRequestBuilder<SyncWorker>()
                 .setInputData(workDataOf(ONLY_POSITIONS to true))

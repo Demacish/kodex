@@ -11,6 +11,7 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import app.kodex.R
 import app.kodex.account.AccountStore
+import app.kodex.data.SettingsStore
 import app.kodex.data.db.DownloadKinds
 import app.kodex.data.db.DownloadState
 import app.kodex.data.db.KodexDatabase
@@ -21,38 +22,47 @@ import app.kodex.shared.api.PageDimensions
 import app.kodex.sync.ApiProvider
 import java.io.IOException
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-/** Downloads one book, with a notification while it runs (a foreground job). */
+/** Downloads one book when its turn comes, with a notification while it runs (a foreground job). */
 class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params), KoinComponent {
     private val db: KodexDatabase by inject()
     private val accounts: AccountStore by inject()
     private val apis: ApiProvider by inject()
     private val downloads: Downloads by inject()
     private val fetcher: Fetcher by inject()
+    private val settings: SettingsStore by inject()
 
     override suspend fun doWork(): Result {
         val bookId = inputData.getInt(BOOK_ID, -1)
         val dao = db.downloads()
-        val download = dao.get(bookId) ?: return Result.success()
+        val waiting = dao.get(bookId) ?: return Result.success()
+        if (waiting.state == DownloadState.PAUSED || waiting.state == DownloadState.DONE) return Result.success()
         val book = db.catalog().bookNow(bookId) ?: return Result.success().also { downloads.remove(bookId) }
         val session = accounts.current() ?: return Result.failure()
+        if (waiting.state == DownloadState.FAILED) dao.setState(bookId, DownloadState.QUEUED)
+        // Its turn: as many run at once as the setting says, in the queue's order.
+        val limit = settings.current().concurrency
+        dao.turns().first { order -> bookId !in order || bookId in order.take(limit) }
+        val download = dao.get(bookId)?.takeIf { it.state == DownloadState.QUEUED || it.state == DownloadState.RUNNING }
+            ?: return Result.success()
         val api = apis.api(session)
         runCatching { setForeground(foreground(book.title, 0)) }
-        dao.update(bookId, DownloadState.RUNNING, download.bytes, download.total, null)
+        dao.progress(bookId, download.bytes, download.total)
         return try {
             when (download.kind) {
                 DownloadKinds.FILE -> {
                     val digest = api.digest(bookId)
-                    dao.update(bookId, DownloadState.RUNNING, download.bytes, digest.size, null)
-                    fetcher.file(api.fileUrl(bookId), session.key, downloads.file(bookId, book.format), digest) { bytes ->
-                        dao.update(bookId, DownloadState.RUNNING, bytes, digest.size, null)
+                    dao.progress(bookId, download.bytes, digest.size)
+                    fetcher.file(api.fileUrl(bookId), session.key, downloads.file(download, book.format), digest) { bytes ->
+                        dao.progress(bookId, bytes, digest.size)
                         progress(book.title, bytes, digest.size)
                     }
                     dao.setSha256(bookId, digest.sha256)
                     if (book.format == "cbz") dao.setPageSizes(bookId, runCatching { api.pageSizesJson(bookId) }.getOrNull())
-                    dao.update(bookId, DownloadState.DONE, digest.size, digest.size, null)
+                    dao.done(bookId, digest.size, System.currentTimeMillis())
                 }
                 else -> {
                     val sizes = api.pageSizesJson(bookId)
@@ -60,11 +70,11 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
                     dao.setPageSizes(bookId, sizes)
                     var bytes = 0L
                     for (index in 0 until count) {
-                        bytes += fetcher.page(api.pageUrl(bookId, index), session.key, downloads.pages(bookId), index)
-                        dao.update(bookId, DownloadState.RUNNING, bytes, book.fileSize, null)
+                        bytes += fetcher.page(api.pageUrl(bookId, index), session.key, downloads.pages(download), index)
+                        dao.progress(bookId, bytes, book.fileSize)
                         progress(book.title, index + 1L, count.toLong())
                     }
-                    dao.update(bookId, DownloadState.DONE, bytes, bytes, null)
+                    dao.done(bookId, bytes, System.currentTimeMillis())
                 }
             }
             Result.success()
@@ -75,21 +85,20 @@ class DownloadWorker(context: Context, params: WorkerParameters) : CoroutineWork
             if (runAttemptCount < 2) Result.retry() else Result.failure()
         } catch (e: Refused) {
             failed(bookId, e)
-            if (e.status >= 500 && runAttemptCount < 5) Result.retry() else Result.failure()
+            if (e.status >= 500 && runAttemptCount < Downloads.ATTEMPTS - 1) Result.retry() else Result.failure()
         } catch (e: KodexApiException) {
             failed(bookId, e)
-            if (e.status >= 500 && runAttemptCount < 5) Result.retry() else Result.failure()
+            if (e.status >= 500 && runAttemptCount < Downloads.ATTEMPTS - 1) Result.retry() else Result.failure()
         } catch (e: IOException) {
             // The network went: what came is kept, and the rest comes when it is back.
             val now = dao.get(bookId)
-            dao.update(bookId, DownloadState.QUEUED, now?.bytes ?: 0, now?.total ?: 0, null)
+            if (now?.state == DownloadState.RUNNING) dao.setState(bookId, DownloadState.QUEUED)
             Result.retry()
         }
     }
 
     private suspend fun failed(bookId: Int, e: Exception) {
-        val now = db.downloads().get(bookId)
-        db.downloads().update(bookId, DownloadState.FAILED, now?.bytes ?: 0, now?.total ?: 0, e.message ?: e.javaClass.simpleName)
+        db.downloads().fail(bookId, e.message ?: e.javaClass.simpleName)
     }
 
     private suspend fun progress(title: String, done: Long, total: Long) {

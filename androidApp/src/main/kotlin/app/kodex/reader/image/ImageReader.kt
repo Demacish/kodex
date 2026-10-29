@@ -5,6 +5,9 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -52,6 +55,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -65,6 +69,9 @@ import app.kodex.data.db.BookEntity
 import app.kodex.data.db.ProgressEntity
 import app.kodex.reader.ImagePages
 import app.kodex.reader.ReaderChrome
+import app.kodex.reader.LocalReaderInk
+import app.kodex.reader.ReaderHost
+import app.kodex.data.PageFit
 import app.kodex.data.PageFilter
 import app.kodex.shared.reader.Half
 import app.kodex.shared.reader.PagePosition
@@ -86,8 +93,9 @@ import kotlinx.coroutines.launch
 /**
  * Comics and manga: page by page left to right or right to left (two pages side by side on a
  * wide screen, or a wide page in halves on a narrow one), or one long strip for webtoons.
- * Pinch or double-tap to zoom; tap the sides to turn the page (or only the edges, or not at
- * all) and the middle for the menu. The next book in the series waits after the last page.
+ * A page fits the screen whole, by its width or height, or at its own size. Pinch or double-tap
+ * to zoom; tap the sides to turn the page (or only the edges, or not at all) and the middle for
+ * the menu. The next book in the series waits after the last page.
  */
 /** The book after this one in its series, offered at the end. */
 data class NextBook(val id: Int, val title: String)
@@ -99,6 +107,7 @@ fun ImageReader(
     prefs: AppSettings,
     start: ProgressEntity?,
     next: NextBook?,
+    host: ReaderHost,
     onPosition: (Position) -> Unit,
     onChrome: (Boolean) -> Unit,
     onNext: (Int) -> Unit,
@@ -107,13 +116,14 @@ fun ImageReader(
     val count = pages.count
     if (count == 0) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(stringResource(R.string.reader_no_pages), color = Color.White)
+            Text(stringResource(R.string.reader_no_pages), color = LocalReaderInk.current)
         }
         return
     }
     val first = remember { PagePosition.from(start?.locatorKind, start?.position, start?.percent ?: 0.0, count) }
     var page by rememberSaveable { mutableIntStateOf(first) }
-    var mode by rememberSaveable { mutableStateOf(prefs.imageMode) }
+    var mode by rememberSaveable { mutableStateOf(host.mode) }
+    var fit by rememberSaveable { mutableStateOf(prefs.fit) }
     var chrome by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(chrome) { onChrome(chrome) }
 
@@ -152,7 +162,7 @@ fun ImageReader(
                     onMenu = { chrome = !chrome },
                 )
                 else -> Paged(
-                    pages, steps, page, rtl, filter, next,
+                    pages, steps, page, rtl, fit, filter, next,
                     onShowing = showing,
                     onTap = onTap,
                     onNext = onNext,
@@ -161,12 +171,24 @@ fun ImageReader(
             }
         }
         if (chrome) {
+            val step = steps[stepOf(steps, page)].map { it.page }
             ReaderChrome(
-                title = book.title,
+                title = host.title.copy(rtl = rtl),
                 page = page,
                 count = count,
                 mode = mode,
                 onMode = { mode = it },
+                fit = fit,
+                onFit = { chosen ->
+                    fit = chosen
+                    host.update { it.copy(fit = chosen) }
+                },
+                bookmarks = host.bookmarkControls(
+                    here = { it.locatorKind == "page" && it.position.toIntOrNull() in step },
+                    at = { Position(page.toString(), "page", (step.last() + 1) * 100.0 / count, false) },
+                    open = { mark -> mark.position.toIntOrNull()?.let { target -> showing(steps[stepOf(steps, target.coerceIn(0, count - 1))]) } },
+                ),
+                light = host.light,
                 onSeek = { target -> showing(steps[stepOf(steps, target)]) },
                 onClose = onClose,
             )
@@ -180,6 +202,7 @@ private fun Paged(
     steps: List<List<Slot>>,
     page: Int,
     rtl: Boolean,
+    fit: PageFit,
     filter: ColorFilter?,
     next: NextBook?,
     onShowing: (List<Slot>) -> Unit,
@@ -219,8 +242,13 @@ private fun Paged(
                 }
             },
         ) {
+            val ordered = if (rtl) step.reversed() else step
+            // Half pages are always shown whole: their halves are cut to fit the screen.
+            if (fit != PageFit.PAGE && ordered.none { it.half != null }) {
+                Fitted(pages, ordered, fit, filter)
+                return@Zoomable
+            }
             Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                val ordered = if (rtl) step.reversed() else step
                 ordered.forEach { slot ->
                     val half = slot.half
                     val size = pages.sizes.getOrNull(slot.page)
@@ -237,6 +265,45 @@ private fun Paged(
                             },
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * A step's pages fitted to the screen's width (scrolling down a tall page), its height
+ * (scrolling across a wide one), or at one image pixel per screen pixel (scrolling both ways).
+ */
+@Composable
+private fun Fitted(pages: ImagePages, ordered: List<Slot>, fit: PageFit, filter: ColorFilter?) {
+    val density = LocalDensity.current
+    when (fit) {
+        PageFit.WIDTH -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+            Row(Modifier.fillMaxWidth()) {
+                ordered.forEach { slot ->
+                    val size = pages.sizes.getOrNull(slot.page)
+                    val shape = if (size != null) Modifier.aspectRatio((size.width.toFloat() / size.height).coerceIn(0.05f, 20f)) else Modifier
+                    Page(pages, slot.page, filter, Modifier.weight(1f).then(shape), contentScale = ContentScale.FillWidth)
+                }
+            }
+        }
+        PageFit.HEIGHT -> Row(
+            Modifier.fillMaxSize().horizontalScroll(rememberScrollState()),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            ordered.forEach { slot ->
+                val size = pages.sizes.getOrNull(slot.page)
+                val shape = if (size != null) Modifier.aspectRatio((size.width.toFloat() / size.height).coerceIn(0.05f, 20f)) else Modifier
+                Page(pages, slot.page, filter, Modifier.fillMaxHeight().then(shape), contentScale = ContentScale.FillHeight)
+            }
+        }
+        else -> Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).horizontalScroll(rememberScrollState())) {
+            Row {
+                ordered.forEach { slot ->
+                    val size = pages.sizes.getOrNull(slot.page)
+                    val shape = if (size != null) with(density) { Modifier.size(size.width.toDp(), size.height.toDp()) } else Modifier
+                    Page(pages, slot.page, filter, shape, contentScale = ContentScale.None)
                 }
             }
         }
@@ -296,8 +363,8 @@ private fun NextPanel(next: NextBook, onNext: (Int) -> Unit) {
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(stringResource(R.string.reader_next), color = Color.White, style = MaterialTheme.typography.titleMedium)
-        Text(next.title, color = Color.White, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
+        Text(stringResource(R.string.reader_next), color = LocalReaderInk.current, style = MaterialTheme.typography.titleMedium)
+        Text(next.title, color = LocalReaderInk.current, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
         Button(onClick = { onNext(next.id) }) { Text(stringResource(R.string.reader_open_next)) }
     }
 }
@@ -359,7 +426,7 @@ private fun Page(
         },
         error = {
             Box(Modifier.fillMaxSize().heightIn(min = 200.dp).padding(24.dp), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.reader_page_failed, index + 1), color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.reader_page_failed, index + 1), color = LocalReaderInk.current, style = MaterialTheme.typography.bodyMedium)
             }
         },
         success = { SubcomposeAsyncImageContent(Modifier.testTag("page-shown-$index")) },

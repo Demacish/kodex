@@ -1,5 +1,6 @@
 package app.kodex.data.db
 
+import androidx.room3.ColumnInfo
 import androidx.room3.Entity
 import androidx.room3.Index
 import androidx.room3.PrimaryKey
@@ -20,6 +21,8 @@ data class SeriesEntity(
     val summary: String?,
     val bookCount: Int,
     val following: Boolean,
+    /** `ongoing` or `ended` when the series is matched; else null. */
+    val status: String? = null,
 )
 
 @Entity(tableName = "books", indices = [Index("seriesId"), Index("libraryId")])
@@ -38,6 +41,10 @@ data class BookEntity(
     val summary: String?,
     val publishedYear: Int?,
     val language: String?,
+    /** Where the file is in the server's library, as the server knows it. */
+    @ColumnInfo(defaultValue = "") val filePath: String = "",
+    /** The book's genres, comma separated. */
+    @ColumnInfo(defaultValue = "") val genres: String = "",
 )
 
 @Entity(tableName = "collections")
@@ -84,9 +91,18 @@ data class SyncStateEntity(
     val syncedAt: Long?,
     /** This device's report numbers for the server's journal (client_seq). */
     val lastSeq: Long,
+    /**
+     * Which fields of the catalog the device keeps ([CATALOG_VERSION]); a catalog kept by an
+     * older app is fetched again from the start, so the new fields fill in.
+     */
+    @ColumnInfo(defaultValue = "1") val catalogVersion: Int = CATALOG_VERSION,
 )
 
-enum class DownloadState { QUEUED, RUNNING, DONE, FAILED }
+/** 2: the books' file paths and genres, and the series' status. */
+const val CATALOG_VERSION = 2
+
+/** [PAUSED]: stopped by the user, with what came kept, until resumed. */
+enum class DownloadState { QUEUED, RUNNING, PAUSED, DONE, FAILED }
 
 /**
  * A downloaded (or downloading) book. [kind] says what is on disk: the book's file, verified
@@ -106,9 +122,40 @@ data class DownloadEntity(
     val requestedAt: Long,
     /** The pages' [width, height] as the server measured them (JSON), for the reader's layout. */
     val pageSizes: String?,
+    /** Its place in the queue: the lowest goes first. */
+    @ColumnInfo(defaultValue = "0") val position: Long = 0,
+    /** How many times it failed since it was last asked for. */
+    @ColumnInfo(defaultValue = "0") val attempts: Int = 0,
+    /** When it was done (epoch milliseconds). */
+    val finishedAt: Long? = null,
+    /** On the memory card, not in the device's own storage. */
+    @ColumnInfo(defaultValue = "0") val onCard: Boolean = false,
 )
 
 object DownloadKinds {
     const val FILE = "file"
     const val PAGES = "pages"
+}
+
+/**
+ * A bookmark: the server's, or one made or removed here that hasn't reached it yet ([pending]:
+ * [Pending.SAVE] or [Pending.DELETE]; a removed one is hidden until the server has forgotten it).
+ */
+@Entity(tableName = "bookmarks", indices = [Index("bookId")])
+data class BookmarkEntity(
+    @PrimaryKey val id: String,
+    val bookId: Int,
+    val position: String,
+    val locatorKind: String,
+    val percent: Double,
+    val chapter: String?,
+    val note: String?,
+    /** ISO 8601. */
+    val createdAt: String,
+    val pending: String?,
+) {
+    object Pending {
+        const val SAVE = "save"
+        const val DELETE = "delete"
+    }
 }

@@ -92,6 +92,13 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
+          # The screens drawn by the screenshot tests (androidApp/src/test/.../screens), to look at.
+          name: app-screenshots
+          path: androidApp/build/outputs/screenshots
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
           name: room-schemas
           path: androidApp/schemas
       - name: The Room schema is committed

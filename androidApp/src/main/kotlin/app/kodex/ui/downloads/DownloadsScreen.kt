@@ -519,8 +519,9 @@ private fun QueueList(queue: List<Transfer>, settings: AppSettings, actions: Dow
                         },
                         contentAlignment = Alignment.Center,
                     ) { Icon(Icons.Filled.DragIndicator, contentDescription = stringResource(R.string.drag_to_reorder), tint = colors.textMuted) }
-                    Text("#${index + 1}", style = MaterialTheme.typography.labelLarge, color = colors.accentText, modifier = Modifier.width(34.dp))
-                    Thumb(row, settings)
+                    Text("#${index + 1}", style = MaterialTheme.typography.labelLarge, color = colors.accentText, modifier = Modifier.width(30.dp))
+                    // A small cover, so the title has room next to the buttons.
+                    Cover(row.bookId, width = 40.dp, corner = 6.dp)
                     Spacer(Modifier.width(12.dp))
                     Column(Modifier.weight(1f)) {
                         Text(row.title, style = MaterialTheme.typography.titleSmall, color = colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
@@ -533,13 +534,10 @@ private fun QueueList(queue: List<Transfer>, settings: AppSettings, actions: Dow
                             style = MaterialTheme.typography.bodySmall, color = colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis,
                         )
                     }
+                    // A queued one is paused with the rest (Pausa alla) or under Aktiva; a paused one goes on from here.
                     if (row.state == DownloadState.PAUSED) {
                         IconButton(onClick = { actions.resume(row.bookId) }) {
                             Icon(Icons.Filled.PlayArrow, contentDescription = stringResource(R.string.resume), tint = colors.offlineText)
-                        }
-                    } else {
-                        IconButton(onClick = { actions.pause(row.bookId) }) {
-                            Icon(Icons.Filled.Pause, contentDescription = stringResource(R.string.pause), tint = colors.textMuted)
                         }
                     }
                     IconButton(onClick = { actions.moveToFront(row.bookId) }, enabled = index > 0) {

@@ -6,6 +6,8 @@ All notable changes to Kodex are listed here. The format follows
 
 ## [Unreleased]
 
+## [2.1.2] - 2026-10-29
+
 ### Fixed
 
 - The app's sync failed on a library brought over from v1: its books have
@@ -309,7 +311,8 @@ collections, OPDS and Kobo), phase 5 (the Android app), phase 6
   linked to for a series the matching engine has matched; it only fills in
   missing details.
 
-[Unreleased]: https://github.com/Demacish/kodex/compare/v2.1.1...HEAD
+[Unreleased]: https://github.com/Demacish/kodex/compare/v2.1.2...HEAD
+[2.1.2]: https://github.com/Demacish/kodex/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/Demacish/kodex/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/Demacish/kodex/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/Demacish/kodex/releases/tag/v2.0.0

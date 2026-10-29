@@ -89,7 +89,7 @@ def test_a_book_that_isnt_there_or_a_bad_id_is_refused(books):
 def test_another_users_bookmarks_are_theirs(books):
     client, session_factory, (book, _) = books
     with session_factory() as db:
-        other = User(oidc_subject="other-sub", username="bertil")
+        other = User(id=2, oidc_subject="other-sub", username="bertil")
         db.add(other)
         db.flush()
         db.add(Bookmark(id=FIRST, user_id=other.id, book_id=book, position="3", locator_kind="page",

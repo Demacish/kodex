@@ -310,15 +310,19 @@ private fun Hero(
                     Icon(Icons.Filled.PlayArrow, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
                     val number = numberLabel(next.number, next.editionType, libraryType)
-                    Text(
-                        when {
-                            everything -> stringResource(R.string.read_again)
-                            reading || books.any { it.finished == true } ->
-                                number?.let { stringResource(R.string.continue_with, it) } ?: stringResource(R.string.continue_reading)
-                            else -> stringResource(R.string.start_reading)
-                        },
-                        maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    )
+                    Column {
+                        Text(
+                            when {
+                                everything -> stringResource(R.string.read_again)
+                                reading || books.any { it.finished == true } -> stringResource(R.string.continue_reading)
+                                else -> stringResource(R.string.start_reading)
+                            },
+                            maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        )
+                        if (number != null) {
+                            Text(number, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+                    }
                 }
             }
             val missing = books.count { it.downloadState == null || it.downloadState == DownloadState.FAILED }

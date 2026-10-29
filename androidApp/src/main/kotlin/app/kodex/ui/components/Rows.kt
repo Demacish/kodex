@@ -178,8 +178,7 @@ fun BookLine(
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 val number = numberLabel(book.number, book.editionType, book.libraryType)
                 Text(
-                    listOfNotNull(number, book.title.takeUnless { number != null && it.endsWith(number.substringAfter(' ')) })
-                        .joinToString(": "),
+                    if (number == null || mentions(book.title, book.number)) book.title else "$number: ${book.title}",
                     style = MaterialTheme.typography.titleMedium,
                     color = when {
                         book.finished == true -> colors.textMuted
@@ -204,4 +203,11 @@ fun BookLine(
         }
         trailing()
     }
+}
+
+/** Whether a title already says its number ("Kapitel 40: …", "Serie 043"), so it isn't put in front again. */
+fun mentions(title: String, number: Double?): Boolean {
+    number ?: return false
+    val text = if (number % 1.0 == 0.0) number.toLong().toString() else number.toString()
+    return Regex("(?<![\\d.])0*" + Regex.escape(text) + "(?![\\d])").containsMatchIn(title)
 }

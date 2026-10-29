@@ -68,7 +68,6 @@ fun SeriesCard(series: SeriesRow, settings: AppSettings, onClick: () -> Unit, mo
             progress = if (started && series.bookCount > 0) series.readCount.toFloat() / series.bookCount else null,
             finished = series.bookCount > 0 && series.readCount == series.bookCount,
             download = if (series.bookCount > 0 && series.downloadedCount == series.bookCount) DownloadState.DONE else null,
-            corner = if (series.following) stringResource(R.string.following_short) else null,
         ),
         onClick = onClick,
         modifier = modifier.testTag("series-${series.id}"),

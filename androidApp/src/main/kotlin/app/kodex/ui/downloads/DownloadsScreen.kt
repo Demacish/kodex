@@ -436,7 +436,7 @@ private fun ActiveCard(transfer: Transfer, settings: AppSettings, actions: Downl
                             style = MaterialTheme.typography.labelMedium, color = colors.text, modifier = Modifier.weight(1f),
                         )
                         if (transfer.rate > 0) {
-                            val left = ((row.total - row.bytes).coerceAtLeast(0) / transfer.rate).toLong()
+                            val left = kotlin.math.ceil((row.total - row.bytes).coerceAtLeast(0) / transfer.rate).toLong().coerceAtLeast(1)
                             Text(speed(transfer.rate) + " · " + eta(left), style = MaterialTheme.typography.labelMedium, color = colors.offlineText)
                         }
                     }

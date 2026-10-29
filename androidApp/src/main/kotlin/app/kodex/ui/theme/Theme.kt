@@ -3,6 +3,7 @@ package app.kodex.ui.theme
 import android.app.Activity
 import android.content.Context
 import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
@@ -114,6 +115,7 @@ fun kodexColors(accent: Accent, dark: Boolean): KodexColors {
 }
 
 /** The device's own colours (Material You) in Kodex's roles. */
+@RequiresApi(Build.VERSION_CODES.S)
 private fun deviceColors(context: Context, dark: Boolean): Pair<KodexColors, ColorScheme> {
     val scheme = if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
     val base = kodexColors(Accent.AMBER, dark)
@@ -131,8 +133,8 @@ private fun scheme(c: KodexColors): ColorScheme = if (c.dark) {
     darkColorScheme(
         primary = c.accent, onPrimary = c.onAccent, primaryContainer = c.accentSoft, onPrimaryContainer = c.accentText,
         inversePrimary = c.accentText,
-        // The chosen chip, tab and slider track take the accent; teal comes from KodexTheme.colors.
-        secondary = c.offline, onSecondary = Color(0xFF04201D), secondaryContainer = c.accentSoft, onSecondaryContainer = c.accentText,
+        // The chosen chip, tab (and its label) and slider track take the accent; teal comes from KodexTheme.colors.
+        secondary = c.accentText, onSecondary = c.onAccent, secondaryContainer = c.accentSoft, onSecondaryContainer = c.accentText,
         tertiary = c.accentText, onTertiary = c.onAccent,
         background = c.background, onBackground = c.text,
         surface = c.background, onSurface = c.text, surfaceVariant = c.surface3, onSurfaceVariant = c.textMuted,
@@ -148,7 +150,7 @@ private fun scheme(c: KodexColors): ColorScheme = if (c.dark) {
     lightColorScheme(
         primary = c.accent, onPrimary = c.onAccent, primaryContainer = c.accentSoft, onPrimaryContainer = c.accentText,
         inversePrimary = c.accent,
-        secondary = c.offlineText, onSecondary = Color.White, secondaryContainer = c.accentSoft, onSecondaryContainer = c.accentText,
+        secondary = c.accentText, onSecondary = Color.White, secondaryContainer = c.accentSoft, onSecondaryContainer = c.accentText,
         tertiary = c.accentText, onTertiary = Color.White,
         background = c.background, onBackground = c.text,
         surface = c.background, onSurface = c.text, surfaceVariant = c.surface3, onSurfaceVariant = c.textMuted,

@@ -175,11 +175,11 @@ fun BookContent(
                 val finished = progress?.finished == true
                 val state = download?.state
                 val canRead = state == DownloadState.DONE || book.format !in FILE_FORMATS || book.format == "cbz"
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                val read: @Composable (Modifier) -> Unit = { modifier ->
                     Button(
                         onClick = { actions.read(null, null) },
                         enabled = canRead,
-                        modifier = Modifier.heightIn(min = 52.dp).testTag("read"),
+                        modifier = modifier.heightIn(min = 52.dp).testTag("read"),
                         shape = MaterialTheme.shapes.small,
                     ) {
                         Icon(Icons.Filled.PlayArrow, contentDescription = null)
@@ -192,38 +192,63 @@ fun BookContent(
                             },
                         )
                     }
+                }
+                val save: @Composable (Modifier) -> Unit = { modifier ->
                     val outlined = ButtonDefaults.outlinedButtonColors(containerColor = colors.surface1, contentColor = colors.text)
                     val border = BorderStroke(1.dp, colors.border)
-                    when (state) {
-                        DownloadState.DONE -> OutlinedButton(actions.removeDownload, Modifier.heightIn(min = 52.dp).testTag("remove-download"),
-                            shape = MaterialTheme.shapes.small, colors = outlined, border = border) {
-                            Icon(Icons.Filled.Delete, contentDescription = null)
-                            Spacer(Modifier.width(8.dp))
-                            Text(stringResource(R.string.remove_download))
-                        }
-                        DownloadState.QUEUED, DownloadState.RUNNING -> OutlinedButton(actions.pause, Modifier.heightIn(min = 52.dp).testTag("pause"),
-                            shape = MaterialTheme.shapes.small, colors = outlined, border = border) {
-                            Icon(Icons.Filled.Pause, contentDescription = null)
-                            Spacer(Modifier.width(8.dp))
-                            Text(stringResource(R.string.pause))
-                        }
-                        DownloadState.PAUSED, DownloadState.FAILED -> OutlinedButton(actions.resume, Modifier.heightIn(min = 52.dp).testTag("resume"),
-                            shape = MaterialTheme.shapes.small, colors = outlined, border = border) {
-                            Icon(Icons.Filled.Download, contentDescription = null, tint = colors.offlineText)
-                            Spacer(Modifier.width(8.dp))
-                            Text(stringResource(if (state == DownloadState.FAILED) R.string.retry else R.string.resume))
-                        }
-                        null -> OutlinedButton(actions.download, Modifier.heightIn(min = 52.dp).testTag("download"),
-                            shape = MaterialTheme.shapes.small, colors = outlined, border = border) {
-                            Icon(Icons.Filled.Download, contentDescription = null, tint = colors.offlineText)
-                            Spacer(Modifier.width(8.dp))
-                            Text(stringResource(R.string.download))
-                        }
+                    val (onClick, tag) = when (state) {
+                        DownloadState.DONE -> actions.removeDownload to "remove-download"
+                        DownloadState.QUEUED, DownloadState.RUNNING -> actions.pause to "pause"
+                        DownloadState.PAUSED, DownloadState.FAILED -> actions.resume to "resume"
+                        null -> actions.download to "download"
                     }
-                    TextButton(onClick = { actions.markRead(!finished) }, modifier = Modifier.heightIn(min = 52.dp)) {
+                    OutlinedButton(onClick, modifier.heightIn(min = 52.dp).testTag(tag), shape = MaterialTheme.shapes.small,
+                        colors = outlined, border = border) {
+                        Icon(
+                            when (state) {
+                                DownloadState.DONE -> Icons.Filled.Delete
+                                DownloadState.QUEUED, DownloadState.RUNNING -> Icons.Filled.Pause
+                                else -> Icons.Filled.Download
+                            },
+                            contentDescription = null,
+                            tint = if (state == DownloadState.DONE || state == DownloadState.QUEUED || state == DownloadState.RUNNING) colors.text else colors.offlineText,
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            stringResource(
+                                when (state) {
+                                    DownloadState.DONE -> R.string.remove_download
+                                    DownloadState.QUEUED, DownloadState.RUNNING -> R.string.pause
+                                    DownloadState.FAILED -> R.string.retry
+                                    DownloadState.PAUSED -> R.string.resume
+                                    null -> R.string.download
+                                },
+                            ),
+                            maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+                val mark: @Composable (Modifier) -> Unit = { modifier ->
+                    TextButton(onClick = { actions.markRead(!finished) }, modifier = modifier.heightIn(min = 52.dp)) {
                         Icon(if (finished) Icons.Filled.RemoveDone else Icons.Filled.DoneAll, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
-                        Text(stringResource(if (finished) R.string.mark_unread else R.string.mark_read))
+                        Text(stringResource(if (finished) R.string.mark_unread else R.string.mark_read), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                }
+                if (wide) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        read(Modifier)
+                        save(Modifier)
+                        mark(Modifier)
+                    }
+                } else {
+                    // On a phone reading takes the whole width, the rest share a row under it.
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        read(Modifier.fillMaxWidth())
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            save(Modifier.weight(1f))
+                            mark(Modifier.weight(1f))
+                        }
                     }
                 }
                 if (!canRead) Text(stringResource(R.string.download_to_read), style = MaterialTheme.typography.bodySmall, color = colors.textMuted)

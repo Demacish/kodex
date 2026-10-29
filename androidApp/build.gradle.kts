@@ -25,8 +25,8 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
         // major * 10000 + minor * 100 + patch, so every release counts up.
-        versionCode = 20102
-        versionName = "2.1.2"
+        versionCode = 20200
+        versionName = "2.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

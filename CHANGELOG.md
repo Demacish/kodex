@@ -6,6 +6,8 @@ All notable changes to Kodex are listed here. The format follows
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-10-30
+
 ### Added
 
 - Bookmarks: a place in a book to find again on any device.
@@ -369,7 +371,8 @@ collections, OPDS and Kobo), phase 5 (the Android app), phase 6
   linked to for a series the matching engine has matched; it only fills in
   missing details.
 
-[Unreleased]: https://github.com/Demacish/kodex/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/Demacish/kodex/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/Demacish/kodex/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/Demacish/kodex/compare/v2.1.2...v2.2.0
 [2.1.2]: https://github.com/Demacish/kodex/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/Demacish/kodex/compare/v2.1.0...v2.1.1

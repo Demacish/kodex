@@ -3,4 +3,4 @@
 v1 code under app/ moves here one module at a time.
 """
 
-__version__ = "2.2.0"
+__version__ = "2.3.0"

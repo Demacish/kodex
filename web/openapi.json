@@ -598,7 +598,7 @@
             "type": "boolean"
           },
           "version": {
-            "default": "2.2.0",
+            "default": "2.3.0",
             "description": "The server's version; a web client older or newer reloads.",
             "title": "Version",
             "type": "string"
@@ -7140,7 +7140,7 @@
   "info": {
     "description": "Self-hosted library server and reader for comics, manga and e-books",
     "title": "Kodex",
-    "version": "2.2.0"
+    "version": "2.3.0"
   },
   "openapi": "3.1.0",
   "paths": {

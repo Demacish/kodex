@@ -169,7 +169,7 @@
     <string name="continue_with">Continue with %1$s</string>
     <string name="continue_percent">Continue (%1$d%%)</string>
     <string name="start_reading">Start reading</string>
-    <string name="download_all">All</string>
+    <string name="download_all">Download all</string>
     <string name="follow">Follow</string>
     <string name="following">Following</string>
     <string name="follow_failed">Couldn\'t reach the server, so following didn\'t change.</string>
@@ -355,4 +355,8 @@
     <string name="search_offline">No connection: searching the catalog on the device.</string>
     <string name="search_text_offline">Searching the text needs the server.</string>
     <string name="search_text_hint">Finds words inside the e-books and PDFs the server has indexed.</string>
+    <string name="release_in_library">In the library</string>
+    <string name="release_missing">Not in the library</string>
+    <string name="release_request">Request</string>
+    <string name="release_requested">Requested</string>
 </resources>

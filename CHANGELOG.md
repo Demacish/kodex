@@ -26,6 +26,10 @@ All notable changes to Kodex are listed here. The format follows
 
 ### Added
 
+- In the app's Upptäck, a new number not in the library, or one coming, can be
+  asked for ("Önska": a request on the server, as on the web); one in the
+  library can be read straight away. What is coming is grouped by date, and a
+  tablet shows the new and coming beside the suggestions and the followed.
 - The app has Sök: the server's search over titles and metadata and in the
   books' text (a hit opens an e-book at its chapter, a PDF at its page), with
   the words marked; without a connection it searches the catalog on the device.

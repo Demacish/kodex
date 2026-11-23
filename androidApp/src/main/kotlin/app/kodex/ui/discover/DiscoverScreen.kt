@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -26,14 +29,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +47,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,11 +71,13 @@ import app.kodex.data.db.SeriesRow
 import app.kodex.shared.api.KodexApiException
 import app.kodex.shared.api.Recommendation
 import app.kodex.shared.api.ReleaseEvent
+import app.kodex.shared.api.RequestIn
 import app.kodex.sync.ApiProvider
 import app.kodex.ui.AppViewModel
 import app.kodex.ui.BookKey
 import app.kodex.ui.Navigator
 import app.kodex.ui.SeriesKey
+import app.kodex.ui.SettingsKey
 import app.kodex.ui.components.BrandBar
 import app.kodex.ui.components.Cover
 import app.kodex.ui.components.KodexCard
@@ -101,6 +110,8 @@ data class DiscoverRemote(
     val generating: Boolean = false,
     /** Something done that is worth saying (a request made). */
     val note: Int? = null,
+    /** The release events asked for in this visit ("Önskad"). */
+    val requested: Set<Int> = emptySet(),
 )
 
 class DiscoverViewModel(db: KodexDatabase, private val accounts: AccountStore, private val apis: ApiProvider) : ViewModel() {
@@ -132,6 +143,19 @@ class DiscoverViewModel(db: KodexDatabase, private val accounts: AccountStore, p
     fun dismiss(event: ReleaseEvent) = act {
         it.dismissRelease(event.id)
         remote.update { state -> state.copy(releases = state.releases?.filterNot { r -> r.id == event.id }) }
+    }
+
+    /** Asks the server for a number not in the library (a request, as the web's "Önska"). */
+    fun request(event: ReleaseEvent, mediaType: String) = act {
+        it.request(
+            RequestIn(
+                title = listOfNotNull(event.seriesTitle, event.issueNumber?.let { n -> "#$n" }).joinToString(" "),
+                mediaType = mediaType,
+                seriesId = event.seriesId,
+                issueNumber = event.issueNumber?.toDoubleOrNull(),
+            ),
+        )
+        remote.update { state -> state.copy(requested = state.requested + event.id, note = R.string.discover_requested) }
     }
 
     fun swipe(item: Recommendation, want: Boolean) = act {
@@ -175,6 +199,9 @@ class DiscoverActions(
     val dismiss: (ReleaseEvent) -> Unit = {},
     val swipe: (Recommendation, Boolean) -> Unit = { _, _ -> },
     val generate: () -> Unit = {},
+    val request: (ReleaseEvent) -> Unit = {},
+    val read: (Int) -> Unit = {},
+    val account: () -> Unit = {},
 )
 
 /** Upptäck: the followed series and their new numbers, what is coming, and the server's suggestions. */
@@ -194,6 +221,15 @@ fun DiscoverScreen(navigator: Navigator, app: AppViewModel) {
             dismiss = { vm.dismiss(it) },
             swipe = { item, want -> vm.swipe(item, want) },
             generate = { vm.generate() },
+            request = { event ->
+                vm.request(event, when (followed.firstOrNull { it.id == event.seriesId }?.libraryType?.lowercase()) {
+                    "manga" -> "manga"
+                    "ebooks" -> "ebook"
+                    else -> "series"
+                })
+            },
+            read = { navigator.read(it) },
+            account = { navigator.switchTo(SettingsKey) },
         ),
     )
 }
@@ -205,7 +241,7 @@ fun DiscoverContent(followed: List<SeriesRow>, remote: DiscoverRemote, settings:
     val byId = followed.associateBy { it.id }
     Scaffold(
         topBar = {
-            BrandBar(stringResource(R.string.tab_discover)) {
+            BrandBar(stringResource(R.string.tab_discover), onAccount = actions.account) {
                 IconButton(onClick = actions.refresh, modifier = Modifier.testTag("discover-refresh")) {
                     Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.refresh))
                 }
@@ -218,65 +254,89 @@ fun DiscoverContent(followed: List<SeriesRow>, remote: DiscoverRemote, settings:
                 val wide = maxWidth >= 600.dp
                 val released = remote.releases.orEmpty().filter { it.status != "unreleased" }
                 val coming = remote.releases.orEmpty().filter { it.status == "unreleased" }
-                LazyColumn(
-                    Modifier.readable(900.dp).fillMaxSize().testTag("discover"),
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 32.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    remote.problem?.let { problem -> item(key = "problem") { Note(stringResource(problem), colors.danger) } }
-                    remote.note?.let { note -> item(key = "note") { Note(stringResource(note), colors.offlineText) } }
-
-                    item(key = "new-title") {
-                        SectionHeader(stringResource(R.string.discover_new), mark = colors.offline) {
-                            if (released.isNotEmpty()) {
-                                Text(
-                                    stringResource(R.string.discover_new_count, released.size).uppercase(),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = colors.offlineText,
-                                    modifier = Modifier.clip(CircleShape).background(colors.offlineSoft).padding(horizontal = 8.dp, vertical = 3.dp),
-                                )
-                            }
+                val padding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 32.dp)
+                if (maxWidth >= 900.dp) {
+                    // A tablet: what is new and coming to the left, the suggestions and the followed to the right.
+                    Row(Modifier.fillMaxSize().testTag("discover"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        LazyColumn(Modifier.weight(1.3f).fillMaxSize(), contentPadding = padding, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            notes(remote)
+                            newNumbers(released, followed, byId, remote, settings, actions)
+                            coming(coming, remote, actions)
+                        }
+                        LazyColumn(Modifier.weight(1f).fillMaxSize(), contentPadding = padding, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            suggestions(remote, actions)
+                            following(followed, settings, actions, wide = true)
                         }
                     }
-                    when {
-                        remote.releases == null && remote.loading -> item(key = "loading") { Loading() }
-                        remote.releases == null -> item(key = "offline") { Quiet(stringResource(R.string.discover_needs_server)) }
-                        released.isEmpty() -> item(key = "no-new") {
-                            Quiet(stringResource(if (followed.isEmpty()) R.string.discover_follow_hint else R.string.discover_nothing_new))
-                        }
-                        else -> items(released, key = { "r${it.id}" }) { event ->
-                            ReleaseCard(event, byId[event.seriesId], settings, actions)
-                        }
-                    }
-
-                    if (followed.isNotEmpty()) {
-                        item(key = "followed-title") { SectionHeader(stringResource(R.string.discover_following, followed.size)) }
-                        item(key = "followed") {
-                            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                items(followed, key = { it.id }) { series ->
-                                    SeriesCard(series, settings, { actions.openSeries(series.id) }, width = if (wide) 136.dp else 112.dp)
-                                }
-                            }
-                        }
-                    }
-
-                    if (coming.isNotEmpty()) {
-                        item(key = "coming-title") { SectionHeader(stringResource(R.string.discover_coming)) }
-                        item(key = "coming") { Coming(coming, actions) }
-                    }
-
-                    item(key = "suggest-title") {
-                        SectionHeader(stringResource(R.string.discover_suggestions), mark = colors.accentText)
-                    }
-                    val suggestions = remote.recommendations.orEmpty()
-                    if (suggestions.isEmpty()) {
-                        item(key = "suggest-empty") { NoSuggestions(remote, actions) }
-                    } else {
-                        items(suggestions, key = { "s${it.id}" }) { Suggestion(it, actions) }
+                } else {
+                    LazyColumn(
+                        Modifier.readable(900.dp).fillMaxSize().testTag("discover"),
+                        contentPadding = padding,
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        notes(remote)
+                        newNumbers(released, followed, byId, remote, settings, actions)
+                        following(followed, settings, actions, wide)
+                        coming(coming, remote, actions)
+                        suggestions(remote, actions)
                     }
                 }
             }
         }
+    }
+}
+
+private fun LazyListScope.notes(remote: DiscoverRemote) {
+    remote.problem?.let { problem -> item(key = "problem") { Note(stringResource(problem), KodexTheme.colors.danger) } }
+    remote.note?.let { note -> item(key = "note") { Note(stringResource(note), KodexTheme.colors.offlineText) } }
+}
+
+private fun LazyListScope.newNumbers(
+    released: List<ReleaseEvent>,
+    followed: List<SeriesRow>,
+    byId: Map<Int, SeriesRow>,
+    remote: DiscoverRemote,
+    settings: AppSettings,
+    actions: DiscoverActions,
+) {
+    item(key = "new-title") { SectionHeader(stringResource(R.string.discover_new), count = released.size.takeIf { it > 0 }) }
+    when {
+        remote.releases == null && remote.loading -> item(key = "loading") { Loading() }
+        remote.releases == null -> item(key = "offline") { Quiet(stringResource(R.string.discover_needs_server)) }
+        released.isEmpty() -> item(key = "no-new") {
+            Quiet(stringResource(if (followed.isEmpty()) R.string.discover_follow_hint else R.string.discover_nothing_new))
+        }
+        else -> items(released, key = { "r${it.id}" }) { event ->
+            ReleaseCard(event, byId[event.seriesId], settings, event.id in remote.requested, actions)
+        }
+    }
+}
+
+private fun LazyListScope.following(followed: List<SeriesRow>, settings: AppSettings, actions: DiscoverActions, wide: Boolean) {
+    if (followed.isEmpty()) return
+    item(key = "followed-title") { SectionHeader(stringResource(R.string.discover_following, followed.size)) }
+    item(key = "followed") {
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            items(followed, key = { it.id }) { series ->
+                SeriesCard(series, settings, { actions.openSeries(series.id) }, width = if (wide) 136.dp else 112.dp)
+            }
+        }
+    }
+}
+
+private fun LazyListScope.coming(coming: List<ReleaseEvent>, remote: DiscoverRemote, actions: DiscoverActions) {
+    if (coming.isEmpty()) return
+    item(key = "coming-title") { SectionHeader(stringResource(R.string.discover_coming), count = coming.size) }
+    item(key = "coming") { Coming(coming, remote.requested, actions) }
+}
+
+private fun LazyListScope.suggestions(remote: DiscoverRemote, actions: DiscoverActions) {
+    item(key = "suggest-title") { SectionHeader(stringResource(R.string.discover_suggestions), mark = KodexTheme.colors.accentText) }
+    val suggestions = remote.recommendations.orEmpty()
+    if (suggestions.isEmpty()) {
+        item(key = "suggest-empty") { NoSuggestions(remote, actions) }
+    } else {
+        items(suggestions, key = { "s${it.id}" }) { Suggestion(it, actions) }
     }
 }
 
@@ -301,9 +361,17 @@ private fun ReleaseEvent.label(): String = listOfNotNull(issueNumber?.let { "#$i
 private fun date(iso: String?): String? =
     iso?.let { runCatching { LocalDate.parse(it).format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)) }.getOrNull() }
 
-/** A new number in a followed series: in the library already (open it), or out but not here. */
+/** A small chip on a release: in the library (teal), not in it, or asked for. */
 @Composable
-private fun ReleaseCard(event: ReleaseEvent, series: SeriesRow?, settings: AppSettings, actions: DiscoverActions) {
+private fun ReleaseChip(text: String, ink: androidx.compose.ui.graphics.Color, fill: androidx.compose.ui.graphics.Color) {
+    Text(text, style = MaterialTheme.typography.labelMedium, color = ink, maxLines = 1,
+        modifier = Modifier.clip(CircleShape).background(fill).padding(horizontal = 8.dp, vertical = 2.dp))
+}
+
+/** A new number in a followed series: in the library already (read it), or out but not here (ask for it, or hide it). */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ReleaseCard(event: ReleaseEvent, series: SeriesRow?, settings: AppSettings, requested: Boolean, actions: DiscoverActions) {
     val colors = KodexTheme.colors
     val owned = event.status == "owned" && event.ownedBookId != null
     Surface(
@@ -315,54 +383,80 @@ private fun ReleaseCard(event: ReleaseEvent, series: SeriesRow?, settings: AppSe
             if (owned && book != null) actions.openBook(book) else actions.openSeries(event.seriesId)
         }.testTag("release-${event.id}"),
     ) {
-        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            Cover(event.ownedBookId ?: series?.firstBookId, width = 56.dp, corner = 6.dp)
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                series?.let { MediaBadge(mediaKind(it.libraryType, ""), stringResource(R.string.badge_series), settings.rtl(it.libraryType)) }
-                Text(event.seriesTitle, style = MaterialTheme.typography.titleMedium, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(
-                    stringResource(if (owned) R.string.release_owned else R.string.release_out, event.label()),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (owned) colors.offlineText else colors.accentText,
-                    maxLines = 1, overflow = TextOverflow.Ellipsis,
-                )
-                date(event.storeDate)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = colors.textMuted) }
-            }
-            if (owned) {
-                Box(Modifier.size(44.dp).clip(CircleShape).background(colors.offlineSoft), contentAlignment = Alignment.Center) {
-                    Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = stringResource(R.string.open), tint = colors.offlineText)
+        Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            Cover(event.ownedBookId ?: series?.firstBookId, width = 64.dp, corner = 8.dp)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    series?.let { MediaBadge(mediaKind(it.libraryType, ""), stringResource(R.string.badge_series), settings.rtl(it.libraryType)) }
+                    when {
+                        owned -> ReleaseChip(stringResource(R.string.release_in_library), colors.offlineText, colors.offlineSoft)
+                        requested -> ReleaseChip(stringResource(R.string.release_requested), colors.accentText, colors.accentSoft)
+                        else -> ReleaseChip(stringResource(R.string.release_missing), colors.textMuted, colors.surface3)
+                    }
                 }
-            } else {
-                IconButton(onClick = { actions.dismiss(event) }) {
-                    Icon(Icons.Filled.VisibilityOff, contentDescription = stringResource(R.string.release_hide), tint = colors.textMuted)
+                Text(listOfNotNull(event.seriesTitle, event.issueNumber?.let { "#$it" }).joinToString(" "), style = MaterialTheme.typography.titleMedium,
+                    color = colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                event.title?.takeIf { it.isNotBlank() }?.let {
+                    Text(it, style = MaterialTheme.typography.bodyMedium, color = colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                date(event.storeDate)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = colors.textFaint) }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End), verticalAlignment = Alignment.CenterVertically) {
+                    val book = event.ownedBookId
+                    if (owned && book != null) {
+                        FilledTonalButton(onClick = { actions.read(book) }, modifier = Modifier.testTag("release-read-${event.id}")) {
+                            Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text(stringResource(R.string.read))
+                        }
+                    } else {
+                        TextButton(onClick = { actions.dismiss(event) }) { Text(stringResource(R.string.release_hide)) }
+                        OutlinedButton(onClick = { actions.request(event) }, enabled = !requested, modifier = Modifier.testTag("release-request-${event.id}")) {
+                            Icon(Icons.Filled.BookmarkAdd, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text(stringResource(if (requested) R.string.release_requested else R.string.release_request))
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-/** What is coming, by date. */
+/** What is coming, under each date; a number can be asked for or hidden. */
 @Composable
-private fun Coming(events: List<ReleaseEvent>, actions: DiscoverActions) {
+private fun Coming(events: List<ReleaseEvent>, requested: Set<Int>, actions: DiscoverActions) {
     val colors = KodexTheme.colors
-    KodexCard(Modifier.fillMaxWidth(), padding = PaddingValues(vertical = 4.dp)) {
-        events.forEach { event ->
-            Row(
-                Modifier.fillMaxWidth().clickable { actions.openSeries(event.seriesId) }.padding(start = 16.dp, end = 4.dp, top = 6.dp, bottom = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    date(event.storeDate) ?: stringResource(R.string.release_no_date),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = colors.accentText,
-                    modifier = Modifier.width(96.dp),
-                )
-                Column(Modifier.weight(1f)) {
-                    Text(event.seriesTitle, style = MaterialTheme.typography.titleSmall, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(event.label(), style = MaterialTheme.typography.bodySmall, color = colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                }
-                IconButton(onClick = { actions.dismiss(event) }) {
-                    Icon(Icons.Filled.VisibilityOff, contentDescription = stringResource(R.string.release_hide), tint = colors.textMuted)
+    KodexCard(Modifier.fillMaxWidth(), padding = PaddingValues(vertical = 8.dp)) {
+        events.groupBy { it.storeDate }.forEach { (day, onDay) ->
+            Text(
+                date(day) ?: stringResource(R.string.release_no_date),
+                style = MaterialTheme.typography.labelLarge,
+                color = colors.accentText,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 2.dp),
+            )
+            onDay.forEach { event ->
+                val asked = event.id in requested
+                Row(
+                    Modifier.fillMaxWidth().clickable { actions.openSeries(event.seriesId) }.padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(listOfNotNull(event.seriesTitle, event.issueNumber?.let { "#$it" }).joinToString(" "), style = MaterialTheme.typography.titleSmall,
+                            color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        event.title?.takeIf { it.isNotBlank() }?.let {
+                            Text(it, style = MaterialTheme.typography.bodySmall, color = colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+                    }
+                    if (asked) {
+                        ReleaseChip(stringResource(R.string.release_requested), colors.accentText, colors.accentSoft)
+                    } else {
+                        IconButton(onClick = { actions.request(event) }, modifier = Modifier.testTag("coming-request-${event.id}")) {
+                            Icon(Icons.Filled.BookmarkAdd, contentDescription = stringResource(R.string.release_request), tint = colors.accentText)
+                        }
+                    }
+                    IconButton(onClick = { actions.dismiss(event) }) {
+                        Icon(Icons.Filled.VisibilityOff, contentDescription = stringResource(R.string.release_hide), tint = colors.textMuted)
+                    }
                 }
             }
         }

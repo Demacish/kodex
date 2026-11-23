@@ -168,7 +168,7 @@
     <string name="continue_with">Fortsätt med %1$s</string>
     <string name="continue_percent">Fortsätt (%1$d %%)</string>
     <string name="start_reading">Börja läsa</string>
-    <string name="download_all">Alla</string>
+    <string name="download_all">Ladda ner alla</string>
     <string name="follow">Följ</string>
     <string name="following">Följer</string>
     <string name="follow_failed">Servern gick inte att nå, så följningen ändrades inte.</string>
@@ -354,4 +354,8 @@
     <string name="search_offline">Ingen anslutning: söker i katalogen på enheten.</string>
     <string name="search_text_offline">Sökning i texten kräver servern.</string>
     <string name="search_text_hint">Hittar ord i de e-böcker och PDF:er som servern har indexerat.</string>
+    <string name="release_in_library">I biblioteket</string>
+    <string name="release_missing">Saknas i biblioteket</string>
+    <string name="release_request">Önska</string>
+    <string name="release_requested">Önskad</string>
 </resources>

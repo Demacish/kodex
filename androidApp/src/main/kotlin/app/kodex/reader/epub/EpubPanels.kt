@@ -23,7 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.TextFields
-import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -273,7 +273,7 @@ fun EpubContentsPanel(entries: List<Pair<Int, Link>>, current: String?, onOpen: 
 fun EpubButtons(onContents: () -> Unit, onText: () -> Unit) {
     val colors = KodexTheme.colors
     IconButton(onClick = onContents, modifier = Modifier.testTag("epub-contents-open")) {
-        Icon(Icons.AutoMirrored.Filled.List, contentDescription = stringResource(R.string.epub_contents), tint = colors.text)
+        Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = stringResource(R.string.epub_contents), tint = colors.text)
     }
     IconButton(onClick = onText, modifier = Modifier.testTag("epub-text-open")) {
         Icon(Icons.Filled.TextFields, contentDescription = stringResource(R.string.epub_text), tint = colors.text)

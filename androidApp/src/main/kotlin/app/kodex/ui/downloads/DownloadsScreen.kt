@@ -82,6 +82,7 @@ import app.kodex.data.db.KodexDatabase
 import app.kodex.download.Downloads
 import app.kodex.ui.AppViewModel
 import app.kodex.ui.BookKey
+import app.kodex.ui.SettingsKey
 import app.kodex.ui.Navigator
 import app.kodex.ui.components.BrandBar
 import app.kodex.ui.components.Cover
@@ -191,6 +192,7 @@ class DownloadsActions(
     val moveToFront: (Int) -> Unit = {},
     val reorder: (List<Int>) -> Unit = {},
     val cleanup: (Int) -> Unit = {},
+    val account: () -> Unit = {},
 )
 
 /** Nedladdat: what is on its way and how fast, the queue, what came, and how much room is left. */
@@ -209,6 +211,7 @@ fun DownloadsScreen(app: AppViewModel, navigator: Navigator) {
         DownloadsActions(
             tab = { tab = it },
             open = { navigator.open(BookKey(it)) },
+            account = { navigator.switchTo(SettingsKey) },
             pause = { vm.pause(it) },
             resume = { vm.resume(it) },
             remove = { vm.remove(it) },
@@ -243,7 +246,7 @@ fun DownloadsContent(
     val paused = transfers.any { it.row.state == DownloadState.PAUSED }
     Scaffold(
         topBar = {
-            BrandBar(stringResource(R.string.tab_downloads)) {
+            BrandBar(stringResource(R.string.tab_downloads), onAccount = actions.account) {
                 if (going) {
                     OutlinedButton(
                         onClick = actions.pauseAll,

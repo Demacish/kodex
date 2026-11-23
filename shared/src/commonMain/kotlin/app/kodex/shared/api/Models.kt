@@ -236,3 +236,12 @@ data class FulltextHit(
     val position: String,
     val snippet: String,
 )
+
+/** A request for something not in the library (a missing number of a series), for whoever looks after it. */
+@Serializable
+data class RequestIn(
+    val title: String,
+    val mediaType: String = "series",
+    val seriesId: Int? = null,
+    val issueNumber: Double? = null,
+)

@@ -147,6 +147,17 @@ class KodexApi(
     /** New numbers in the followed series, soonest first (the hidden ones left out). */
     suspend fun releases(): List<ReleaseEvent> = call { http.get("releases") { auth() }.body() }
 
+    /** Asks for something not in the library; the server answers with the request, which the app doesn't need. */
+    suspend fun request(request: RequestIn) {
+        call {
+            http.post("requests") {
+                auth()
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
+        }
+    }
+
     /** The server's search over titles and metadata. */
     suspend fun searchBooks(query: String, limit: Int = 50): List<BookSearchHit> = call {
         http.get("search/books") {

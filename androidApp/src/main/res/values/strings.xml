@@ -308,4 +308,14 @@
     <string name="to_library">Go to the library</string>
     <string name="account">Account</string>
     <string name="see_all">See all</string>
+    <string name="libraries">Libraries</string>
+    <string name="all_series">All series</string>
+    <string name="library_card_line">%1$d books · %2$d series</string>
+    <plurals name="library_titles">
+        <item quantity="one">%d title</item>
+        <item quantity="other">%d titles</item>
+    </plurals>
+    <string name="collection_smart">Smart collection</string>
+    <string name="collection_manual">Collection</string>
+    <string name="read_in_order">Read in order</string>
 </resources>

@@ -2,6 +2,7 @@ package app.kodex.ui.library
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -139,35 +141,75 @@ fun BookContent(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 val libraryType = row?.libraryType
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Cover(book.id, width = if (wide) 180.dp else 124.dp, corner = 10.dp)
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        MediaBadge(mediaKind(libraryType, book.format), book.format, settings.rtl(libraryType))
-                        Text(book.title, style = MaterialTheme.typography.headlineMedium, color = colors.text, maxLines = 4,
-                            overflow = TextOverflow.Ellipsis)
-                        val seriesId = book.seriesId
-                        val seriesTitle = row?.seriesTitle
-                        if (seriesId != null && seriesTitle != null) {
+                val seriesId = book.seriesId
+                val seriesTitle = row?.seriesTitle
+                val facts = listOfNotNull(
+                    book.pageCount?.let { stringResource(R.string.pages_count, it) },
+                    book.language?.uppercase(Locale.ROOT),
+                    book.publishedYear?.toString(),
+                    book.format.uppercase(Locale.ROOT),
+                    size(book.fileSize),
+                )
+                val seriesChip: @Composable () -> Unit = {
+                    if (seriesId != null && seriesTitle != null) {
+                        Row(
+                            Modifier.clip(CircleShape).background(colors.accentSoft).clickable { actions.openSeries(seriesId) }
+                                .padding(horizontal = 12.dp, vertical = 6.dp).testTag("book-series"),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = null, tint = colors.accentText, modifier = Modifier.size(16.dp))
                             Text(
                                 listOfNotNull(seriesTitle, numberLabel(book.number, book.editionType, libraryType)).joinToString(" · "),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = colors.accentText,
-                                modifier = Modifier.clip(MaterialTheme.shapes.small).clickable { actions.openSeries(seriesId) }
-                                    .padding(vertical = 2.dp).testTag("book-series"),
+                                style = MaterialTheme.typography.labelLarge, color = colors.accentText, maxLines = 1, overflow = TextOverflow.Ellipsis,
                             )
                         }
-                        if (book.authors.isNotBlank()) Text(book.authors, style = MaterialTheme.typography.bodyMedium, color = colors.text)
-                        Text(
-                            listOfNotNull(
-                                book.format.uppercase(Locale.ROOT),
-                                book.pageCount?.let { stringResource(R.string.pages_count, it) },
-                                size(book.fileSize),
-                                book.publishedYear?.toString(),
-                                book.language?.uppercase(Locale.ROOT),
-                            ).joinToString(" · "),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = colors.textMuted,
-                        )
+                    }
+                }
+                val factChips: @Composable () -> Unit = {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp, if (wide) Alignment.Start else Alignment.CenterHorizontally),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        facts.forEach { fact ->
+                            Text(fact, style = MaterialTheme.typography.labelMedium, color = colors.textMuted,
+                                modifier = Modifier.clip(MaterialTheme.shapes.small).background(colors.surface1)
+                                    .border(1.dp, colors.borderSubtle, MaterialTheme.shapes.small).padding(horizontal = 8.dp, vertical = 4.dp))
+                        }
+                    }
+                }
+                if (wide) {
+                    // Beside the series on a tablet: the cover to the left, the rest beside it.
+                    Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                        Box {
+                            Cover(book.id, width = 180.dp, corner = 12.dp)
+                            MediaBadge(mediaKind(libraryType, book.format), book.format, settings.rtl(libraryType),
+                                Modifier.align(Alignment.TopStart).padding(6.dp))
+                        }
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            seriesChip()
+                            Text(book.title, style = MaterialTheme.typography.headlineMedium, color = colors.text, maxLines = 4,
+                                overflow = TextOverflow.Ellipsis)
+                            if (book.authors.isNotBlank()) Text(book.authors, style = MaterialTheme.typography.bodyLarge, color = colors.textMuted)
+                            factChips()
+                        }
+                    }
+                } else {
+                    // On a phone the book is centred, as in the concept: cover, series, title, who, facts.
+                    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Box {
+                            Cover(book.id, width = 168.dp, corner = 12.dp)
+                            MediaBadge(mediaKind(libraryType, book.format), book.format, settings.rtl(libraryType),
+                                Modifier.align(Alignment.TopStart).padding(6.dp))
+                        }
+                        Spacer(Modifier.height(4.dp))
+                        seriesChip()
+                        Text(book.title, style = MaterialTheme.typography.headlineMedium, color = colors.text, maxLines = 4,
+                            overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+                        if (book.authors.isNotBlank()) {
+                            Text(book.authors, style = MaterialTheme.typography.bodyLarge, color = colors.textMuted, textAlign = TextAlign.Center)
+                        }
+                        factChips()
                     }
                 }
 

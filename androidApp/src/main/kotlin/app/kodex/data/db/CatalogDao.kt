@@ -178,6 +178,40 @@ interface CatalogDao {
 
     @Query("$SERIES_ROW WHERE s.id = :id") fun seriesRow(id: Int): Flow<SeriesRow?>
 
+    /** Every series in every library, for Bibliotek's "Alla serier". */
+    @Query("$SERIES_ROW ORDER BY s.title COLLATE NOCASE")
+    fun allSeries(): Flow<List<SeriesRow>>
+
+    /** A library's newest series, as the first book of each: the covers on its card. */
+    @Query(
+        """SELECT (SELECT b.id FROM books b WHERE b.seriesId = s.id ORDER BY b.number IS NULL, b.number, b.sortTitle LIMIT 1)
+           FROM series s WHERE s.libraryId = :libraryId AND EXISTS (SELECT 1 FROM books x WHERE x.seriesId = s.id)
+           ORDER BY s.id DESC LIMIT :limit""",
+    )
+    fun seriesCovers(libraryId: Int, limit: Int = 4): Flow<List<Int>>
+
+    /** A library's newest books: the covers on its card when it has no series (e-books). */
+    @Query("SELECT b.id FROM books b WHERE b.libraryId = :libraryId ORDER BY b.id DESC LIMIT :limit")
+    fun bookCovers(libraryId: Int, limit: Int = 4): Flow<List<Int>>
+
+    /**
+     * Next in the series: in each series where a book is finished and none is half read, the
+     * first one not finished, the series read most lately first (Läs's "Nästa i serien").
+     */
+    @Query(
+        """$BOOK_ROW WHERE b.id IN (
+             SELECT (SELECT n.id FROM books n LEFT JOIN progress np ON np.bookId = n.id
+                     WHERE n.seriesId = r.id AND (np.finished IS NULL OR NOT np.finished)
+                     ORDER BY n.number IS NULL, n.number, n.sortTitle LIMIT 1)
+             FROM series r
+             WHERE EXISTS (SELECT 1 FROM books x JOIN progress xp ON xp.bookId = x.id WHERE x.seriesId = r.id AND xp.finished)
+               AND NOT EXISTS (SELECT 1 FROM books y JOIN progress yp ON yp.bookId = y.id
+                               WHERE y.seriesId = r.id AND NOT yp.finished AND yp.percent > 0))
+           ORDER BY (SELECT max(q.readAt) FROM books z JOIN progress q ON q.bookId = z.id WHERE z.seriesId = b.seriesId) DESC
+           LIMIT :limit""",
+    )
+    fun nextInSeries(limit: Int = 12): Flow<List<BookRow>>
+
     /** The newest books (the server's ids count up). */
     @Query("$BOOK_ROW ORDER BY b.id DESC LIMIT :limit")
     fun recentlyAdded(limit: Int = 30): Flow<List<BookRow>>

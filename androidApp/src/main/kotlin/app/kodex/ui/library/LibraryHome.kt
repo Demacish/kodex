@@ -1,17 +1,25 @@
 package app.kodex.ui.library
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
@@ -42,10 +50,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.kodex.R
@@ -63,7 +74,9 @@ import app.kodex.ui.SeriesKey
 import app.kodex.ui.SettingsKey
 import app.kodex.ui.components.BookCard
 import app.kodex.ui.components.BrandBar
+import app.kodex.ui.components.Cover
 import app.kodex.ui.components.EmptyCatalog
+import app.kodex.ui.components.PageHeading
 import app.kodex.ui.components.Pill
 import app.kodex.ui.components.SectionHeader
 import app.kodex.ui.components.SeriesCard
@@ -95,6 +108,10 @@ data class LibraryHomeState(
     val query: String = "",
     val results: List<BookRow> = emptyList(),
     val seriesResults: List<SeriesRow> = emptyList(),
+    /** Every series, for "Alla serier" under Allt. */
+    val allSeries: List<SeriesRow> = emptyList(),
+    /** Each library's card covers, by its id. */
+    val covers: Map<Int, List<Int>> = emptyMap(),
     /** When the catalog was last brought up to date, and what is waiting to be sent. */
     val synced: String? = null,
 )
@@ -126,6 +143,8 @@ fun LibraryHome(navigator: Navigator, app: AppViewModel) {
     val query by vm.query.collectAsStateWithLifecycle()
     val results by vm.results.collectAsStateWithLifecycle(initialValue = emptyList())
     val seriesResults by vm.seriesResults.collectAsStateWithLifecycle(initialValue = emptyList())
+    val allSeries by vm.allSeries.collectAsStateWithLifecycle(initialValue = emptyList())
+    val covers by vm.libraryCovers.collectAsStateWithLifecycle(initialValue = emptyMap())
     var selected by rememberSaveable { mutableIntStateOf(Shelf.ALL) }
     var sort by rememberSaveable { mutableStateOf(SeriesSort.TITLE) }
     var filter by rememberSaveable { mutableStateOf(SeriesFilter.ALL) }
@@ -146,7 +165,7 @@ fun LibraryHome(navigator: Navigator, app: AppViewModel) {
     LibraryHomeContent(
         LibraryHomeState(
             libraries, selected, reading, recent, collections, downloaded, series, loose, sort, filter, filtersOpen, searching,
-            query, results, seriesResults, syncLine(app),
+            query, results, seriesResults, syncLine(app), allSeries, covers,
         ),
         settings,
         LibraryHomeActions(
@@ -223,7 +242,7 @@ fun LibraryHomeContent(
                     searchResults(state, settings, actions)
                     return@LazyVerticalGrid
                 }
-                full("chips") { Shelves(state, actions) }
+                if (state.selected != Shelf.ALL) full("chips") { Shelves(state, actions) }
                 when (state.selected) {
                     Shelf.ALL -> everything(state, settings, actions, wide)
                     Shelf.DOWNLOADED -> {
@@ -257,12 +276,30 @@ private fun Shelves(state: LibraryHomeState, actions: LibraryHomeActions) {
     }
 }
 
+/**
+ * Allt (the 2.4 look): the libraries as cards with their covers, the collections, then every
+ * series with the filters. What is being read and what came last are under Läs.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 private fun LazyGridScope.everything(state: LibraryHomeState, settings: AppSettings, actions: LibraryHomeActions, wide: Boolean) {
-    // What is being read is under Läs (the 2.4 look); the library starts with what came last.
-    if (state.recent.isNotEmpty()) {
-        full("recent-title") { SectionHeader(stringResource(R.string.recently_added), mark = KodexTheme.colors.offline) }
-        items(state.recent.take(if (wide) 24 else 12), key = { "r${it.id}" }) { BookCard(it, settings, { actions.openBook(it.id) }) }
+    full("heading") {
+        val titles = state.libraries.sumOf { it.bookCount }
+        PageHeading(
+            stringResource(R.string.tab_library),
+            line = listOfNotNull(pluralStringResource(R.plurals.library_titles, titles, titles), state.synced).joinToString(" · "),
+        )
+    }
+    full("search-entry") { SearchEntry(actions) }
+    full("libraries-title") { SectionHeader(stringResource(R.string.libraries), count = state.libraries.size) }
+    full("libraries") {
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.testTag("library-cards")) {
+            items(state.libraries, key = { it.id }) { library ->
+                LibraryCard(library, state.covers[library.id].orEmpty(), wide) { actions.select(library.id) }
+            }
+            if (state.downloaded.isNotEmpty()) {
+                item { DownloadedCard(state.downloaded.size, wide) { actions.select(Shelf.DOWNLOADED) } }
+            }
+        }
     }
     if (state.collections.isNotEmpty()) {
         full("collections-title") { SectionHeader(stringResource(R.string.collections)) }
@@ -274,7 +311,104 @@ private fun LazyGridScope.everything(state: LibraryHomeState, settings: AppSetti
             }
         }
     }
-    state.synced?.let { line -> full("synced") { Quiet(line) } }
+    val series = state.allSeries.shown(state.filter, state.sort)
+    full("all-series-title") { SectionHeader(stringResource(R.string.all_series), count = series.size) }
+    full("all-series-filters") {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.testTag("series-filters")) {
+                items(SeriesFilter.entries) { f -> Pill(stringResource(filterLabel(f)), state.filter == f, { actions.filter(f) }) }
+            }
+            if (state.filtersOpen) {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(SeriesSort.entries) { sort -> Pill(stringResource(sortLabel(sort)), state.sort == sort, { actions.sort(sort) }) }
+                }
+            }
+        }
+    }
+    items(series, key = { "a${it.id}" }) { SeriesCard(it, settings, { actions.openSeries(it.id) }) }
+    if (series.isEmpty()) full("all-none") { Quiet(stringResource(R.string.nothing_matches)) }
+}
+
+/** A field that opens the search (the search itself has the whole bar). */
+@Composable
+private fun SearchEntry(actions: LibraryHomeActions) {
+    val colors = KodexTheme.colors
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = 52.dp).clip(CircleShape).background(colors.surface1)
+            .border(1.dp, colors.border, CircleShape).clickable { actions.search(true) }.padding(horizontal = 16.dp)
+            .testTag("search-entry"),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Icon(Icons.Filled.Search, contentDescription = null, tint = colors.textMuted)
+        Text(stringResource(R.string.search_library), style = MaterialTheme.typography.bodyLarge, color = colors.textMuted,
+            modifier = Modifier.weight(1f))
+        Icon(Icons.Filled.Tune, contentDescription = null, tint = colors.textFaint)
+    }
+}
+
+/** A library as a card: four of its covers, its name and how much is in it. */
+@Composable
+private fun LibraryCard(library: LibraryRow, covers: List<Int>, wide: Boolean, onClick: () -> Unit) {
+    val colors = KodexTheme.colors
+    val width = if (wide) 220.dp else 168.dp
+    Column(
+        Modifier.width(width).clip(MaterialTheme.shapes.medium).background(colors.surface1)
+            .border(1.dp, colors.border, MaterialTheme.shapes.medium).clickable(onClick = onClick).padding(10.dp)
+            .testTag("library-card-${library.id}"),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Mosaic(covers, Modifier.fillMaxWidth())
+        Column(Modifier.padding(horizontal = 2.dp)) {
+            Text(library.name, style = MaterialTheme.typography.titleMedium, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(stringResource(R.string.library_card_line, library.bookCount, library.seriesCount), style = MaterialTheme.typography.bodySmall,
+                color = colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+    }
+}
+
+/** Up to four covers, two by two (an empty square where there are fewer). */
+@Composable
+private fun Mosaic(covers: List<Int>, modifier: Modifier = Modifier) {
+    val colors = KodexTheme.colors
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        (0 until 2).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                (0 until 2).forEach { col ->
+                    val id = covers.getOrNull(row * 2 + col)
+                    Box(Modifier.weight(1f)) {
+                        if (id != null) {
+                            Cover(id, corner = 6.dp)
+                        } else {
+                            Box(Modifier.fillMaxWidth().aspectRatio(2f / 3f).clip(MaterialTheme.shapes.small).background(colors.surface3))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** What is on the device, as a card beside the libraries. */
+@Composable
+private fun DownloadedCard(count: Int, wide: Boolean, onClick: () -> Unit) {
+    val colors = KodexTheme.colors
+    val width = if (wide) 220.dp else 168.dp
+    Column(
+        Modifier.width(width).clip(MaterialTheme.shapes.medium).background(colors.offlineSoft)
+            .border(1.dp, colors.border, MaterialTheme.shapes.medium).clickable(onClick = onClick).padding(10.dp)
+            .testTag("downloaded-card"),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Box(Modifier.fillMaxWidth().aspectRatio(2f / 3f).clip(MaterialTheme.shapes.small), contentAlignment = Alignment.Center) {
+            Icon(Icons.Filled.DownloadDone, contentDescription = null, tint = colors.offline, modifier = Modifier.size(48.dp))
+        }
+        Column(Modifier.padding(horizontal = 2.dp)) {
+            Text(stringResource(R.string.shelf_downloaded), style = MaterialTheme.typography.titleMedium, color = colors.text, maxLines = 1)
+            Text(pluralStringResource(R.plurals.library_titles, count, count), style = MaterialTheme.typography.bodySmall, color = colors.offlineText,
+                maxLines = 1)
+        }
+    }
 }
 
 private fun LazyGridScope.oneLibrary(state: LibraryHomeState, settings: AppSettings, actions: LibraryHomeActions) {

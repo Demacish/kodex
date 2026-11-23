@@ -307,4 +307,14 @@
     <string name="to_library">Till biblioteket</string>
     <string name="account">Konto</string>
     <string name="see_all">Se alla</string>
+    <string name="libraries">Bibliotek</string>
+    <string name="all_series">Alla serier</string>
+    <string name="library_card_line">%1$d böcker · %2$d serier</string>
+    <plurals name="library_titles">
+        <item quantity="one">%d titel</item>
+        <item quantity="other">%d titlar</item>
+    </plurals>
+    <string name="collection_smart">Smart samling</string>
+    <string name="collection_manual">Samling</string>
+    <string name="read_in_order">Läs i ordning</string>
 </resources>

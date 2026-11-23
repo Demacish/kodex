@@ -17,9 +17,11 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 /** How a library's series are ordered. */
@@ -72,6 +74,19 @@ class LibraryViewModel(db: KodexDatabase) : ViewModel() {
     val downloaded = catalog.downloadedBooks()
 
     fun series(libraryId: Int) = catalog.seriesIn(libraryId)
+
+    val allSeries = catalog.allSeries()
+    val nextInSeries = catalog.nextInSeries()
+
+    /** Each library's card covers, by its id. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val libraryCovers: Flow<Map<Int, List<Int>>> = libraries.flatMapLatest { rows ->
+        if (rows.isEmpty()) flowOf(emptyMap()) else combine(rows.map { row -> covers(row.id).map { row.id to it } }) { it.toMap() }
+    }
+
+    /** Up to four covers for a library's card: its newest series, or its newest books when it has none. */
+    fun covers(libraryId: Int): Flow<List<Int>> =
+        combine(catalog.seriesCovers(libraryId), catalog.bookCovers(libraryId)) { series, books -> series.ifEmpty { books } }
 
     fun looseBooks(libraryId: Int) = catalog.looseBooks(libraryId)
 

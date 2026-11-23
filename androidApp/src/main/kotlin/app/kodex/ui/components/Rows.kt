@@ -142,8 +142,9 @@ fun bookState(book: BookRow): String {
 }
 
 /**
- * A book in a series' list: whether it is read, its number and title, how it is, its download,
- * and its own actions at the end ([trailing]). A long press starts choosing several.
+ * A book in a series' list (the 2.4 look): its cover, its number and title, how it is (a "Läst"
+ * badge, a progress line while it is being read), its download, and its own actions at the end
+ * ([trailing]). A long press starts choosing several.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -161,20 +162,21 @@ fun BookLine(
     Row(
         modifier
             .fillMaxWidth()
-            .heightIn(min = 64.dp)
-            .background(if (selected) colors.accentSoft else if (reading) colors.surface1 else colors.background)
+            .heightIn(min = 76.dp)
+            .padding(horizontal = 12.dp, vertical = 4.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .background(if (selected) colors.accentSoft else if (reading) colors.surface2 else colors.surface1)
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
-            .padding(start = 16.dp, end = 4.dp, top = 8.dp, bottom = 8.dp)
+            .padding(start = 10.dp, end = 2.dp, top = 8.dp, bottom = 8.dp)
             .testTag("book-${book.id}"),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         if (selecting) {
             Checkbox(checked = selected, onCheckedChange = { onClick() }, modifier = Modifier.size(30.dp))
-        } else {
-            ReadMark(book.finished == true, reading)
         }
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Cover(book.id, width = 44.dp, corner = 6.dp)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 val number = numberLabel(book.number, book.editionType, book.libraryType)
                 Text(
@@ -189,19 +191,30 @@ fun BookLine(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false),
                 )
-                if (reading) {
-                    Text(
-                        stringResource(R.string.reading).uppercase(),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colors.accentText,
-                        modifier = Modifier.clip(RoundedCornerShape(6.dp)).background(colors.accentSoft).padding(horizontal = 6.dp, vertical = 2.dp),
-                    )
+                when {
+                    reading -> StateBadge(stringResource(R.string.reading), colors.accentText, colors.accentSoft)
+                    book.finished == true -> StateBadge(stringResource(R.string.finished), colors.offlineText, colors.offlineSoft, Icons.Filled.Check)
                 }
             }
             Text(bookState(book), style = MaterialTheme.typography.bodySmall, color = colors.textMuted, maxLines = 1,
                 overflow = TextOverflow.Ellipsis)
+            if (reading) ProgressStrip(((book.percent ?: 0.0) / 100).toFloat(), Modifier.padding(top = 2.dp, end = 8.dp), track = colors.surface3)
         }
         trailing()
+    }
+}
+
+/** A small rounded badge in a row: "Läser", "✓ Läst". */
+@Composable
+fun StateBadge(text: String, ink: androidx.compose.ui.graphics.Color, fill: androidx.compose.ui.graphics.Color,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null) {
+    Row(
+        Modifier.clip(RoundedCornerShape(8.dp)).background(fill).padding(horizontal = 7.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+    ) {
+        icon?.let { Icon(it, contentDescription = null, tint = ink, modifier = Modifier.size(12.dp)) }
+        Text(text, style = MaterialTheme.typography.labelMedium, color = ink, maxLines = 1)
     }
 }
 

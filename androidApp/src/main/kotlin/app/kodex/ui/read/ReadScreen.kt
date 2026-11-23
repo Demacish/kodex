@@ -75,6 +75,8 @@ import org.koin.compose.viewmodel.koinViewModel
 
 data class ReadState(
     val reading: List<ContinueRow> = emptyList(),
+    /** In series being read through: the next book, when none is half read. */
+    val next: List<BookRow> = emptyList(),
     val recent: List<BookRow> = emptyList(),
     val collections: List<CollectionEntity> = emptyList(),
     /** When the catalog was last brought up to date, and what is waiting to be sent. */
@@ -91,17 +93,18 @@ class ReadActions(
     val account: () -> Unit = {},
 )
 
-/** Läs: the book being read, large, the others being read, what came last, and the collections. */
+/** Läs: the book being read, large, the others being read, the next in series read through, what came last, and the collections. */
 @Composable
 fun ReadScreen(navigator: Navigator, app: AppViewModel) {
     val vm: LibraryViewModel = koinViewModel()
     val settings by app.settings.collectAsStateWithLifecycle()
     val libraries by vm.libraries.collectAsStateWithLifecycle(initialValue = emptyList())
     val reading by vm.continueReading.collectAsStateWithLifecycle(initialValue = emptyList())
+    val next by vm.nextInSeries.collectAsStateWithLifecycle(initialValue = emptyList())
     val recent by vm.recentlyAdded.collectAsStateWithLifecycle(initialValue = emptyList())
     val collections by vm.collections.collectAsStateWithLifecycle(initialValue = emptyList())
     ReadContent(
-        ReadState(reading, recent, collections, syncLine(app), hasLibrary = libraries.isNotEmpty()),
+        ReadState(reading, next, recent, collections, syncLine(app), hasLibrary = libraries.isNotEmpty()),
         settings,
         ReadActions(
             read = { navigator.read(it) },
@@ -158,6 +161,16 @@ fun ReadContent(state: ReadState, settings: AppSettings, actions: ReadActions, e
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp), modifier = Modifier.testTag("home")) {
                             items(shelf, key = { it.id }) { book ->
                                 ContinueCard(book, settings, width = if (wide) 180.dp else 150.dp) { actions.read(book.id) }
+                            }
+                        }
+                    }
+                }
+                if (state.next.isNotEmpty()) {
+                    item("next-title") { SectionHeader(stringResource(R.string.reader_next), count = state.next.size) }
+                    item("next") {
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp), modifier = Modifier.testTag("next-in-series")) {
+                            items(state.next, key = { "n${it.id}" }) { book ->
+                                BookCard(book, settings, { actions.openBook(book.id) }, width = if (wide) 150.dp else 120.dp)
                             }
                         }
                     }

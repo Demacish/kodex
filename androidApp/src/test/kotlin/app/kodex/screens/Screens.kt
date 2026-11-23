@@ -67,6 +67,7 @@ import app.kodex.ui.downloads.NetworkState
 import app.kodex.ui.downloads.Transfer
 import app.kodex.ui.library.BookActions
 import app.kodex.ui.library.BookContent
+import app.kodex.ui.library.CollectionContent
 import app.kodex.ui.library.LibraryHomeActions
 import app.kodex.ui.library.LibraryHomeContent
 import app.kodex.ui.library.LibraryHomeState
@@ -111,7 +112,7 @@ abstract class Screens(private val device: String, private val theme: ThemeChoic
 
     @Test fun read() = shoot("00-read", Tab.READ) {
         ReadContent(
-            ReadState(reading = READING, recent = RECENT, collections = COLLECTIONS, synced = "Synkad 29 okt. 2026 22:29 · 2 positioner väntar på att skickas"),
+            ReadState(reading = READING, next = CHAPTERS.filter { it.finished != true }.take(4), recent = RECENT, collections = COLLECTIONS, synced = "Synkad 29 okt. 2026 22:29 · 2 positioner väntar på att skickas"),
             SETTINGS, ReadActions(), empty = {},
         )
     }
@@ -119,7 +120,8 @@ abstract class Screens(private val device: String, private val theme: ThemeChoic
     @Test fun library() = shoot("01-library", Tab.LIBRARY) {
         LibraryHomeContent(
             LibraryHomeState(libraries = LIBRARIES, reading = READING, recent = RECENT, collections = COLLECTIONS, downloaded = DOWNLOADED,
-                synced = "Synkad 29 okt. 2026 22:29 · 2 positioner väntar på att skickas"),
+                synced = "Synkad 29 okt. 2026 22:29", allSeries = MANGA,
+                covers = mapOf(1 to listOf(301, 302, 303, 304), 2 to listOf(101, 102, 103, 104), 3 to listOf(201, 202))),
             SETTINGS, LibraryHomeActions(), empty = {},
         )
     }
@@ -151,6 +153,10 @@ abstract class Screens(private val device: String, private val theme: ThemeChoic
                 Box(Modifier.weight(1f)) { Book() }
             }
         }
+    }
+
+    @Test fun collection() = shoot("13-collection", Tab.LIBRARY) {
+        CollectionContent("Läs härnäst", CHAPTERS + RECENT.take(3), SETTINGS, {}, {}, smart = true)
     }
 
     @Test fun downloadsActive() = shoot("07-downloads-active", Tab.DOWNLOADS) { Downloads(DownloadsTab.ACTIVE) }

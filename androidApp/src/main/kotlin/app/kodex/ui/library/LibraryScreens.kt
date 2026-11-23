@@ -22,8 +22,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,6 +36,7 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CollectionsBookmark
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.filled.Download
@@ -63,6 +66,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -84,6 +88,7 @@ import app.kodex.ui.components.DownloadButton
 import app.kodex.ui.components.Empty
 import app.kodex.ui.components.KodexCard
 import app.kodex.ui.components.MediaBadge
+import app.kodex.ui.components.Overline
 import app.kodex.ui.components.Pill
 import app.kodex.ui.components.ProgressStrip
 import app.kodex.ui.components.coverCells
@@ -277,98 +282,103 @@ private fun Hero(
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Cover(row?.firstBookId, width = if (wide) 180.dp else 124.dp, corner = 10.dp)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                MediaBadge(mediaKind(libraryType, ""), stringResource(R.string.badge_series), settings.rtl(libraryType))
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    MediaBadge(mediaKind(libraryType, ""), stringResource(R.string.badge_series), settings.rtl(libraryType))
+                    series.status?.let { status ->
+                        val ongoing = status.lowercase() == "ongoing"
+                        Row(
+                            Modifier.clip(CircleShape).background(if (ongoing) colors.offlineSoft else colors.surface3)
+                                .padding(horizontal = 8.dp, vertical = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        ) {
+                            Box(Modifier.size(6.dp).clip(CircleShape).background(if (ongoing) colors.offline else colors.textMuted))
+                            Text(stringResource(if (ongoing) R.string.status_ongoing else R.string.status_ended),
+                                style = MaterialTheme.typography.labelMedium, color = if (ongoing) colors.offlineText else colors.textMuted)
+                        }
+                    }
+                }
                 Text(series.title, style = if (wide) MaterialTheme.typography.displaySmall else MaterialTheme.typography.headlineMedium,
                     color = colors.text, maxLines = 3, overflow = TextOverflow.Ellipsis)
                 val authors = books.firstOrNull { it.authors.isNotBlank() }?.authors
                 if (authors != null) Text(authors, style = MaterialTheme.typography.bodyLarge, color = colors.accentText, maxLines = 2)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    series.publisher?.let { Fact(stringResource(R.string.publisher), it) }
-                    series.startYear?.let { Fact(stringResource(R.string.year), it.toString()) }
-                    Fact(stringResource(R.string.books), books.size.toString())
-                }
-                series.status?.let { status ->
-                    val ongoing = status.lowercase() == "ongoing"
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Box(Modifier.size(8.dp).clip(CircleShape).background(if (ongoing) colors.offline else colors.textMuted))
-                        Text(stringResource(if (ongoing) R.string.status_ongoing else R.string.status_ended),
-                            style = MaterialTheme.typography.labelLarge, color = if (ongoing) colors.offlineText else colors.textMuted)
-                    }
-                }
+                Text(
+                    listOfNotNull(series.publisher, series.startYear?.let { "$it–" }, pluralStringResource(R.plurals.library_titles, books.size, books.size))
+                        .joinToString(" · "),
+                    style = MaterialTheme.typography.bodyMedium, color = colors.textMuted, maxLines = 2, overflow = TextOverflow.Ellipsis,
+                )
             }
         }
         val next = nextToRead(books)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            if (next != null) {
-                val reading = next.finished != true && (next.percent ?: 0.0) > 0
-                val everything = books.all { it.finished == true }
-                Button(
-                    onClick = { actions.read(next.id) },
-                    modifier = Modifier.weight(1f).heightIn(min = 52.dp).testTag("series-read"),
-                    shape = MaterialTheme.shapes.small,
-                ) {
-                    Icon(Icons.Filled.PlayArrow, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    val number = numberLabel(next.number, next.editionType, libraryType)
-                    Column {
-                        Text(
-                            when {
-                                everything -> stringResource(R.string.read_again)
-                                reading || books.any { it.finished == true } -> stringResource(R.string.continue_reading)
-                                else -> stringResource(R.string.start_reading)
-                            },
-                            maxLines = 1, overflow = TextOverflow.Ellipsis,
-                        )
-                        if (number != null) {
-                            Text(number, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        }
+        if (next != null) {
+            val reading = next.finished != true && (next.percent ?: 0.0) > 0
+            val everything = books.all { it.finished == true }
+            Button(
+                onClick = { actions.read(next.id) },
+                modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp).testTag("series-read"),
+                shape = MaterialTheme.shapes.medium,
+            ) {
+                Box(Modifier.size(32.dp).clip(CircleShape).background(colors.onAccent.copy(alpha = 0.12f)), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(20.dp))
+                }
+                Spacer(Modifier.width(12.dp))
+                val number = numberLabel(next.number, next.editionType, libraryType)
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        when {
+                            everything -> stringResource(R.string.read_again)
+                            reading || books.any { it.finished == true } -> stringResource(R.string.continue_reading)
+                            else -> stringResource(R.string.start_reading)
+                        },
+                        style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    )
+                    if (number != null) {
+                        Text(number, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
+                if (reading) {
+                    Text(
+                        stringResource(R.string.percent, (next.percent ?: 0.0).toInt()),
+                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.clip(CircleShape).background(colors.onAccent.copy(alpha = 0.12f)).padding(horizontal = 10.dp, vertical = 4.dp),
+                    )
+                }
             }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             val missing = books.count { it.downloadState == null || it.downloadState == DownloadState.FAILED }
             OutlinedButton(
                 onClick = actions.downloadAll,
                 enabled = missing > 0,
-                modifier = Modifier.heightIn(min = 52.dp).testTag("download-all"),
+                modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("download-all"),
                 shape = MaterialTheme.shapes.small,
                 border = BorderStroke(1.dp, colors.border),
                 colors = ButtonDefaults.outlinedButtonColors(containerColor = colors.surface1, contentColor = colors.text),
             ) {
-                Icon(Icons.Filled.DownloadForOffline, contentDescription = null, tint = colors.offlineText)
+                Icon(Icons.Filled.DownloadForOffline, contentDescription = null, tint = colors.offlineText, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
-                Text(stringResource(R.string.download_all))
+                Text(stringResource(R.string.download_all), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             val following = series.following
             OutlinedButton(
                 onClick = { actions.follow(!following) },
                 enabled = !state.followBusy,
-                modifier = Modifier.heightIn(min = 52.dp).testTag("follow"),
+                modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("follow"),
                 shape = MaterialTheme.shapes.small,
-                border = BorderStroke(1.dp, if (following) colors.accent else colors.border),
+                border = BorderStroke(1.dp, if (following) colors.accentSoft else colors.border),
                 colors = ButtonDefaults.outlinedButtonColors(
                     containerColor = if (following) colors.accentSoft else colors.surface1,
                     contentColor = if (following) colors.accentText else colors.text,
                 ),
             ) {
-                Icon(if (following) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder, contentDescription = null)
-                if (wide) {
-                    Spacer(Modifier.width(6.dp))
-                    Text(stringResource(if (following) R.string.following else R.string.follow))
-                }
+                Icon(if (following) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text(stringResource(if (following) R.string.following else R.string.follow), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
         state.problem?.let { Text(stringResource(it), color = colors.danger, style = MaterialTheme.typography.bodyMedium) }
         ProgressCard(books)
         series.summary?.takeIf { it.isNotBlank() }?.let { Summary(it) }
-    }
-}
-
-@Composable
-private fun Fact(label: String, value: String) {
-    val colors = KodexTheme.colors
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text("$label:", style = MaterialTheme.typography.bodyMedium, color = colors.textMuted)
-        Text(value, style = MaterialTheme.typography.bodyMedium, color = colors.text)
     }
 }
 
@@ -425,7 +435,7 @@ private fun ListHead(libraryType: String?, issues: Int, collected: Int, kinds: B
     val colors = KodexTheme.colors
     val manga = libraryType?.lowercase() == "manga"
     Column(
-        Modifier.fillMaxWidth().background(colors.surface1).padding(horizontal = 16.dp, vertical = 10.dp),
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -537,18 +547,29 @@ private fun Choice(icon: androidx.compose.ui.graphics.vector.ImageVector, label:
     }
 }
 
-/** A collection's books, as covers. */
+/** A collection's books, as covers, in its order. */
 @Composable
 fun CollectionScreen(collectionId: Int, name: String, navigator: Navigator, app: AppViewModel) {
     val vm: LibraryViewModel = koinViewModel()
     val settings by app.settings.collectAsStateWithLifecycle()
     val books by remember(collectionId) { vm.collectionBooks(collectionId) }.collectAsStateWithLifecycle(initialValue = emptyList())
-    CollectionContent(name, books, settings, navigator::back) { navigator.open(BookKey(it)) }
+    val collections by vm.collections.collectAsStateWithLifecycle(initialValue = emptyList())
+    val smart = collections.firstOrNull { it.id == collectionId }?.collectionType == "smart"
+    CollectionContent(name, books, settings, navigator::back, { navigator.open(BookKey(it)) }, smart = smart, onRead = { navigator.read(it) })
 }
 
 @Composable
-fun CollectionContent(name: String, books: List<BookRow>, settings: AppSettings, onBack: () -> Unit, onOpen: (Int) -> Unit) {
-    Scaffold(topBar = { Bar(name, onBack = onBack) }, containerColor = KodexTheme.colors.background) { padding ->
+fun CollectionContent(
+    name: String,
+    books: List<BookRow>,
+    settings: AppSettings,
+    onBack: () -> Unit,
+    onOpen: (Int) -> Unit,
+    smart: Boolean = false,
+    onRead: (Int) -> Unit = {},
+) {
+    val colors = KodexTheme.colors
+    Scaffold(topBar = { Bar(name, onBack = onBack) }, containerColor = colors.background) { padding ->
         if (books.isEmpty()) {
             Empty(stringResource(R.string.collection_empty), Modifier.padding(padding))
             return@Scaffold
@@ -560,7 +581,41 @@ fun CollectionContent(name: String, books: List<BookRow>, settings: AppSettings,
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.fillMaxSize().testTag("collection"),
         ) {
-            items(books, key = { it.id }) { BookCard(it, settings, { onOpen(it.id) }) }
+            item(key = "head", span = { GridItemSpan(maxLineSpan) }) {
+                KodexCard(Modifier.fillMaxWidth().testTag("collection-head")) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Box(Modifier.size(44.dp).clip(MaterialTheme.shapes.small).background(colors.accentSoft), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Filled.CollectionsBookmark, contentDescription = null, tint = colors.accentText)
+                        }
+                        Column(Modifier.weight(1f)) {
+                            Overline(stringResource(if (smart) R.string.collection_smart else R.string.collection_manual), color = colors.accentText)
+                            Text(pluralStringResource(R.plurals.library_titles, books.size, books.size), style = MaterialTheme.typography.titleMedium,
+                                color = colors.text)
+                        }
+                    }
+                    val first = books.firstOrNull { it.finished != true }
+                    if (first != null) {
+                        Spacer(Modifier.height(14.dp))
+                        Button(onClick = { onRead(first.id) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("read-in-order")) {
+                            Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.read_in_order))
+                        }
+                    }
+                }
+            }
+            itemsIndexed(books, key = { _, it -> it.id }) { index, book ->
+                Box {
+                    BookCard(book, settings, { onOpen(book.id) })
+                    Text(
+                        (index + 1).toString(),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colors.onAccent,
+                        modifier = Modifier.align(Alignment.TopStart).padding(top = 30.dp, start = 6.dp).clip(CircleShape)
+                            .background(colors.accent).padding(horizontal = 7.dp, vertical = 1.dp),
+                    )
+                }
+            }
         }
     }
 }

@@ -27,10 +27,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import androidx.fragment.compose.AndroidFragment
 import app.kodex.R
+import app.kodex.data.AppSettings
 import app.kodex.data.Position
 import app.kodex.data.db.BookEntity
 import app.kodex.reader.ReaderChrome
 import app.kodex.reader.ReaderHost
+import app.kodex.ui.theme.KodexTheme
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -57,13 +59,16 @@ class EpubLinks(private val context: Context) : EpubNavigatorFragment.Listener {
 /**
  * EPUB with Readium's navigator: pages turn with a tap at the sides or a swipe, the middle
  * shows the menu; "Läs upp" reads the book aloud from where the page is (Readium's TTS
- * navigator, with the device's text-to-speech engine).
+ * navigator, with the device's text-to-speech engine). The bar opens the contents and the
+ * text's look (theme, font, size, spacing, margins, pages or scrolling, one or two columns),
+ * kept in the settings for every book.
  */
 @OptIn(ExperimentalReadiumApi::class)
 @Composable
 fun EpubReader(
     book: BookEntity,
     session: EpubSession,
+    settings: AppSettings,
     host: ReaderHost,
     onPosition: (Position) -> Unit,
     onChrome: (Boolean) -> Unit,
@@ -72,6 +77,11 @@ fun EpubReader(
     var navigator by remember { mutableStateOf<EpubNavigatorFragment?>(null) }
     var chrome by rememberSaveable { mutableStateOf(false) }
     var tts by remember { mutableStateOf<AndroidTtsNavigator?>(null) }
+    /** The panel open over the bar: the text's look or the contents. */
+    var panel by rememberSaveable { mutableStateOf<String?>(null) }
+    val dark = KodexTheme.colors.dark
+    val preferences = remember(settings, dark) { epubPreferences(settings, dark) }
+    val entries = remember(session) { contents(session.publication.tableOfContents) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     LaunchedEffect(chrome) { onChrome(chrome) }
@@ -93,6 +103,13 @@ fun EpubReader(
             }
         }
         if (chrome) {
+            val textPanel: @Composable () -> Unit = { EpubTextPanel(settings, host.update) { panel = null } }
+            val contentsPanel: @Composable () -> Unit = {
+                EpubContentsPanel(entries, locator?.title, onOpen = { link ->
+                    navigator?.go(link, animated = false)
+                    panel = null
+                }) { panel = null }
+            }
             val here = locator?.let { EpubSession.encode(it) }
             val herePlace = here?.position?.let { place(it) }
             ReaderChrome(
@@ -115,6 +132,23 @@ fun EpubReader(
                 light = host.light,
                 onSeek = {},
                 onClose = onClose,
+                actions = {
+                    EpubButtons(
+                        onContents = { panel = if (panel == "contents") null else "contents" },
+                        onText = { panel = if (panel == "text") null else "text" },
+                    )
+                },
+                panel = when (panel) {
+                    "text" -> textPanel
+                    "contents" -> contentsPanel
+                    else -> null
+                },
+                status = locator?.let { at ->
+                    listOfNotNull(
+                        at.title?.takeIf { it.isNotBlank() },
+                        stringResource(R.string.percent, ((at.locations.totalProgression ?: 0.0) * 100).toInt()),
+                    ).joinToString(" · ")
+                },
                 extra = {
                     FilterChip(
                         selected = tts != null,
@@ -152,6 +186,9 @@ fun EpubReader(
             )
         }
     }
+
+    // The text's look follows the settings, from the first page on.
+    LaunchedEffect(navigator, preferences) { navigator?.submitPreferences(preferences) }
 
     // Where the reader is (the first one is where it opened, which isn't reading).
     val current = navigator

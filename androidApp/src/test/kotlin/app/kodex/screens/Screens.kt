@@ -50,6 +50,8 @@ import app.kodex.reader.BookmarkControls
 import app.kodex.reader.LightControls
 import app.kodex.reader.ReaderChrome
 import app.kodex.reader.ReaderTitle
+import app.kodex.reader.epub.EpubButtons
+import app.kodex.reader.epub.EpubTextPanel
 import app.kodex.shared.api.Recommendation
 import app.kodex.shared.api.ReleaseEvent
 import app.kodex.sync.SyncStatus
@@ -193,6 +195,22 @@ abstract class Screens(private val device: String, private val theme: ThemeChoic
                 bookmarks = BookmarkControls(true, MARKS, {}, {}, {}),
                 light = LightControls(0.75f, true, {}, {}, {}),
                 onSeek = {}, onClose = {},
+            )
+        }
+    }
+
+    /** An e-book's reader with the text's look open (the 2.4 look). */
+    @Test fun epubText() = shoot("14-epub-text", null) {
+        Box(Modifier.fillMaxSize().background(Color(0xFF121316))) {
+            ReaderChrome(
+                title = ReaderTitle("Den sista fyren", null), page = 0, count = 0,
+                mode = null, onMode = {}, fit = null, onFit = {},
+                bookmarks = BookmarkControls(false, MARKS, {}, {}, {}),
+                light = LightControls(-1f, false, {}, {}, {}),
+                onSeek = {}, onClose = {},
+                actions = { EpubButtons({}, {}) },
+                panel = { EpubTextPanel(SETTINGS, {}, {}) },
+                status = "Sju · Ljuset bortom Orion · 46 %",
             )
         }
     }

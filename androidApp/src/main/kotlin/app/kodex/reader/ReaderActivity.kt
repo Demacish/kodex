@@ -192,7 +192,7 @@ class ReaderActivity : FragmentActivity() {
                     onNext = ::openNext,
                     onClose = ::finish,
                 )
-                is Opened.Epub -> EpubReader(current.book, opened.session, host, reporter::report, ::chrome, ::finish)
+                is Opened.Epub -> EpubReader(current.book, opened.session, prefs, host, reporter::report, ::chrome, ::finish)
                 is Opened.Pdf -> PdfReader(current.book, opened.file, current.start, host, reporter::report, ::chrome, ::finish)
                 Opened.NeedsDownload -> Problem(stringResource(R.string.reader_needs_download))
                 is Opened.Failed -> Problem(stringResource(R.string.reader_failed, opened.message))

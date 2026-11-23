@@ -17,6 +17,20 @@ All notable changes to Kodex are listed here. The format follows
   the others being read, what came last and the collections; side by side
   on a tablet), Bibliotek, Upptäck, Nedladdat and Inställningar. The account
   button at the top opens the settings.
+- Läs has "Nästa i serien": in each series with a finished book and none
+  half read, the first one not finished.
+- Bibliotek starts with the libraries as cards with their covers, the
+  collections, and every series with filters. The series page, book details
+  and collections have the new look (a large read button, rows with covers and
+  a Läst badge, book details centred on a phone, collections numbered in order).
+
+### Added
+
+- The app's e-book reader has its contents and the text's look: theme (auto,
+  light, sepia, dark, black), the book's font or a serif or sans-serif one,
+  size, line spacing, margins, turning pages or scrolling, one or two columns
+  (two on a tablet lying down) and justified text, kept for every book. The
+  bar shows the chapter and how far into the book.
 
 ## [2.3.0] - 2026-10-30
 

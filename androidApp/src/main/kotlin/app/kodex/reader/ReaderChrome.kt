@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -102,11 +103,17 @@ fun ReaderChrome(
     onSeek: (Int) -> Unit,
     onClose: () -> Unit,
     extra: @Composable () -> Unit = {},
+    /** More buttons in the top bar (an e-book's contents and text). */
+    actions: @Composable RowScope.() -> Unit = {},
+    /** A panel over the bottom one (an e-book's text settings or contents). */
+    panel: (@Composable () -> Unit)? = null,
+    /** Where in the book, when it has no pages to count (an e-book's chapter and percentage). */
+    status: String? = null,
 ) {
     val colors = KodexTheme.colors
     var showMarks by remember { mutableStateOf(false) }
     Box(Modifier.fillMaxSize().testTag("reader-chrome")) {
-        TopBar(title, onClose, Modifier.align(Alignment.TopCenter), bookmarks, onList = { showMarks = !showMarks })
+        TopBar(title, onClose, Modifier.align(Alignment.TopCenter), bookmarks, onList = { showMarks = !showMarks }, actions = actions)
         Column(
             Modifier.align(Alignment.BottomCenter).fillMaxWidth().windowInsetsPadding(WindowInsets.safeDrawing)
                 .padding(horizontal = 12.dp, vertical = 8.dp),
@@ -114,6 +121,7 @@ fun ReaderChrome(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             if (showMarks && bookmarks != null) BookmarkPanel(bookmarks) { showMarks = false }
+            panel?.invoke()
             Surface(
                 shape = RoundedCornerShape(24.dp),
                 color = colors.surface2.copy(alpha = 0.96f),
@@ -165,6 +173,17 @@ fun ReaderChrome(
                     }
                     Light(light, extra)
                 }
+            }
+            if (count <= 1 && status != null) {
+                Text(
+                    status,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = colors.textMuted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.clip(CircleShape).background(colors.background.copy(alpha = 0.7f)).padding(horizontal = 10.dp, vertical = 2.dp)
+                        .testTag("reader-status"),
+                )
             }
             if (count > 1) {
                 Text(
@@ -290,6 +309,7 @@ fun TopBar(
     modifier: Modifier = Modifier,
     bookmarks: BookmarkControls? = null,
     onList: () -> Unit = {},
+    actions: @Composable RowScope.() -> Unit = {},
 ) {
     val colors = KodexTheme.colors
     Row(
@@ -320,6 +340,7 @@ fun TopBar(
             }
             Text(title.title, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium)
         }
+        actions()
         if (bookmarks != null) {
             IconButton(onClick = bookmarks.toggle, modifier = Modifier.testTag("reader-bookmark")) {
                 Icon(

@@ -22,6 +22,19 @@ enum class ThemeChoice { SYSTEM, LIGHT, DARK }
 /** The accent colour: Kodex's periwinkle (the default since the 2.4 look), the earlier amber, or the device's own. */
 enum class Accent { KODEX, AMBER, CORAL, SKY, VIOLET, DEVICE }
 
+/** An e-book's page colours: following the app (dark, or black with [AppSettings.pureBlack]), or chosen. */
+enum class EpubTheme { AUTO, LIGHT, SEPIA, DARK, BLACK }
+
+/** An e-book's font: the book's own, or a serif or sans-serif one. */
+enum class EpubFont { PUBLISHER, SERIF, SANS }
+
+enum class EpubSpacing { TIGHT, NORMAL, LOOSE }
+
+enum class EpubMargins { NARROW, NORMAL, WIDE }
+
+/** One column, two (an open book), or two when the screen is wide and lies down. */
+enum class EpubColumns { AUTO, ONE, TWO }
+
 /** How many covers fit across a phone: three ([COMPACT]) or two ([LARGE]); more on wider screens. */
 enum class CardDensity { COMPACT, LARGE }
 
@@ -66,6 +79,15 @@ data class AppSettings(
     val theme: ThemeChoice = ThemeChoice.SYSTEM,
     val accent: Accent = Accent.KODEX,
     val density: CardDensity = CardDensity.COMPACT,
+    val epubTheme: EpubTheme = EpubTheme.AUTO,
+    val epubFont: EpubFont = EpubFont.PUBLISHER,
+    /** The text's size, 1 = the book's. */
+    val epubSize: Float = 1f,
+    val epubSpacing: EpubSpacing = EpubSpacing.NORMAL,
+    val epubMargins: EpubMargins = EpubMargins.NORMAL,
+    val epubScroll: Boolean = false,
+    val epubJustify: Boolean = false,
+    val epubColumns: EpubColumns = EpubColumns.AUTO,
 ) {
     /** The direction a book in a library of [libraryType] (the server's library_type) opens in. */
     fun modeFor(libraryType: String?): ImageMode = when (libraryType?.lowercase()) {
@@ -108,6 +130,14 @@ class SettingsStore(private val context: Context) {
         /** Which look the settings were last saved under: amber, the old default, becomes Kodex's colour once. */
         val look = intPreferencesKey("look")
         val density = stringPreferencesKey("density")
+        val epubTheme = stringPreferencesKey("epub_theme")
+        val epubFont = stringPreferencesKey("epub_font")
+        val epubSize = floatPreferencesKey("epub_size")
+        val epubSpacing = stringPreferencesKey("epub_spacing")
+        val epubMargins = stringPreferencesKey("epub_margins")
+        val epubScroll = booleanPreferencesKey("epub_scroll")
+        val epubJustify = booleanPreferencesKey("epub_justify")
+        val epubColumns = stringPreferencesKey("epub_columns")
     }
 
     val settings: Flow<AppSettings> = context.settingsData.data.map { it.settings() }
@@ -145,6 +175,14 @@ class SettingsStore(private val context: Context) {
             accent = choice<Accent>(Keys.accent)?.let { if (it == Accent.AMBER && (this[Keys.look] ?: 0) < LOOK) defaults.accent else it }
                 ?: defaults.accent,
             density = choice<CardDensity>(Keys.density) ?: defaults.density,
+            epubTheme = choice<EpubTheme>(Keys.epubTheme) ?: defaults.epubTheme,
+            epubFont = choice<EpubFont>(Keys.epubFont) ?: defaults.epubFont,
+            epubSize = this[Keys.epubSize] ?: defaults.epubSize,
+            epubSpacing = choice<EpubSpacing>(Keys.epubSpacing) ?: defaults.epubSpacing,
+            epubMargins = choice<EpubMargins>(Keys.epubMargins) ?: defaults.epubMargins,
+            epubScroll = this[Keys.epubScroll] ?: defaults.epubScroll,
+            epubJustify = this[Keys.epubJustify] ?: defaults.epubJustify,
+            epubColumns = choice<EpubColumns>(Keys.epubColumns) ?: defaults.epubColumns,
         )
     }
 
@@ -173,6 +211,14 @@ class SettingsStore(private val context: Context) {
             it[Keys.accent] = next.accent.name
             it[Keys.look] = LOOK
             it[Keys.density] = next.density.name
+            it[Keys.epubTheme] = next.epubTheme.name
+            it[Keys.epubFont] = next.epubFont.name
+            it[Keys.epubSize] = next.epubSize.coerceIn(0.6f, 2.5f)
+            it[Keys.epubSpacing] = next.epubSpacing.name
+            it[Keys.epubMargins] = next.epubMargins.name
+            it[Keys.epubScroll] = next.epubScroll
+            it[Keys.epubJustify] = next.epubJustify
+            it[Keys.epubColumns] = next.epubColumns.name
         }
     }
 }

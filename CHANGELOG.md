@@ -41,6 +41,9 @@ All notable changes to Kodex are listed here. The format follows
 - The app has Sök: the server's search over titles and metadata and in the
   books' text (a hit opens an e-book at its chapter, a PDF at its page), with
   the words marked; without a connection it searches the catalog on the device.
+- The app's image reader turns pages with a keyboard (the arrows the way the
+  book reads, Page Up/Down, space) and a mouse wheel; the webtoon strip scrolls
+  with the keys.
 - After a comic's or manga's last page the app shows the end: read through,
   how long this sitting took and its pace, the next book in the series (with
   its cover), and starting over or closing the book.

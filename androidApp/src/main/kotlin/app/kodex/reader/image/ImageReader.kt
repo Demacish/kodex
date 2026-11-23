@@ -2,6 +2,8 @@ package app.kodex.reader.image
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculatePan
@@ -61,11 +63,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.layout.ContentScale
@@ -251,9 +261,45 @@ private fun Paged(
         val target = stepOf(steps, page)
         if (state.currentPage >= steps.size || steps[state.currentPage].none { it.page == page }) state.scrollToPage(target)
     }
+    // A keyboard or a mouse turns the pages too (a tablet with a keyboard): the arrows the way the
+    // book reads, Page Up/Down and space, and the wheel.
+    val focus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
+    val turn: (Boolean) -> Unit = { forward ->
+        if (!state.isScrollInProgress) {
+            scope.launch { state.animateScrollToPage((state.currentPage + if (forward) 1 else -1).coerceIn(0, total - 1)) }
+        }
+    }
     HorizontalPager(
         state = state,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().focusRequester(focus).focusable()
+            .onPreviewKeyEvent { event ->
+                if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+                val forward = when (event.key) {
+                    Key.DirectionRight -> !rtl
+                    Key.DirectionLeft -> rtl
+                    Key.PageDown, Key.Spacebar, Key.DirectionDown -> true
+                    Key.PageUp, Key.DirectionUp -> false
+                    else -> return@onPreviewKeyEvent false
+                }
+                turn(forward)
+                true
+            }
+            .pointerInput(rtl) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        if (event.type == PointerEventType.Scroll) {
+                            val delta = event.changes.firstOrNull()?.scrollDelta ?: continue
+                            val amount = if (delta.y != 0f) delta.y else delta.x
+                            if (amount != 0f) {
+                                turn(amount > 0)
+                                event.changes.forEach { it.consume() }
+                            }
+                        }
+                    }
+                }
+            },
         reverseLayout = rtl,
         // The pages either side are loaded before they are turned to.
         beyondViewportPageCount = 2,
@@ -373,8 +419,25 @@ private fun Strip(
         snapshotFlow { state.firstVisibleItemIndex }.collect { if (it < pages.count) onShowing(it) }
     }
     LaunchedEffect(page) { if (page != state.firstVisibleItemIndex) state.scrollToItem(page) }
+    // A keyboard scrolls the strip most of a screen at a time.
+    val scope = rememberCoroutineScope()
+    val focus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
     Zoomable(onTap = { onMenu() }, onVerticalPan = { state.dispatchRawDelta(-it) }) {
-        LazyColumn(state = state, modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            state = state,
+            modifier = Modifier.fillMaxSize().focusRequester(focus).focusable().onPreviewKeyEvent { event ->
+                if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+                val step = state.layoutInfo.viewportSize.height * 0.85f
+                val by = when (event.key) {
+                    Key.PageDown, Key.Spacebar, Key.DirectionDown -> step
+                    Key.PageUp, Key.DirectionUp -> -step
+                    else -> return@onPreviewKeyEvent false
+                }
+                scope.launch { state.animateScrollBy(by) }
+                true
+            },
+        ) {
             itemsIndexed(pages.pages, key = { i, _ -> i }) { i, _ ->
                 val size = pages.sizes.getOrNull(i)
                 // A page of unknown size takes its height from the image once it has loaded.

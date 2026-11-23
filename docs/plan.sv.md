@@ -548,6 +548,9 @@ Målenheten är en Samsung Galaxy Tab S10+ (12,4 tum, 2800 × 1752 pixlar), i b�
 - [x] Bibliotek och serier som omslagsrutnät, hemskärmens hyllor med större omslag på breda skärmar, läsbar bredd för inställningar och bokdetaljer.
   - Appens nya utseende (tillägg 2026‑10‑29, från ett koncept): Hem och Bibliotek är en flik med biblioteken som val ovanför hyllorna; Upptäck, nedladdningskön, bokmärken (server och app) och passningslägena i läsaren kom med samtidigt.
 - [ ] Läsarna: två spalter i EPUB i liggande läge, läsarens kontroller och tryckzoner i plattstorlek, bläddring med tangentbord och mus.
+  - Skrivet 2026-11-23 i appens nya utseende (2.4, grenen `app-redesign`), men inte provat på en platta:
+    - EPUB-läsaren har spalter: auto, en eller två. Auto ger två i liggande läge på en bred skärm. Readiums `ColumnCount`.
+    - Bildläsaren bläddrar med piltangenterna åt bokens håll, med Page Up/Down, mellanslag och skrollhjulet. Webtoon-remsan rullar med tangenterna.
 - [x] Webbklienten på en platta: navigeringen och läsarna med touch, i båda orienteringarna.
   - Kontrollerna har touchstorlek vid `pointer: coarse`.
   - Navigeringen är en skena mellan md och lg och en flikrad med Mer på telefonen.

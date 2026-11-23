@@ -3,6 +3,7 @@ package app.kodex.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.DownloadForOffline
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.LocalLibrary
@@ -44,10 +45,13 @@ import app.kodex.ui.library.LibraryHome
 import app.kodex.ui.library.SeriesScreen
 import app.kodex.ui.login.LoginScreen
 import app.kodex.ui.login.LoginViewModel
+import app.kodex.ui.read.ReadScreen
 import app.kodex.ui.settings.SettingsScreen
 import app.kodex.ui.theme.KodexTheme
 import kotlinx.serialization.Serializable
 import org.koin.compose.viewmodel.koinViewModel
+
+@Serializable data object ReadKey : NavKey
 
 @Serializable data object LibraryHomeKey : NavKey
 
@@ -63,7 +67,9 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Serializable data object SettingsKey : NavKey
 
+/** The five tabs (the 2.4 look): Läs first, where the app opens. */
 enum class Tab(val key: NavKey, val label: Int, val icon: ImageVector) {
+    READ(ReadKey, R.string.tab_read, Icons.Filled.AutoStories),
     LIBRARY(LibraryHomeKey, R.string.tab_library, Icons.Filled.LocalLibrary),
     DISCOVER(DiscoverKey, R.string.tab_discover, Icons.Filled.Explore),
     DOWNLOADS(DownloadsKey, R.string.tab_downloads, Icons.Filled.DownloadForOffline),
@@ -76,6 +82,13 @@ val LocalSession = staticCompositionLocalOf<Session?> { null }
 /** Where the screens go: one place, so every screen navigates the same way. */
 class Navigator(private val stack: MutableList<NavKey>, private val openReader: (Int, String?, String?) -> Unit) {
     fun open(key: NavKey) {
+        stack.add(key)
+    }
+
+    /** Another tab, from its start (the account button, "Till biblioteket"). */
+    fun switchTo(key: NavKey) {
+        if (stack.lastOrNull() == key && stack.size == 1) return
+        stack.clear()
         stack.add(key)
     }
 
@@ -135,10 +148,10 @@ fun ShellFrame(tab: Tab, onTab: (Tab) -> Unit, badge: (Tab) -> Boolean = { false
 @Composable
 private fun Shell(app: AppViewModel) {
     val context = LocalContext.current
-    val stack = rememberNavBackStack(LibraryHomeKey)
+    val stack = rememberNavBackStack(ReadKey)
     val navigator = Navigator(stack) { id, position, kind -> context.startActivity(ReaderActivity.intent(context, id, position, kind)) }
     val current = stack.lastOrNull()
-    val tab = Tab.entries.lastOrNull { tab -> stack.any { it == tab.key } } ?: Tab.LIBRARY
+    val tab = Tab.entries.lastOrNull { tab -> stack.any { it == tab.key } } ?: Tab.READ
     val listDetail = rememberListDetailSceneStrategy<NavKey>()
     val active by app.activeDownloads.collectAsStateWithLifecycle(initialValue = 0)
     ShellFrame(
@@ -157,6 +170,7 @@ private fun Shell(app: AppViewModel) {
             entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator(), rememberViewModelStoreNavEntryDecorator()),
             sceneStrategies = listOf(listDetail),
             entryProvider = entryProvider {
+                entry<ReadKey> { ReadScreen(navigator, app) }
                 entry<LibraryHomeKey> { LibraryHome(navigator, app) }
                 entry<DiscoverKey> { DiscoverScreen(navigator, app) }
                 entry<SeriesKey>(metadata = ListDetailSceneStrategy.listPane()) { SeriesScreen(it.id, navigator, app) }

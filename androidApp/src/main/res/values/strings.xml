@@ -296,4 +296,16 @@
         <item quantity="one">Finished books go after %1$d day.</item>
         <item quantity="other">Finished books go after %1$d days.</item>
     </plurals>
+
+    <!-- The 2.4 look -->
+    <string name="tab_read">Read</string>
+    <string name="accent_kodex">Kodex blue</string>
+    <string name="read_active">Active reading</string>
+    <string name="read_title">Continue where you left off</string>
+    <string name="ready_offline">Ready offline</string>
+    <string name="continue_action">Continue</string>
+    <string name="read_nothing">Nothing started yet. Pick something in the library.</string>
+    <string name="to_library">Go to the library</string>
+    <string name="account">Account</string>
+    <string name="see_all">See all</string>
 </resources>

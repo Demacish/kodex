@@ -295,4 +295,16 @@
         <item quantity="one">Utlästa böcker tas bort efter %1$d dag.</item>
         <item quantity="other">Utlästa böcker tas bort efter %1$d dagar.</item>
     </plurals>
+
+    <!-- The 2.4 look -->
+    <string name="tab_read">Läs</string>
+    <string name="accent_kodex">Kodexblå</string>
+    <string name="read_active">Aktiv läsning</string>
+    <string name="read_title">Fortsätt där du slutade</string>
+    <string name="ready_offline">Redo offline</string>
+    <string name="continue_action">Fortsätt</string>
+    <string name="read_nothing">Inget påbörjat ännu. Välj något i biblioteket.</string>
+    <string name="to_library">Till biblioteket</string>
+    <string name="account">Konto</string>
+    <string name="see_all">Se alla</string>
 </resources>

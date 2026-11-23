@@ -462,6 +462,7 @@ private fun AccentChoice(selected: Accent, onSelect: (Accent) -> Unit) {
 }
 
 private fun accentLabel(accent: Accent): Int = when (accent) {
+    Accent.KODEX -> R.string.accent_kodex
     Accent.AMBER -> R.string.accent_amber
     Accent.CORAL -> R.string.accent_coral
     Accent.SKY -> R.string.accent_sky

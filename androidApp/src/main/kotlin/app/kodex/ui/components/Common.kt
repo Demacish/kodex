@@ -32,6 +32,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardDoubleArrowLeft
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -54,7 +55,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -64,7 +64,6 @@ import app.kodex.R
 import app.kodex.data.CardDensity
 import app.kodex.data.db.DownloadState
 import app.kodex.ui.LocalSession
-import app.kodex.ui.theme.Jakarta
 import app.kodex.ui.theme.KodexTheme
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
@@ -126,17 +125,17 @@ fun MediaBadge(kind: MediaKind, format: String, rtl: Boolean, modifier: Modifier
     Row(
         modifier
             .clip(RoundedCornerShape(6.dp))
-            .background(if (manga) Color(0xE6141416) else Color(0xCC141416))
-            .border(1.dp, if (manga) colors.accent.copy(alpha = 0.8f) else Color.White.copy(alpha = 0.14f), RoundedCornerShape(6.dp))
+            .background(Color(0xD9121316))
+            .border(1.dp, Color.White.copy(alpha = if (manga) 0.22f else 0.12f), RoundedCornerShape(6.dp))
             .padding(horizontal = 6.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(3.dp),
     ) {
-        Text(label, style = MaterialTheme.typography.labelSmall, color = if (manga) Color(0xFFFBBF24) else Color(0xFFF3F4F6))
+        Text(label, style = MaterialTheme.typography.labelSmall, color = Color(0xFFE3E2E6))
         if (rtl) {
             Icon(
                 Icons.Filled.KeyboardDoubleArrowLeft, contentDescription = stringResource(R.string.mode_rtl),
-                tint = Color(0xFFFBBF24), modifier = Modifier.size(11.dp),
+                tint = if (colors.dark) colors.accentText else Color(0xFFE3E2E6), modifier = Modifier.size(11.dp),
             )
         }
     }
@@ -249,7 +248,10 @@ fun CoverCard(
 /** The covers' columns: about three across a phone (two when they are large), more on wider screens. */
 fun coverCells(density: CardDensity): GridCells = GridCells.Adaptive(if (density == CardDensity.LARGE) 150.dp else 104.dp)
 
-/** A section's title with an accent mark before it, and an action at the end. */
+/**
+ * A section's title, its [count] in a small badge after it (or a dot in [mark] when that isn't
+ * the accent: "new" in teal), and an action at the end ("Se alla ›").
+ */
 @Composable
 fun SectionHeader(
     title: String,
@@ -257,18 +259,29 @@ fun SectionHeader(
     mark: Color = KodexTheme.colors.accent,
     action: String? = null,
     onAction: (() -> Unit)? = null,
+    count: Int? = null,
     trailing: @Composable RowScope.() -> Unit = {},
 ) {
     val colors = KodexTheme.colors
-    Row(modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.width(4.dp).height(20.dp).clip(CircleShape).background(mark))
-        Spacer(Modifier.width(10.dp))
-        Text(title, style = MaterialTheme.typography.headlineSmall, color = colors.text, modifier = Modifier.weight(1f),
+    Row(
+        modifier.fillMaxWidth().heightIn(min = 48.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(title, style = MaterialTheme.typography.headlineSmall, color = colors.text, modifier = Modifier.weight(1f, fill = false),
             maxLines = 1, overflow = TextOverflow.Ellipsis)
+        when {
+            count != null -> Text(
+                count.toString(), style = MaterialTheme.typography.labelMedium, color = colors.textMuted,
+                modifier = Modifier.clip(CircleShape).background(colors.surface3).padding(horizontal = 8.dp, vertical = 1.dp),
+            )
+            mark != colors.accent -> Box(Modifier.size(7.dp).clip(CircleShape).background(mark))
+        }
+        Spacer(Modifier.weight(1f))
         trailing()
         if (action != null && onAction != null) {
             Text(
-                action,
+                "$action ›",
                 style = MaterialTheme.typography.labelLarge,
                 color = colors.accentText,
                 modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable(onClick = onAction).padding(horizontal = 8.dp, vertical = 12.dp),
@@ -324,39 +337,94 @@ fun Pill(
     }
 }
 
-/** Kodex's mark: an open book in the accent, on a raised square. */
+/** Kodex's mark: an open book in the accent, on a soft accent square. */
 @Composable
-fun Logo(modifier: Modifier = Modifier, size: Dp = 36.dp) {
+fun Logo(modifier: Modifier = Modifier, size: Dp = 40.dp) {
     val colors = KodexTheme.colors
     Box(
-        modifier.size(size).clip(RoundedCornerShape(size / 4)).background(colors.surface2)
-            .border(1.dp, colors.border, RoundedCornerShape(size / 4)),
+        modifier.size(size).clip(RoundedCornerShape(size * 0.3f)).background(colors.accentSoft),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = null, tint = colors.accent, modifier = Modifier.size(size * 0.6f))
+        Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = null, tint = colors.accentText, modifier = Modifier.size(size * 0.55f))
     }
 }
 
-/** The top of a tab: the mark, "Kodex" and what the tab is, with the tab's actions at the end. */
+/** A small capital line over a title or a section ("KODEX", "AKTIV LÄSNING"). */
+@Composable
+fun Overline(text: String, modifier: Modifier = Modifier, color: Color = KodexTheme.colors.textMuted) {
+    Text(text.uppercase(), style = MaterialTheme.typography.labelSmall, color = color, maxLines = 1, overflow = TextOverflow.Ellipsis,
+        modifier = modifier)
+}
+
+/** The round account button at the end of a tab's bar: it opens the settings. */
+@Composable
+fun AccountButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val colors = KodexTheme.colors
+    IconButton(onClick = onClick, modifier = modifier.testTag("account")) {
+        Box(Modifier.size(34.dp).clip(CircleShape).background(colors.accentSoft), contentAlignment = Alignment.Center) {
+            Icon(Icons.Filled.Person, contentDescription = stringResource(R.string.account), tint = colors.accentText, modifier = Modifier.size(20.dp))
+        }
+    }
+}
+
+/**
+ * The top of a tab: the mark, "KODEX" small over what the tab is, the tab's actions, and (with
+ * [onAccount]) the account button at the end.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BrandBar(subtitle: String, actions: @Composable RowScope.() -> Unit = {}) {
+fun BrandBar(subtitle: String, onAccount: (() -> Unit)? = null, actions: @Composable RowScope.() -> Unit = {}) {
     val colors = KodexTheme.colors
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Logo()
                 Column {
-                    Text(stringResource(R.string.app_name), fontFamily = Jakarta, fontWeight = FontWeight.ExtraBold,
-                        style = MaterialTheme.typography.titleLarge, color = colors.accentText)
-                    Text(subtitle.uppercase(), style = MaterialTheme.typography.labelSmall, color = colors.textMuted, maxLines = 1,
-                        overflow = TextOverflow.Ellipsis)
+                    Overline(stringResource(R.string.app_name), color = colors.accentText)
+                    Text(subtitle, style = MaterialTheme.typography.titleLarge, color = colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
         },
-        actions = actions,
+        actions = {
+            actions()
+            if (onAccount != null) AccountButton(onAccount)
+        },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = colors.background, scrolledContainerColor = colors.surface1),
     )
+}
+
+/** A tab's big title under its bar, a line about it, and something at the end (a status chip). */
+@Composable
+fun PageHeading(title: String, modifier: Modifier = Modifier, line: String? = null, trailing: @Composable RowScope.() -> Unit = {}) {
+    val colors = KodexTheme.colors
+    Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(title, style = MaterialTheme.typography.headlineLarge, color = colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            if (!line.isNullOrBlank()) {
+                Text(line, style = MaterialTheme.typography.bodyMedium, color = colors.textMuted, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            }
+        }
+        trailing()
+    }
+}
+
+/** A small rounded chip with a dot: the server's state ("● Synkad 2 min sedan"), "Redo offline". */
+@Composable
+fun StatusChip(text: String, modifier: Modifier = Modifier, dot: Color = KodexTheme.colors.offline, icon: ImageVector? = null) {
+    val colors = KodexTheme.colors
+    Row(
+        modifier.clip(CircleShape).background(colors.surface1).border(1.dp, colors.borderSubtle, CircleShape)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        if (icon != null) {
+            Icon(icon, contentDescription = null, tint = dot, modifier = Modifier.size(16.dp))
+        } else {
+            Box(Modifier.size(7.dp).clip(CircleShape).background(dot))
+        }
+        Text(text, style = MaterialTheme.typography.labelMedium, color = colors.textMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
 }
 
 /** A page under a tab: back, its title, and its actions. */

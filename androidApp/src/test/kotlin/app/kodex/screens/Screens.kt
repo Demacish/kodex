@@ -73,6 +73,9 @@ import app.kodex.ui.library.LibraryHomeState
 import app.kodex.ui.library.SeriesActions
 import app.kodex.ui.library.SeriesContent
 import app.kodex.ui.library.SeriesUiState
+import app.kodex.ui.read.ReadActions
+import app.kodex.ui.read.ReadContent
+import app.kodex.ui.read.ReadState
 import app.kodex.ui.settings.SettingsActions
 import app.kodex.ui.settings.SettingsContent
 import app.kodex.ui.settings.SettingsInfo
@@ -94,7 +97,7 @@ abstract class Screens(private val device: String, private val theme: ThemeChoic
 
     private fun shoot(name: String, tab: Tab?, content: @Composable () -> Unit) {
         compose.setContent {
-            KodexTheme(theme, Accent.AMBER) {
+            KodexTheme(theme, Accent.KODEX) {
                 CompositionLocalProvider(LocalSession provides SESSION, LocalCoverArt provides { id -> Art(id) }) {
                     if (tab != null) ShellFrame(tab, {}, badge = { it == Tab.DOWNLOADS }) { content() } else content()
                 }
@@ -104,6 +107,13 @@ abstract class Screens(private val device: String, private val theme: ThemeChoic
         val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
         val dir = File(System.getProperty("kodex.screenshots") ?: "build/outputs/screenshots", device).apply { mkdirs() }
         File(dir, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+    }
+
+    @Test fun read() = shoot("00-read", Tab.READ) {
+        ReadContent(
+            ReadState(reading = READING, recent = RECENT, collections = COLLECTIONS, synced = "Synkad 29 okt. 2026 22:29 · 2 positioner väntar på att skickas"),
+            SETTINGS, ReadActions(), empty = {},
+        )
     }
 
     @Test fun library() = shoot("01-library", Tab.LIBRARY) {

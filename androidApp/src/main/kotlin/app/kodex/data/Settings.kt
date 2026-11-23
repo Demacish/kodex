@@ -19,7 +19,8 @@ enum class ImageMode { PAGED_LTR, PAGED_RTL, VERTICAL }
 enum class ThemeChoice { SYSTEM, LIGHT, DARK }
 
 /** The colour of buttons, progress and the chosen tab; [DEVICE] is the device's own (Android 12+). */
-enum class Accent { AMBER, CORAL, SKY, VIOLET, DEVICE }
+/** The accent colour: Kodex's periwinkle (the default since the 2.4 look), the earlier amber, or the device's own. */
+enum class Accent { KODEX, AMBER, CORAL, SKY, VIOLET, DEVICE }
 
 /** How many covers fit across a phone: three ([COMPACT]) or two ([LARGE]); more on wider screens. */
 enum class CardDensity { COMPACT, LARGE }
@@ -63,7 +64,7 @@ data class AppSettings(
     /** Black around the pages (OLED), rather than the theme's background. */
     val pureBlack: Boolean = true,
     val theme: ThemeChoice = ThemeChoice.SYSTEM,
-    val accent: Accent = Accent.AMBER,
+    val accent: Accent = Accent.KODEX,
     val density: CardDensity = CardDensity.COMPACT,
 ) {
     /** The direction a book in a library of [libraryType] (the server's library_type) opens in. */
@@ -75,6 +76,9 @@ data class AppSettings(
 }
 
 private val Context.settingsData: DataStore<Preferences> by preferencesDataStore("settings")
+
+/** The look the settings are saved under (3 = the 2.4 redesign, where Kodex's periwinkle became the default). */
+private const val LOOK = 3
 
 class SettingsStore(private val context: Context) {
     private object Keys {
@@ -101,6 +105,8 @@ class SettingsStore(private val context: Context) {
         val pureBlack = booleanPreferencesKey("pure_black")
         val theme = stringPreferencesKey("theme")
         val accent = stringPreferencesKey("accent")
+        /** Which look the settings were last saved under: amber, the old default, becomes Kodex's colour once. */
+        val look = intPreferencesKey("look")
         val density = stringPreferencesKey("density")
     }
 
@@ -136,7 +142,8 @@ class SettingsStore(private val context: Context) {
             brightness = this[Keys.brightness] ?: defaults.brightness,
             pureBlack = this[Keys.pureBlack] ?: defaults.pureBlack,
             theme = choice<ThemeChoice>(Keys.theme) ?: defaults.theme,
-            accent = choice<Accent>(Keys.accent) ?: defaults.accent,
+            accent = choice<Accent>(Keys.accent)?.let { if (it == Accent.AMBER && (this[Keys.look] ?: 0) < LOOK) defaults.accent else it }
+                ?: defaults.accent,
             density = choice<CardDensity>(Keys.density) ?: defaults.density,
         )
     }
@@ -164,6 +171,7 @@ class SettingsStore(private val context: Context) {
             it[Keys.pureBlack] = next.pureBlack
             it[Keys.theme] = next.theme.name
             it[Keys.accent] = next.accent.name
+            it[Keys.look] = LOOK
             it[Keys.density] = next.density.name
         }
     }

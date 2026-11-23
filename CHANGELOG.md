@@ -6,6 +6,18 @@ All notable changes to Kodex are listed here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The Android app has a new look (2.4): Roboto Flex instead of Inter and
+  Plus Jakarta Sans, Kodex's periwinkle as the accent (amber, coral, sky,
+  violet and the device's own can still be chosen; amber, the old default,
+  moves to periwinkle once), teal only for what is on the device, and new
+  bars, section titles and badges.
+- The app has five tabs: Läs (where it opens: the book being read, large,
+  the others being read, what came last and the collections; side by side
+  on a tablet), Bibliotek, Upptäck, Nedladdat and Inställningar. The account
+  button at the top opens the settings.
+
 ## [2.3.0] - 2026-10-30
 
 ### Added

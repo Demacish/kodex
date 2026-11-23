@@ -60,9 +60,9 @@ import app.kodex.ui.BookKey
 import app.kodex.ui.CollectionKey
 import app.kodex.ui.Navigator
 import app.kodex.ui.SeriesKey
+import app.kodex.ui.SettingsKey
 import app.kodex.ui.components.BookCard
 import app.kodex.ui.components.BrandBar
-import app.kodex.ui.components.ContinueCard
 import app.kodex.ui.components.EmptyCatalog
 import app.kodex.ui.components.Pill
 import app.kodex.ui.components.SectionHeader
@@ -110,6 +110,7 @@ class LibraryHomeActions(
     val openSeries: (Int) -> Unit = {},
     val read: (Int) -> Unit = {},
     val openCollection: (Int, String) -> Unit = { _, _ -> },
+    val account: () -> Unit = {},
 )
 
 /** Bibliotek: what is being read, what came last, the collections, and each library's series. */
@@ -162,6 +163,7 @@ fun LibraryHome(navigator: Navigator, app: AppViewModel) {
             openSeries = { navigator.open(SeriesKey(it)) },
             read = { navigator.read(it) },
             openCollection = { id, name -> navigator.open(CollectionKey(id, name)) },
+            account = { navigator.switchTo(SettingsKey) },
         ),
         empty = { EmptyCatalog(stringResource(R.string.library_empty), app, it) },
     )
@@ -187,6 +189,7 @@ fun LibraryHomeContent(
                         Shelf.DOWNLOADED -> stringResource(R.string.shelf_downloaded)
                         else -> library?.name.orEmpty()
                     },
+                    onAccount = actions.account,
                     actions = {
                         IconButton(onClick = { actions.search(true) }, modifier = Modifier.testTag("search-open")) {
                             Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.search_library))
@@ -256,16 +259,7 @@ private fun Shelves(state: LibraryHomeState, actions: LibraryHomeActions) {
 
 @OptIn(ExperimentalLayoutApi::class)
 private fun LazyGridScope.everything(state: LibraryHomeState, settings: AppSettings, actions: LibraryHomeActions, wide: Boolean) {
-    if (state.reading.isNotEmpty()) {
-        full("reading-title") { SectionHeader(stringResource(R.string.continue_reading)) }
-        full("reading") {
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp), modifier = Modifier.testTag("home")) {
-                items(state.reading, key = { it.id }) { book ->
-                    ContinueCard(book, settings, width = if (wide) 200.dp else 160.dp) { actions.read(book.id) }
-                }
-            }
-        }
-    }
+    // What is being read is under Läs (the 2.4 look); the library starts with what came last.
     if (state.recent.isNotEmpty()) {
         full("recent-title") { SectionHeader(stringResource(R.string.recently_added), mark = KodexTheme.colors.offline) }
         items(state.recent.take(if (wide) 24 else 12), key = { "r${it.id}" }) { BookCard(it, settings, { actions.openBook(it.id) }) }

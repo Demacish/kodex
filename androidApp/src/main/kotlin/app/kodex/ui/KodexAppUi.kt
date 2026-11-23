@@ -46,6 +46,7 @@ import app.kodex.ui.library.SeriesScreen
 import app.kodex.ui.login.LoginScreen
 import app.kodex.ui.login.LoginViewModel
 import app.kodex.ui.read.ReadScreen
+import app.kodex.ui.search.SearchScreen
 import app.kodex.ui.settings.SettingsScreen
 import app.kodex.ui.theme.KodexTheme
 import kotlinx.serialization.Serializable
@@ -66,6 +67,8 @@ import org.koin.compose.viewmodel.koinViewModel
 @Serializable data object DownloadsKey : NavKey
 
 @Serializable data object SettingsKey : NavKey
+
+@Serializable data object SearchKey : NavKey
 
 /** The five tabs (the 2.4 look): Läs first, where the app opens. */
 enum class Tab(val key: NavKey, val label: Int, val icon: ImageVector) {
@@ -178,6 +181,7 @@ private fun Shell(app: AppViewModel) {
                 entry<BookKey>(metadata = ListDetailSceneStrategy.detailPane()) { BookScreen(it.id, navigator, app) }
                 entry<DownloadsKey> { DownloadsScreen(app, navigator) }
                 entry<SettingsKey> { SettingsScreen(app) }
+                entry<SearchKey> { SearchScreen(navigator, app) }
             },
         )
     }

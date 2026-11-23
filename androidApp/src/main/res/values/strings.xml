@@ -349,4 +349,10 @@
     <string name="epub_contents">Contents</string>
     <string name="epub_contents_none">This book has no table of contents.</string>
     <string name="close">Close</string>
+    <string name="search_titles">Titles and metadata</string>
+    <string name="search_text">In the text</string>
+    <string name="search_server">Searching %1$s</string>
+    <string name="search_offline">No connection: searching the catalog on the device.</string>
+    <string name="search_text_offline">Searching the text needs the server.</string>
+    <string name="search_text_hint">Finds words inside the e-books and PDFs the server has indexed.</string>
 </resources>

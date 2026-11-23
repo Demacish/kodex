@@ -70,6 +70,7 @@ import app.kodex.ui.AppViewModel
 import app.kodex.ui.BookKey
 import app.kodex.ui.CollectionKey
 import app.kodex.ui.Navigator
+import app.kodex.ui.SearchKey
 import app.kodex.ui.SeriesKey
 import app.kodex.ui.SettingsKey
 import app.kodex.ui.components.BookCard
@@ -173,10 +174,8 @@ fun LibraryHome(navigator: Navigator, app: AppViewModel) {
             sort = { sort = it },
             filter = { filter = it },
             toggleFilters = { filtersOpen = !filtersOpen },
-            search = { on ->
-                searching = on
-                if (!on) vm.query.value = ""
-            },
+            // Sök is a screen of its own (the server's search, and the device's catalog offline).
+            search = { on -> if (on) navigator.open(SearchKey) },
             query = { vm.query.value = it },
             openBook = { navigator.open(BookKey(it)) },
             openSeries = { navigator.open(SeriesKey(it)) },

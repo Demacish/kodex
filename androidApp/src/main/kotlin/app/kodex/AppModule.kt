@@ -12,6 +12,7 @@ import app.kodex.reader.OpenBooks
 import app.kodex.sync.ApiProvider
 import app.kodex.sync.SyncProblems
 import app.kodex.ui.discover.DiscoverViewModel
+import app.kodex.ui.search.SearchViewModel
 import app.kodex.ui.downloads.DownloadsViewModel
 import app.kodex.ui.library.BookViewModel
 import app.kodex.ui.library.SeriesViewModel
@@ -57,6 +58,7 @@ val appModule = module {
     viewModel { params -> BookViewModel(params.get(), get(), get(), get(), get()) }
     viewModel { DownloadsViewModel(androidContext(), get(), get()) }
     viewModel { DiscoverViewModel(get(), get(), get()) }
+    viewModel { SearchViewModel(get(), get(), get()) }
 }
 
 /** Work that outlives a screen (saving the last reading position when a reader closes). */

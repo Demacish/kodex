@@ -147,6 +147,24 @@ class KodexApi(
     /** New numbers in the followed series, soonest first (the hidden ones left out). */
     suspend fun releases(): List<ReleaseEvent> = call { http.get("releases") { auth() }.body() }
 
+    /** The server's search over titles and metadata. */
+    suspend fun searchBooks(query: String, limit: Int = 50): List<BookSearchHit> = call {
+        http.get("search/books") {
+            auth()
+            parameter("q", query)
+            parameter("limit", limit)
+        }.body()
+    }
+
+    /** The server's search in the books' text (where it has been indexed). */
+    suspend fun searchFulltext(query: String, limit: Int = 50): List<FulltextHit> = call {
+        http.get("search/fulltext") {
+            auth()
+            parameter("q", query)
+            parameter("limit", limit)
+        }.body()
+    }
+
     suspend fun dismissRelease(eventId: Int) {
         call { http.post("releases/$eventId/dismiss") { auth() } }
     }

@@ -26,6 +26,9 @@ All notable changes to Kodex are listed here. The format follows
 
 ### Added
 
+- The app has Sök: the server's search over titles and metadata and in the
+  books' text (a hit opens an e-book at its chapter, a PDF at its page), with
+  the words marked; without a connection it searches the catalog on the device.
 - The app's e-book reader has its contents and the text's look: theme (auto,
   light, sepia, dark, black), the book's font or a serif or sans-serif one,
   size, line spacing, margins, turning pages or scrolling, one or two columns

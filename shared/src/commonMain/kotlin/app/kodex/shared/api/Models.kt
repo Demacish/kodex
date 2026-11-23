@@ -211,3 +211,28 @@ data class Recommendation(
 
 @Serializable
 data class SwipeIn(val direction: String)
+
+/** A book the server's search found: by title, series, authors, genres, tags, arcs, publisher or summary. */
+@Serializable
+data class BookSearchHit(
+    val bookId: Int,
+    val title: String,
+    val fileFormat: String,
+    val libraryId: Int,
+    val libraryName: String? = null,
+    val seriesId: Int? = null,
+    val seriesTitle: String? = null,
+)
+
+/**
+ * A place in a book's text: [position] is a chapter's path in an EPUB or a page number in a PDF;
+ * [snippet] is escaped HTML with the words in `<mark>`.
+ */
+@Serializable
+data class FulltextHit(
+    val bookId: Int,
+    val libraryId: Int,
+    val title: String,
+    val position: String,
+    val snippet: String,
+)

@@ -221,6 +221,10 @@ interface CatalogDao {
 
     @Query("$BOOK_ROW WHERE b.id = :id") fun bookRow(id: Int): Flow<BookRow?>
 
+    /** These books, in no particular order (the search puts them in the server's). */
+    @Query("$BOOK_ROW WHERE b.id IN (:ids)")
+    fun booksByIds(ids: List<Int>): Flow<List<BookRow>>
+
     @Query(
         """SELECT l.id, l.name, l.libraryType,
                   (SELECT count(*) FROM series s WHERE s.libraryId = l.id) AS seriesCount,

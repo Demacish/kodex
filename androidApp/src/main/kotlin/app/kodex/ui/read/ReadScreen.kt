@@ -25,9 +25,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -52,6 +54,7 @@ import app.kodex.ui.BookKey
 import app.kodex.ui.CollectionKey
 import app.kodex.ui.LibraryHomeKey
 import app.kodex.ui.Navigator
+import app.kodex.ui.SearchKey
 import app.kodex.ui.SettingsKey
 import app.kodex.ui.components.BookCard
 import app.kodex.ui.components.BrandBar
@@ -91,6 +94,7 @@ class ReadActions(
     val openCollection: (Int, String) -> Unit = { _, _ -> },
     val toLibrary: () -> Unit = {},
     val account: () -> Unit = {},
+    val search: () -> Unit = {},
 )
 
 /** Läs: the book being read, large, the others being read, the next in series read through, what came last, and the collections. */
@@ -112,6 +116,7 @@ fun ReadScreen(navigator: Navigator, app: AppViewModel) {
             openCollection = { id, name -> navigator.open(CollectionKey(id, name)) },
             toLibrary = { navigator.switchTo(LibraryHomeKey) },
             account = { navigator.switchTo(SettingsKey) },
+            search = { navigator.open(SearchKey) },
         ),
         empty = { EmptyCatalog(stringResource(R.string.library_empty), app, it) },
     )
@@ -122,7 +127,13 @@ fun ReadScreen(navigator: Navigator, app: AppViewModel) {
 fun ReadContent(state: ReadState, settings: AppSettings, actions: ReadActions, empty: @Composable (Modifier) -> Unit) {
     val colors = KodexTheme.colors
     Scaffold(
-        topBar = { BrandBar(stringResource(R.string.tab_read), onAccount = actions.account) },
+        topBar = {
+            BrandBar(stringResource(R.string.tab_read), onAccount = actions.account) {
+                IconButton(onClick = actions.search, modifier = Modifier.testTag("search-open")) {
+                    Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.search_library))
+                }
+            }
+        },
         containerColor = colors.background,
     ) { padding ->
         if (!state.hasLibrary) {

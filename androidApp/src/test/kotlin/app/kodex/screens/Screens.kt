@@ -52,6 +52,7 @@ import app.kodex.reader.ReaderChrome
 import app.kodex.reader.ReaderTitle
 import app.kodex.reader.epub.EpubButtons
 import app.kodex.reader.epub.EpubTextPanel
+import app.kodex.shared.api.FulltextHit
 import app.kodex.shared.api.Recommendation
 import app.kodex.shared.api.ReleaseEvent
 import app.kodex.sync.SyncStatus
@@ -77,6 +78,10 @@ import app.kodex.ui.library.SeriesActions
 import app.kodex.ui.library.SeriesContent
 import app.kodex.ui.library.SeriesUiState
 import app.kodex.ui.read.ReadActions
+import app.kodex.ui.search.SearchActions
+import app.kodex.ui.search.SearchContent
+import app.kodex.ui.search.SearchUi
+import app.kodex.ui.search.TextHitRow
 import app.kodex.ui.read.ReadContent
 import app.kodex.ui.read.ReadState
 import app.kodex.ui.settings.SettingsActions
@@ -197,6 +202,18 @@ abstract class Screens(private val device: String, private val theme: ThemeChoic
                 onSeek = {}, onClose = {},
             )
         }
+    }
+
+    @Test fun search() = shoot("15-search", Tab.LIBRARY) {
+        SearchContent(
+            SearchUi(
+                query = "Mån", series = MANGA.take(2), books = CHAPTERS.take(3),
+                text = listOf(TextHitRow(FulltextHit(201, 3, "Den sista fyren", "OEBPS/kap3.xhtml",
+                    "…när <mark>månen</mark> steg över fyren tände hon lampan för sista gången…"), RECENT[1])),
+                online = true, server = "kodex.example",
+            ),
+            SETTINGS, SearchActions(), focus = false,
+        )
     }
 
     /** An e-book's reader with the text's look open (the 2.4 look). */

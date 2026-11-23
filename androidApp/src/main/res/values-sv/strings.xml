@@ -348,4 +348,10 @@
     <string name="epub_contents">Innehåll</string>
     <string name="epub_contents_none">Boken har ingen innehållsförteckning.</string>
     <string name="close">Stäng</string>
+    <string name="search_titles">Titlar och metadata</string>
+    <string name="search_text">I bokens text</string>
+    <string name="search_server">Söker på %1$s</string>
+    <string name="search_offline">Ingen anslutning: söker i katalogen på enheten.</string>
+    <string name="search_text_offline">Sökning i texten kräver servern.</string>
+    <string name="search_text_hint">Hittar ord i de e-böcker och PDF:er som servern har indexerat.</string>
 </resources>

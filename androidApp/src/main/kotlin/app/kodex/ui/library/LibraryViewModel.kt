@@ -92,17 +92,6 @@ class LibraryViewModel(db: KodexDatabase) : ViewModel() {
 
     fun collectionBooks(id: Int) = catalog.collectionBooks(id)
 
-    val query = MutableStateFlow("")
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val results: Flow<List<BookRow>> = query.flatMapLatest { text ->
-        if (text.isBlank()) flowOf(emptyList()) else catalog.searchBooks(text.trim())
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val seriesResults: Flow<List<SeriesRow>> = query.flatMapLatest { text ->
-        if (text.isBlank()) flowOf(emptyList()) else catalog.searchSeries(text.trim())
-    }
 }
 
 /** Marking read, downloading and removing books, one or many at a time. */

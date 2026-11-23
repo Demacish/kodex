@@ -105,10 +105,6 @@ data class LibraryHomeState(
     val sort: SeriesSort = SeriesSort.TITLE,
     val filter: SeriesFilter = SeriesFilter.ALL,
     val filtersOpen: Boolean = false,
-    val searching: Boolean = false,
-    val query: String = "",
-    val results: List<BookRow> = emptyList(),
-    val seriesResults: List<SeriesRow> = emptyList(),
     /** Every series, for "Alla serier" under Allt. */
     val allSeries: List<SeriesRow> = emptyList(),
     /** Each library's card covers, by its id. */
@@ -123,7 +119,6 @@ class LibraryHomeActions(
     val filter: (SeriesFilter) -> Unit = {},
     val toggleFilters: () -> Unit = {},
     val search: (Boolean) -> Unit = {},
-    val query: (String) -> Unit = {},
     val openBook: (Int) -> Unit = {},
     val openSeries: (Int) -> Unit = {},
     val read: (Int) -> Unit = {},
@@ -141,32 +136,21 @@ fun LibraryHome(navigator: Navigator, app: AppViewModel) {
     val recent by vm.recentlyAdded.collectAsStateWithLifecycle(initialValue = emptyList())
     val collections by vm.collections.collectAsStateWithLifecycle(initialValue = emptyList())
     val downloaded by vm.downloaded.collectAsStateWithLifecycle(initialValue = emptyList())
-    val query by vm.query.collectAsStateWithLifecycle()
-    val results by vm.results.collectAsStateWithLifecycle(initialValue = emptyList())
-    val seriesResults by vm.seriesResults.collectAsStateWithLifecycle(initialValue = emptyList())
     val allSeries by vm.allSeries.collectAsStateWithLifecycle(initialValue = emptyList())
     val covers by vm.libraryCovers.collectAsStateWithLifecycle(initialValue = emptyMap())
     var selected by rememberSaveable { mutableIntStateOf(Shelf.ALL) }
     var sort by rememberSaveable { mutableStateOf(SeriesSort.TITLE) }
     var filter by rememberSaveable { mutableStateOf(SeriesFilter.ALL) }
     var filtersOpen by rememberSaveable { mutableStateOf(false) }
-    var searching by rememberSaveable { mutableStateOf(false) }
     val series by remember(selected) { if (selected >= 0) vm.series(selected) else flowOf(emptyList()) }
         .collectAsStateWithLifecycle(initialValue = emptyList())
     val loose by remember(selected) { if (selected >= 0) vm.looseBooks(selected) else flowOf(emptyList()) }
         .collectAsStateWithLifecycle(initialValue = emptyList())
-    BackHandler(enabled = searching || selected != Shelf.ALL) {
-        if (searching) {
-            searching = false
-            vm.query.value = ""
-        } else {
-            selected = Shelf.ALL
-        }
-    }
+    BackHandler(enabled = selected != Shelf.ALL) { selected = Shelf.ALL }
     LibraryHomeContent(
         LibraryHomeState(
-            libraries, selected, reading, recent, collections, downloaded, series, loose, sort, filter, filtersOpen, searching,
-            query, results, seriesResults, allSeries, covers, syncLine(app),
+            libraries, selected, reading, recent, collections, downloaded, series, loose, sort, filter, filtersOpen,
+            allSeries, covers, syncLine(app),
         ),
         settings,
         LibraryHomeActions(
@@ -176,7 +160,6 @@ fun LibraryHome(navigator: Navigator, app: AppViewModel) {
             toggleFilters = { filtersOpen = !filtersOpen },
             // Sök is a screen of its own (the server's search, and the device's catalog offline).
             search = { on -> if (on) navigator.open(SearchKey) },
-            query = { vm.query.value = it },
             openBook = { navigator.open(BookKey(it)) },
             openSeries = { navigator.open(SeriesKey(it)) },
             read = { navigator.read(it) },
@@ -198,9 +181,7 @@ fun LibraryHomeContent(
     val library = state.libraries.firstOrNull { it.id == state.selected }
     Scaffold(
         topBar = {
-            if (state.searching) {
-                SearchField(state.query, actions)
-            } else {
+            run {
                 BrandBar(
                     subtitle = when (state.selected) {
                         Shelf.ALL -> stringResource(R.string.tab_library)
@@ -224,7 +205,7 @@ fun LibraryHomeContent(
         },
         containerColor = colors.background,
     ) { padding ->
-        if (state.libraries.isEmpty() && !state.searching) {
+        if (state.libraries.isEmpty()) {
             empty(Modifier.padding(padding))
             return@Scaffold
         }
@@ -237,10 +218,6 @@ fun LibraryHomeContent(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxSize().testTag("library"),
             ) {
-                if (state.searching) {
-                    searchResults(state, settings, actions)
-                    return@LazyVerticalGrid
-                }
                 if (state.selected != Shelf.ALL) full("chips") { Shelves(state, actions) }
                 when (state.selected) {
                     Shelf.ALL -> everything(state, settings, actions, wide)
@@ -434,55 +411,6 @@ private fun LazyGridScope.oneLibrary(state: LibraryHomeState, settings: AppSetti
         full("nothing") {
             Quiet(stringResource(if (state.series.isEmpty() && state.loose.isEmpty()) R.string.library_nothing else R.string.nothing_matches))
         }
-    }
-}
-
-private fun LazyGridScope.searchResults(state: LibraryHomeState, settings: AppSettings, actions: LibraryHomeActions) {
-    if (state.query.isBlank()) {
-        full("hint") { Quiet(stringResource(R.string.search_hint)) }
-        return
-    }
-    if (state.seriesResults.isNotEmpty()) {
-        full("series-title") { SectionHeader(stringResource(R.string.series)) }
-        items(state.seriesResults, key = { "s${it.id}" }) { SeriesCard(it, settings, { actions.openSeries(it.id) }) }
-    }
-    if (state.results.isNotEmpty()) {
-        full("books-title") { SectionHeader(stringResource(R.string.books), mark = KodexTheme.colors.offline) }
-        items(state.results, key = { "b${it.id}" }) { BookCard(it, settings, { actions.openBook(it.id) }) }
-    }
-    if (state.results.isEmpty() && state.seriesResults.isEmpty()) full("none") { Quiet(stringResource(R.string.search_nothing, state.query)) }
-}
-
-@Composable
-private fun SearchField(query: String, actions: LibraryHomeActions) {
-    val colors = KodexTheme.colors
-    val focus = remember { FocusRequester() }
-    LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
-    Row(
-        Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 8.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        IconButton(onClick = { actions.search(false) }) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
-        }
-        OutlinedTextField(
-            value = query,
-            onValueChange = actions.query,
-            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null, tint = colors.textMuted) },
-            trailingIcon = {
-                if (query.isNotEmpty()) {
-                    IconButton(onClick = { actions.query("") }) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.clear)) }
-                }
-            },
-            placeholder = { Text(stringResource(R.string.search_library)) },
-            singleLine = true,
-            shape = CircleShape,
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = colors.surface1, focusedContainerColor = colors.surface1,
-                unfocusedBorderColor = colors.border, focusedBorderColor = colors.accent,
-            ),
-            modifier = Modifier.weight(1f).focusRequester(focus).testTag("search"),
-        )
     }
 }
 

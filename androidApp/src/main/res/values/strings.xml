@@ -379,4 +379,12 @@
     <string name="login_show_password">Show the password</string>
     <string name="login_hide_password">Hide the password</string>
     <string name="login_password_hint">At least 8 characters.</string>
+    <string name="reader_done">Finished · page %1$d of %2$d</string>
+    <string name="reader_congrats">You\'ve read it to the end</string>
+    <string name="reader_time">Reading time</string>
+    <string name="reader_pace">Pace</string>
+    <string name="reader_pace_value">%1$d s/page</string>
+    <string name="reader_minutes">%1$d min</string>
+    <string name="reader_restart">Start over</string>
+    <string name="reader_close_book">Close the book</string>
 </resources>

@@ -1,18 +1,19 @@
 package app.kodex.reader.image
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,17 +21,29 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -60,19 +74,21 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.kodex.R
 import app.kodex.data.AppSettings
 import app.kodex.data.ImageMode
+import app.kodex.data.PageFilter
+import app.kodex.data.PageFit
 import app.kodex.data.Position
 import app.kodex.data.db.BookEntity
 import app.kodex.data.db.ProgressEntity
 import app.kodex.reader.ImagePages
-import app.kodex.reader.ReaderChrome
 import app.kodex.reader.LocalReaderInk
+import app.kodex.reader.ReaderChrome
 import app.kodex.reader.ReaderHost
-import app.kodex.data.PageFit
-import app.kodex.data.PageFilter
+import app.kodex.reader.ReaderTitle
 import app.kodex.shared.reader.Half
 import app.kodex.shared.reader.PagePosition
 import app.kodex.shared.reader.PageSize
@@ -82,6 +98,8 @@ import app.kodex.shared.reader.singlePages
 import app.kodex.shared.reader.spreads
 import app.kodex.shared.reader.stepOf
 import app.kodex.shared.reader.tapAction
+import app.kodex.ui.components.Cover
+import app.kodex.ui.theme.KodexTheme
 import coil3.compose.LocalPlatformContext
 import coil3.compose.SubcomposeAsyncImage
 import coil3.compose.SubcomposeAsyncImageContent
@@ -141,9 +159,13 @@ fun ImageReader(
     }
     // Opening a book isn't reading it: only a page turn reports a position.
     var turned by rememberSaveable { mutableStateOf(false) }
+    // This sitting: since when, and which pages were seen (the end's reading time and pace).
+    val openedAt = remember { System.currentTimeMillis() }
+    var seen by remember { mutableStateOf(emptySet<Int>()) }
     val showing: (List<Slot>) -> Unit = { step ->
         if (step.none { it.page == page }) turned = true
         page = step.first().page
+        seen = seen + step.map { it.page }
         if (turned) {
             val last = step.last().page
             onPosition(Position(PagePosition(page, count).position, "page", (last + 1) * 100.0 / count, last >= count - 1))
@@ -152,20 +174,30 @@ fun ImageReader(
     val filter = remember(prefs.filter) { colorFilter(prefs.filter) }
     val onTap: (Float) -> TapAction = { x -> tapAction(x, rtl = rtl, layout = prefs.tapLayout) }
 
+    val end: @Composable () -> Unit = {
+        EndPanel(
+            title = host.title,
+            count = count,
+            openedAt = openedAt,
+            seen = seen.size,
+            next = next,
+            onNext = onNext,
+            onRestart = { showing(steps.first()) },
+            onClose = onClose,
+        )
+    }
     Box(Modifier.fillMaxSize().testTag("image-reader")) {
         key(steps, mode) {
             when (mode) {
                 ImageMode.VERTICAL -> Strip(
-                    pages, page, filter, next,
+                    pages, page, filter, end,
                     onShowing = { showing(listOf(Slot(it))) },
-                    onNext = onNext,
                     onMenu = { chrome = !chrome },
                 )
                 else -> Paged(
-                    pages, steps, page, rtl, fit, filter, next,
+                    pages, steps, page, rtl, fit, filter, end,
                     onShowing = showing,
                     onTap = onTap,
-                    onNext = onNext,
                     onMenu = { chrome = !chrome },
                 )
             }
@@ -204,21 +236,20 @@ private fun Paged(
     rtl: Boolean,
     fit: PageFit,
     filter: ColorFilter?,
-    next: NextBook?,
+    end: @Composable () -> Unit,
     onShowing: (List<Slot>) -> Unit,
     onTap: (Float) -> TapAction,
-    onNext: (Int) -> Unit,
     onMenu: () -> Unit,
 ) {
-    // After the last page, the next book in the series, when there is one.
-    val total = steps.size + if (next != null) 1 else 0
+    // After the last page, the end: how the reading went, and the next book in the series.
+    val total = steps.size + 1
     val state = rememberPagerState(initialPage = stepOf(steps, page)) { total }
     val scope = rememberCoroutineScope()
     LaunchedEffect(state) { snapshotFlow { state.settledPage }.collect { if (it < steps.size) onShowing(steps[it]) } }
     // A seek from the menu.
     LaunchedEffect(page) {
         val target = stepOf(steps, page)
-        if (state.currentPage < steps.size && steps[state.currentPage].none { it.page == page }) state.scrollToPage(target)
+        if (state.currentPage >= steps.size || steps[state.currentPage].none { it.page == page }) state.scrollToPage(target)
     }
     HorizontalPager(
         state = state,
@@ -226,10 +257,10 @@ private fun Paged(
         reverseLayout = rtl,
         // The pages either side are loaded before they are turned to.
         beyondViewportPageCount = 2,
-        key = { if (it < steps.size) steps[it].first().let { slot -> "${slot.page}-${slot.half}" } else "next" },
+        key = { if (it < steps.size) steps[it].first().let { slot -> "${slot.page}-${slot.half}" } else "end" },
     ) { index ->
         if (index >= steps.size) {
-            NextPanel(next ?: return@HorizontalPager, onNext)
+            end()
             return@HorizontalPager
         }
         val step = steps[index]
@@ -333,9 +364,8 @@ private fun Strip(
     pages: ImagePages,
     page: Int,
     filter: ColorFilter?,
-    next: NextBook?,
+    end: @Composable () -> Unit,
     onShowing: (Int) -> Unit,
-    onNext: (Int) -> Unit,
     onMenu: () -> Unit,
 ) {
     val state = rememberLazyListState(initialFirstVisibleItemIndex = page)
@@ -351,21 +381,98 @@ private fun Strip(
                 val shape = if (size != null) Modifier.aspectRatio((size.width.toFloat() / size.height).coerceIn(0.05f, 20f)) else Modifier
                 Page(pages, i, filter, Modifier.fillMaxWidth().then(shape), contentScale = ContentScale.FillWidth)
             }
-            if (next != null) item(key = "next") { Box(Modifier.fillMaxWidth().height(320.dp)) { NextPanel(next, onNext) } }
+            item(key = "end") { Box(Modifier.fillMaxWidth().height(620.dp)) { end() } }
+        }
+    }
+}
+
+/**
+ * After the last page: the book is read (the page and 100 %), how long this sitting took and
+ * its pace, the next book in the series when there is one, and starting over or closing.
+ */
+@Composable
+private fun EndPanel(
+    title: ReaderTitle,
+    count: Int,
+    openedAt: Long,
+    seen: Int,
+    next: NextBook?,
+    onNext: (Int) -> Unit,
+    onRestart: () -> Unit,
+    onClose: () -> Unit,
+) {
+    val colors = KodexTheme.colors
+    val ink = LocalReaderInk.current
+    val seconds = ((System.currentTimeMillis() - openedAt) / 1000).coerceAtLeast(1)
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp).testTag("reader-end"),
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Column(Modifier.widthIn(max = 480.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            Row(
+                Modifier.clip(CircleShape).background(colors.offlineSoft).padding(horizontal = 12.dp, vertical = 5.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = colors.offline, modifier = Modifier.size(16.dp))
+                Text(stringResource(R.string.reader_done, count, count), style = MaterialTheme.typography.labelMedium, color = colors.offlineText)
+            }
+            Text(stringResource(R.string.reader_congrats), style = MaterialTheme.typography.headlineMedium, color = ink, textAlign = TextAlign.Center)
+            Text(listOfNotNull(title.series, title.title).joinToString(" · "), style = MaterialTheme.typography.bodyMedium, color = colors.textMuted,
+                textAlign = TextAlign.Center)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Stat(stringResource(R.string.reader_time), stringResource(R.string.reader_minutes, ((seconds + 59) / 60).toInt()), Modifier.weight(1f))
+                Stat(stringResource(R.string.reader_pace), stringResource(R.string.reader_pace_value, (seconds / seen.coerceAtLeast(1)).toInt()), Modifier.weight(1f))
+                Stat(stringResource(R.string.reading_progress), stringResource(R.string.percent, 100), Modifier.weight(1f), colors.offlineText)
+            }
+            if (next != null) {
+                Surface(
+                    shape = MaterialTheme.shapes.medium,
+                    color = colors.surface1,
+                    border = BorderStroke(1.dp, colors.border),
+                    modifier = Modifier.fillMaxWidth().testTag("next-book"),
+                ) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                            Cover(next.id, width = 64.dp, corner = 8.dp)
+                            Column(Modifier.weight(1f)) {
+                                Text(stringResource(R.string.reader_next).uppercase(), style = MaterialTheme.typography.labelSmall, color = colors.textMuted)
+                                Text(next.title, style = MaterialTheme.typography.titleMedium, color = colors.text, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                            }
+                        }
+                        Button(onClick = { onNext(next.id) }, modifier = Modifier.fillMaxWidth().testTag("read-next")) {
+                            Text(stringResource(R.string.reader_open_next))
+                            Spacer(Modifier.width(8.dp))
+                            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(18.dp))
+                        }
+                    }
+                }
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = onRestart, modifier = Modifier.weight(1f).testTag("reader-restart")) {
+                    Icon(Icons.Filled.Replay, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text(stringResource(R.string.reader_restart), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                OutlinedButton(onClick = onClose, modifier = Modifier.weight(1f).testTag("reader-close")) {
+                    Text(stringResource(R.string.reader_close_book), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun NextPanel(next: NextBook, onNext: (Int) -> Unit) {
+private fun Stat(label: String, value: String, modifier: Modifier = Modifier, tint: androidx.compose.ui.graphics.Color = KodexTheme.colors.text) {
+    val colors = KodexTheme.colors
     Column(
-        Modifier.fillMaxSize().padding(32.dp).testTag("next-book"),
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier.clip(MaterialTheme.shapes.medium).background(colors.surface1).padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        Text(stringResource(R.string.reader_next), color = LocalReaderInk.current, style = MaterialTheme.typography.titleMedium)
-        Text(next.title, color = LocalReaderInk.current, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
-        Button(onClick = { onNext(next.id) }) { Text(stringResource(R.string.reader_open_next)) }
+        Text(label, style = MaterialTheme.typography.labelSmall, color = colors.textMuted, maxLines = 1)
+        Text(value, style = MaterialTheme.typography.titleMedium, color = tint, maxLines = 1)
     }
 }
 

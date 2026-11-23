@@ -38,13 +38,14 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.FragmentActivity
 import app.kodex.AppScope
 import app.kodex.R
+import app.kodex.account.AccountStore
 import app.kodex.data.AppSettings
 import app.kodex.data.Bookmarks
 import app.kodex.data.Positions
 import app.kodex.data.SettingsStore
 import app.kodex.data.db.BookEntity
-import app.kodex.data.db.ProgressEntity
 import app.kodex.data.db.KodexDatabase
+import app.kodex.data.db.ProgressEntity
 import app.kodex.download.Downloads
 import app.kodex.reader.epub.EpubLinks
 import app.kodex.reader.epub.EpubReader
@@ -52,6 +53,7 @@ import app.kodex.reader.image.ImageReader
 import app.kodex.reader.image.NextBook
 import app.kodex.reader.pdf.PdfReader
 import app.kodex.sync.SyncWorker
+import app.kodex.ui.LocalSession
 import app.kodex.ui.theme.KodexTheme
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -71,6 +73,7 @@ class ReaderActivity : FragmentActivity() {
     private val downloads: Downloads by inject()
     private val scope: AppScope by inject()
     private val bookmarks: Bookmarks by inject()
+    private val accounts: AccountStore by inject()
     private lateinit var reporter: ProgressReporter
     private var bookId = -1
 
@@ -183,7 +186,12 @@ class ReaderActivity : FragmentActivity() {
                 ),
                 update = { change -> scope.launch { settings.update(change) } },
             )
-            CompositionLocalProvider(LocalReaderInk provides if (prefs.pureBlack) Color.White else KodexTheme.colors.text) {
+            // The account, for the covers the end of a book shows (the next one in the series).
+            val session by accounts.session.collectAsState(initial = null)
+            CompositionLocalProvider(
+                LocalReaderInk provides if (prefs.pureBlack) Color.White else KodexTheme.colors.text,
+                LocalSession provides session,
+            ) {
             when (val opened = current.opened) {
                 is Opened.Images -> ImageReader(
                     current.book, opened.pages, prefs, current.start, current.next, host,

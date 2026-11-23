@@ -378,4 +378,12 @@
     <string name="login_show_password">Visa lösenordet</string>
     <string name="login_hide_password">Dölj lösenordet</string>
     <string name="login_password_hint">Minst 8 tecken.</string>
+    <string name="reader_done">Slutläst · sida %1$d av %2$d</string>
+    <string name="reader_congrats">Grattis! Du har läst klart</string>
+    <string name="reader_time">Lästid</string>
+    <string name="reader_pace">Tempo</string>
+    <string name="reader_pace_value">%1$d s/sida</string>
+    <string name="reader_minutes">%1$d min</string>
+    <string name="reader_restart">Börja om från början</string>
+    <string name="reader_close_book">Stäng boken</string>
 </resources>

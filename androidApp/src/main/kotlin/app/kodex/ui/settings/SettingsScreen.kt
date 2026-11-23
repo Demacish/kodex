@@ -7,12 +7,14 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +27,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Brightness2
@@ -46,9 +49,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -134,146 +141,202 @@ fun SettingsScreen(app: AppViewModel) {
     )
 }
 
+/** One part of the settings: its icon, title and tint, and its content. */
+private class SettingsPart(val icon: ImageVector, val title: String, val tint: Color, val content: @Composable () -> Unit)
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsContent(settings: AppSettings, info: SettingsInfo, actions: SettingsActions) {
     val colors = KodexTheme.colors
     val update = actions.update
-    Scaffold(topBar = { BrandBar(stringResource(R.string.tab_settings)) }, containerColor = colors.background) { padding ->
-        Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
-            Column(
-                Modifier.readable().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 32.dp).testTag("settings"),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+    val downloads: @Composable () -> Unit = {
+        Group {
+            Toggle(stringResource(R.string.settings_wifi_only), stringResource(R.string.settings_wifi_only_help), settings.wifiOnly) { on ->
+                update { it.copy(wifiOnly = on) }
+            }
+            Choices(stringResource(R.string.settings_concurrency), stringResource(R.string.settings_concurrency_help),
+                listOf(1, 2, 4).map { it to it.toString() }, settings.concurrency) { n -> update { it.copy(concurrency = n) } }
+            if (info.cardAvailable || settings.storage == StorageTarget.CARD) {
+                Choices(
+                    stringResource(R.string.settings_storage),
+                    stringResource(R.string.settings_storage_help),
+                    listOf(
+                        StorageTarget.INTERNAL to stringResource(R.string.storage_internal) + (info.freeInternal?.let { " · " + size(it) } ?: ""),
+                        StorageTarget.CARD to stringResource(R.string.storage_card) + (info.freeCard?.let { " · " + size(it) } ?: ""),
+                    ),
+                    settings.storage,
+                ) { target -> update { it.copy(storage = target) } }
+            }
+            Choices(stringResource(R.string.settings_auto_next), stringResource(R.string.settings_auto_next_help),
+                listOf(0, 1, 2, 3, 5).map { it to if (it == 0) stringResource(R.string.off) else it.toString() }, settings.autoNext) { n ->
+                update { it.copy(autoNext = n) }
+            }
+            Choices(stringResource(R.string.cleanup_title), stringResource(R.string.cleanup_help),
+                listOf(0, 1, 7, 14, 30).map { it to if (it == 0) stringResource(R.string.off) else stringResource(R.string.days_short, it) },
+                settings.cleanupDays) { n -> update { it.copy(cleanupDays = n) } }
+        }
+    }
+    val reading: @Composable () -> Unit = {
+        Group {
+            val modes = listOf(
+                ImageMode.PAGED_LTR to stringResource(R.string.mode_ltr_short),
+                ImageMode.PAGED_RTL to stringResource(R.string.mode_rtl_short),
+                ImageMode.VERTICAL to stringResource(R.string.mode_vertical),
+            )
+            Choices(stringResource(R.string.settings_mode_manga), null, modes, settings.mangaMode) { m -> update { it.copy(mangaMode = m) } }
+            Choices(stringResource(R.string.settings_mode_comics), null, modes, settings.comicsMode) { m -> update { it.copy(comicsMode = m) } }
+            Choices(stringResource(R.string.settings_mode_books), stringResource(R.string.settings_mode_books_help), modes, settings.booksMode) { m ->
+                update { it.copy(booksMode = m) }
+            }
+            Choices(
+                stringResource(R.string.settings_fit), null,
+                listOf(
+                    PageFit.PAGE to stringResource(R.string.fit_page),
+                    PageFit.WIDTH to stringResource(R.string.fit_width),
+                    PageFit.HEIGHT to stringResource(R.string.fit_height),
+                    PageFit.ORIGINAL to stringResource(R.string.fit_original),
+                ),
+                settings.fit,
+            ) { fit -> update { it.copy(fit = fit) } }
+            Toggle(stringResource(R.string.settings_spreads), stringResource(R.string.settings_spreads_help), settings.spreads) { on ->
+                update { it.copy(spreads = on) }
+            }
+            Toggle(stringResource(R.string.settings_cover_alone), null, settings.coverAlone) { on -> update { it.copy(coverAlone = on) } }
+            Toggle(stringResource(R.string.settings_split_wide), stringResource(R.string.settings_split_wide_help), settings.splitWide) { on ->
+                update { it.copy(splitWide = on) }
+            }
+            Choices(
+                stringResource(R.string.settings_tap_layout), null,
+                listOf(TapLayout.SIDES to stringResource(R.string.tap_sides), TapLayout.EDGES to stringResource(R.string.tap_edges),
+                    TapLayout.OFF to stringResource(R.string.off)),
+                settings.tapLayout,
+            ) { layout -> update { it.copy(tapLayout = layout) } }
+            Choices(
+                stringResource(R.string.settings_filter), null,
+                listOf(
+                    PageFilter.NONE to stringResource(R.string.filter_none),
+                    PageFilter.GRAYSCALE to stringResource(R.string.filter_grayscale),
+                    PageFilter.SEPIA to stringResource(R.string.filter_sepia),
+                    PageFilter.INVERT to stringResource(R.string.filter_invert),
+                ),
+                settings.filter,
+            ) { filter -> update { it.copy(filter = filter) } }
+            Toggle(stringResource(R.string.settings_trim), stringResource(R.string.settings_trim_help), settings.trim) { on ->
+                update { it.copy(trim = on) }
+            }
+            Toggle(stringResource(R.string.settings_pure_black), stringResource(R.string.settings_pure_black_help), settings.pureBlack) { on ->
+                update { it.copy(pureBlack = on) }
+            }
+            Toggle(stringResource(R.string.settings_keep_screen_on), null, settings.keepScreenOn) { on -> update { it.copy(keepScreenOn = on) } }
+        }
+    }
+    val appearance: @Composable () -> Unit = {
+        Group {
+            Choices(
+                stringResource(R.string.settings_theme), null,
+                listOf(ThemeChoice.SYSTEM to stringResource(R.string.theme_system), ThemeChoice.LIGHT to stringResource(R.string.theme_light),
+                    ThemeChoice.DARK to stringResource(R.string.theme_dark)),
+                settings.theme,
+            ) { theme -> update { it.copy(theme = theme) } }
+            AccentChoice(settings.accent) { accent -> update { it.copy(accent = accent) } }
+            Choices(
+                stringResource(R.string.settings_density), stringResource(R.string.settings_density_help),
+                listOf(CardDensity.COMPACT to stringResource(R.string.density_compact), CardDensity.LARGE to stringResource(R.string.density_large)),
+                settings.density,
+            ) { density -> update { it.copy(density = density) } }
+        }
+    }
+    val maintenance: @Composable () -> Unit = {
+        Group {
+            Line(
+                stringResource(R.string.settings_cache),
+                info.cacheBytes?.let { stringResource(R.string.settings_cache_size, size(it)) } ?: stringResource(R.string.settings_cache_measuring),
             ) {
-                ServerCard(info, actions)
-
-                Section(Icons.Filled.DownloadForOffline, stringResource(R.string.settings_downloads), colors.offlineText)
-                Group {
-                    Toggle(stringResource(R.string.settings_wifi_only), stringResource(R.string.settings_wifi_only_help), settings.wifiOnly) { on ->
-                        update { it.copy(wifiOnly = on) }
-                    }
-                    Choices(stringResource(R.string.settings_concurrency), stringResource(R.string.settings_concurrency_help),
-                        listOf(1, 2, 4).map { it to it.toString() }, settings.concurrency) { n -> update { it.copy(concurrency = n) } }
-                    if (info.cardAvailable || settings.storage == StorageTarget.CARD) {
-                        Choices(
-                            stringResource(R.string.settings_storage),
-                            stringResource(R.string.settings_storage_help),
-                            listOf(
-                                StorageTarget.INTERNAL to stringResource(R.string.storage_internal) + (info.freeInternal?.let { " · " + size(it) } ?: ""),
-                                StorageTarget.CARD to stringResource(R.string.storage_card) + (info.freeCard?.let { " · " + size(it) } ?: ""),
-                            ),
-                            settings.storage,
-                        ) { target -> update { it.copy(storage = target) } }
-                    }
-                    Choices(stringResource(R.string.settings_auto_next), stringResource(R.string.settings_auto_next_help),
-                        listOf(0, 1, 2, 3, 5).map { it to if (it == 0) stringResource(R.string.off) else it.toString() }, settings.autoNext) { n ->
-                        update { it.copy(autoNext = n) }
-                    }
-                    Choices(stringResource(R.string.cleanup_title), stringResource(R.string.cleanup_help),
-                        listOf(0, 1, 7, 14, 30).map { it to if (it == 0) stringResource(R.string.off) else stringResource(R.string.days_short, it) },
-                        settings.cleanupDays) { n -> update { it.copy(cleanupDays = n) } }
+                OutlinedButton(
+                    onClick = actions.clearCache,
+                    border = BorderStroke(1.dp, colors.border),
+                    colors = ButtonDefaults.outlinedButtonColors(containerColor = colors.surface2, contentColor = colors.accentText),
+                    modifier = Modifier.testTag("clear-cache"),
+                ) { Text(stringResource(R.string.settings_cache_clear)) }
+            }
+            Line(stringResource(R.string.settings_about), stringResource(R.string.version, BuildConfig.VERSION_NAME), icon = Icons.Filled.Info)
+            Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = actions.logout,
+                    modifier = Modifier.testTag("logout"),
+                    border = BorderStroke(1.dp, colors.danger.copy(alpha = 0.5f)),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.danger),
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.logout))
                 }
-
-                Section(Icons.AutoMirrored.Filled.MenuBook, stringResource(R.string.settings_reading), colors.accentText)
-                Group {
-                    val modes = listOf(
-                        ImageMode.PAGED_LTR to stringResource(R.string.mode_ltr_short),
-                        ImageMode.PAGED_RTL to stringResource(R.string.mode_rtl_short),
-                        ImageMode.VERTICAL to stringResource(R.string.mode_vertical),
-                    )
-                    Choices(stringResource(R.string.settings_mode_manga), null, modes, settings.mangaMode) { m -> update { it.copy(mangaMode = m) } }
-                    Choices(stringResource(R.string.settings_mode_comics), null, modes, settings.comicsMode) { m -> update { it.copy(comicsMode = m) } }
-                    Choices(stringResource(R.string.settings_mode_books), stringResource(R.string.settings_mode_books_help), modes, settings.booksMode) { m ->
-                        update { it.copy(booksMode = m) }
-                    }
-                    Choices(
-                        stringResource(R.string.settings_fit), null,
-                        listOf(
-                            PageFit.PAGE to stringResource(R.string.fit_page),
-                            PageFit.WIDTH to stringResource(R.string.fit_width),
-                            PageFit.HEIGHT to stringResource(R.string.fit_height),
-                            PageFit.ORIGINAL to stringResource(R.string.fit_original),
-                        ),
-                        settings.fit,
-                    ) { fit -> update { it.copy(fit = fit) } }
-                    Toggle(stringResource(R.string.settings_spreads), stringResource(R.string.settings_spreads_help), settings.spreads) { on ->
-                        update { it.copy(spreads = on) }
-                    }
-                    Toggle(stringResource(R.string.settings_cover_alone), null, settings.coverAlone) { on -> update { it.copy(coverAlone = on) } }
-                    Toggle(stringResource(R.string.settings_split_wide), stringResource(R.string.settings_split_wide_help), settings.splitWide) { on ->
-                        update { it.copy(splitWide = on) }
-                    }
-                    Choices(
-                        stringResource(R.string.settings_tap_layout), null,
-                        listOf(TapLayout.SIDES to stringResource(R.string.tap_sides), TapLayout.EDGES to stringResource(R.string.tap_edges),
-                            TapLayout.OFF to stringResource(R.string.off)),
-                        settings.tapLayout,
-                    ) { layout -> update { it.copy(tapLayout = layout) } }
-                    Choices(
-                        stringResource(R.string.settings_filter), null,
-                        listOf(
-                            PageFilter.NONE to stringResource(R.string.filter_none),
-                            PageFilter.GRAYSCALE to stringResource(R.string.filter_grayscale),
-                            PageFilter.SEPIA to stringResource(R.string.filter_sepia),
-                            PageFilter.INVERT to stringResource(R.string.filter_invert),
-                        ),
-                        settings.filter,
-                    ) { filter -> update { it.copy(filter = filter) } }
-                    Toggle(stringResource(R.string.settings_trim), stringResource(R.string.settings_trim_help), settings.trim) { on ->
-                        update { it.copy(trim = on) }
-                    }
-                    Toggle(stringResource(R.string.settings_pure_black), stringResource(R.string.settings_pure_black_help), settings.pureBlack) { on ->
-                        update { it.copy(pureBlack = on) }
-                    }
-                    Toggle(stringResource(R.string.settings_keep_screen_on), null, settings.keepScreenOn) { on -> update { it.copy(keepScreenOn = on) } }
-                }
-
-                Section(Icons.Filled.Palette, stringResource(R.string.settings_appearance), colors.accentText)
-                Group {
-                    Choices(
-                        stringResource(R.string.settings_theme), null,
-                        listOf(ThemeChoice.SYSTEM to stringResource(R.string.theme_system), ThemeChoice.LIGHT to stringResource(R.string.theme_light),
-                            ThemeChoice.DARK to stringResource(R.string.theme_dark)),
-                        settings.theme,
-                    ) { theme -> update { it.copy(theme = theme) } }
-                    AccentChoice(settings.accent) { accent -> update { it.copy(accent = accent) } }
-                    Choices(
-                        stringResource(R.string.settings_density), stringResource(R.string.settings_density_help),
-                        listOf(CardDensity.COMPACT to stringResource(R.string.density_compact), CardDensity.LARGE to stringResource(R.string.density_large)),
-                        settings.density,
-                    ) { density -> update { it.copy(density = density) } }
-                }
-
-                Section(Icons.Filled.CleaningServices, stringResource(R.string.settings_maintenance), colors.textMuted)
-                Group {
-                    Line(
-                        stringResource(R.string.settings_cache),
-                        info.cacheBytes?.let { stringResource(R.string.settings_cache_size, size(it)) } ?: stringResource(R.string.settings_cache_measuring),
+                Text(stringResource(R.string.logout_help), style = MaterialTheme.typography.bodySmall, color = colors.textMuted)
+            }
+        }
+    }
+    val parts = listOf(
+        SettingsPart(Icons.Filled.DownloadForOffline, stringResource(R.string.settings_downloads), colors.offlineText, downloads),
+        SettingsPart(Icons.AutoMirrored.Filled.MenuBook, stringResource(R.string.settings_reading), colors.accentText, reading),
+        SettingsPart(Icons.Filled.Palette, stringResource(R.string.settings_appearance), colors.accentText, appearance),
+        SettingsPart(Icons.Filled.CleaningServices, stringResource(R.string.settings_maintenance), colors.textMuted, maintenance),
+    )
+    var chosen by rememberSaveable { mutableIntStateOf(1) }
+    Scaffold(topBar = { BrandBar(stringResource(R.string.tab_settings)) }, containerColor = colors.background) { padding ->
+        BoxWithConstraints(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
+            if (maxWidth >= 840.dp) {
+                // A tablet: the server and the parts as a list to the left, the chosen part to the right.
+                Row(Modifier.fillMaxSize().testTag("settings")) {
+                    Column(
+                        Modifier.width(360.dp).fillMaxHeight().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 32.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        OutlinedButton(
-                            onClick = actions.clearCache,
-                            border = BorderStroke(1.dp, colors.border),
-                            colors = ButtonDefaults.outlinedButtonColors(containerColor = colors.surface2, contentColor = colors.accentText),
-                            modifier = Modifier.testTag("clear-cache"),
-                        ) { Text(stringResource(R.string.settings_cache_clear)) }
-                    }
-                    Line(stringResource(R.string.settings_about), stringResource(R.string.version, BuildConfig.VERSION_NAME), icon = Icons.Filled.Info)
-                    Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(
-                            onClick = actions.logout,
-                            modifier = Modifier.testTag("logout"),
-                            border = BorderStroke(1.dp, colors.danger.copy(alpha = 0.5f)),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.danger),
-                        ) {
-                            Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
-                            Spacer(Modifier.width(8.dp))
-                            Text(stringResource(R.string.logout))
+                        ServerCard(info, actions)
+                        Spacer(Modifier.height(4.dp))
+                        parts.forEachIndexed { index, part ->
+                            PartRow(part, index == chosen) { chosen = index }
                         }
-                        Text(stringResource(R.string.logout_help), style = MaterialTheme.typography.bodySmall, color = colors.textMuted)
+                    }
+                    VerticalDivider(color = colors.borderSubtle)
+                    Column(
+                        Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp).padding(bottom = 32.dp)
+                            .testTag("settings-part"),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        val part = parts[chosen.coerceIn(0, parts.lastIndex)]
+                        Section(part.icon, part.title, part.tint)
+                        part.content()
+                    }
+                }
+            } else {
+                Column(
+                    Modifier.readable().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 32.dp).testTag("settings"),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    ServerCard(info, actions)
+                    parts.forEach { part ->
+                        Section(part.icon, part.title, part.tint)
+                        part.content()
                     }
                 }
             }
         }
+    }
+}
+
+/** A part in the tablet's list: its icon, title, and the chosen one in the accent. */
+@Composable
+private fun PartRow(part: SettingsPart, chosen: Boolean, onClick: () -> Unit) {
+    val colors = KodexTheme.colors
+    Row(
+        Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(MaterialTheme.shapes.medium)
+            .background(if (chosen) colors.accentSoft else colors.surface1).clickable(onClick = onClick).padding(horizontal = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Icon(part.icon, contentDescription = null, tint = if (chosen) colors.accentText else part.tint, modifier = Modifier.size(22.dp))
+        Text(part.title, style = MaterialTheme.typography.titleMedium, color = if (chosen) colors.accentText else colors.text, modifier = Modifier.weight(1f))
+        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = colors.textFaint)
     }
 }
 

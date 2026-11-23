@@ -165,7 +165,7 @@ fun LibraryHome(navigator: Navigator, app: AppViewModel) {
     LibraryHomeContent(
         LibraryHomeState(
             libraries, selected, reading, recent, collections, downloaded, series, loose, sort, filter, filtersOpen, searching,
-            query, results, seriesResults, syncLine(app), allSeries, covers,
+            query, results, seriesResults, allSeries, covers, syncLine(app),
         ),
         settings,
         LibraryHomeActions(

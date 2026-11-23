@@ -210,7 +210,7 @@ interface CatalogDao {
            ORDER BY (SELECT max(q.readAt) FROM books z JOIN progress q ON q.bookId = z.id WHERE z.seriesId = b.seriesId) DESC
            LIMIT :limit""",
     )
-    fun nextInSeries(limit: Int = 12): Flow<List<BookRow>>
+    fun nextUp(limit: Int = 12): Flow<List<BookRow>>
 
     /** The newest books (the server's ids count up). */
     @Query("$BOOK_ROW ORDER BY b.id DESC LIMIT :limit")

@@ -76,7 +76,7 @@ class LibraryViewModel(db: KodexDatabase) : ViewModel() {
     fun series(libraryId: Int) = catalog.seriesIn(libraryId)
 
     val allSeries = catalog.allSeries()
-    val nextInSeries = catalog.nextInSeries()
+    val nextInSeries = catalog.nextUp()
 
     /** Each library's card covers, by its id. */
     @OptIn(ExperimentalCoroutinesApi::class)

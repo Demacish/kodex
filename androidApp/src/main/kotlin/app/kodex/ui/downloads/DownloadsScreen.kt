@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -23,10 +24,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.CleaningServices
@@ -82,8 +86,8 @@ import app.kodex.data.db.KodexDatabase
 import app.kodex.download.Downloads
 import app.kodex.ui.AppViewModel
 import app.kodex.ui.BookKey
-import app.kodex.ui.SettingsKey
 import app.kodex.ui.Navigator
+import app.kodex.ui.SettingsKey
 import app.kodex.ui.components.BrandBar
 import app.kodex.ui.components.Cover
 import app.kodex.ui.components.KodexCard
@@ -269,12 +273,9 @@ fun DownloadsContent(
         },
         containerColor = colors.background,
     ) { padding ->
-        Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
-            LazyColumn(
-                Modifier.readable(900.dp).fillMaxSize().testTag("downloads"),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 32.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
+        BoxWithConstraints(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
+            val wide = maxWidth >= 900.dp
+            val list: LazyListScope.() -> Unit = {
                 item(key = "tabs") {
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         item { Pill(stringResource(R.string.downloads_active), tab == DownloadsTab.ACTIVE, { actions.tab(DownloadsTab.ACTIVE) }, count = active.size) }
@@ -282,7 +283,7 @@ fun DownloadsContent(
                         item { Pill(stringResource(R.string.downloads_history), tab == DownloadsTab.HISTORY, { actions.tab(DownloadsTab.HISTORY) }, count = history.size) }
                     }
                 }
-                item(key = "summary") { Summary(transfers, network, free, used, settings) }
+                if (!wide) item(key = "summary") { Summary(transfers, network, free, used, settings) }
                 when (tab) {
                     DownloadsTab.ACTIVE -> {
                         if (active.isEmpty()) item(key = "none") { Quiet(stringResource(if (queue.isEmpty()) R.string.downloads_nothing_active else R.string.downloads_waiting_turn)) }
@@ -294,7 +295,29 @@ fun DownloadsContent(
                         items(history, key = { it.row.bookId }) { HistoryRow(it.row, settings, actions) }
                     }
                 }
-                item(key = "cleanup") { Cleanup(settings.cleanupDays, actions) }
+                if (!wide) item(key = "cleanup") { Cleanup(settings.cleanupDays, actions) }
+            }
+            val listPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 32.dp)
+            if (wide) {
+                // A tablet: the transfers to the left, how much room and the cleanup to the right.
+                Row(Modifier.fillMaxSize().testTag("downloads"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    LazyColumn(Modifier.weight(1.4f).fillMaxSize(), contentPadding = listPadding, verticalArrangement = Arrangement.spacedBy(12.dp),
+                        content = list)
+                    Column(
+                        Modifier.weight(1f).fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 8.dp, end = 16.dp, top = 4.dp, bottom = 32.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Summary(transfers, network, free, used, settings)
+                        Cleanup(settings.cleanupDays, actions)
+                    }
+                }
+            } else {
+                LazyColumn(
+                    Modifier.readable(900.dp).fillMaxSize().testTag("downloads"),
+                    contentPadding = listPadding,
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    content = list,
+                )
             }
         }
     }

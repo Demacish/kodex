@@ -17,6 +17,8 @@ All notable changes to Kodex are listed here. The format follows
   the others being read, what came last and the collections; side by side
   on a tablet), Bibliotek, Upptäck, Nedladdat and Inställningar. The account
   button at the top opens the settings.
+- On a tablet Nedladdat shows the transfers beside the room left and the
+  cleanup.
 - On a tablet the app's settings are a list of their parts beside the chosen
   one; the launcher icon and the first frame take the new colours.
 - Läs has "Nästa i serien": in each series with a finished book and none

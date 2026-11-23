@@ -52,6 +52,7 @@ import app.kodex.reader.ReaderChrome
 import app.kodex.reader.ReaderTitle
 import app.kodex.reader.epub.EpubButtons
 import app.kodex.reader.epub.EpubTextPanel
+import app.kodex.shared.api.AuthConfig
 import app.kodex.shared.api.FulltextHit
 import app.kodex.shared.api.Recommendation
 import app.kodex.shared.api.ReleaseEvent
@@ -77,6 +78,10 @@ import app.kodex.ui.library.LibraryHomeState
 import app.kodex.ui.library.SeriesActions
 import app.kodex.ui.library.SeriesContent
 import app.kodex.ui.library.SeriesUiState
+import app.kodex.ui.login.LoginActions
+import app.kodex.ui.login.LoginContent
+import app.kodex.ui.login.LoginError
+import app.kodex.ui.login.LoginState
 import app.kodex.ui.read.ReadActions
 import app.kodex.ui.search.SearchActions
 import app.kodex.ui.search.SearchContent
@@ -214,6 +219,34 @@ abstract class Screens(private val device: String, private val theme: ThemeChoic
             ),
             SETTINGS, SearchActions(), focus = false,
         )
+    }
+
+    /** Logging in, step by step (the 2.4 look). */
+    @Test fun loginConnect() = shoot("16-login-connect", null) {
+        LoginContent(LoginState(server = "kodex.example", error = LoginError.NotKodex), LoginActions())
+    }
+
+    @Test fun loginPassword() {
+        val config = AuthConfig(localLogin = true, passkeys = true, oidc = false, oidcName = "", setupRequired = false, authDisabled = false)
+        shoot("17-login-password", null) { LoginContent(LoginState(server = "https://kodex.example", config = config), LoginActions()) }
+    }
+
+    @Test fun loginSteps() {
+        val config = AuthConfig(localLogin = true, passkeys = true, oidc = false, oidcName = "", setupRequired = false, authDisabled = false)
+        shoot("18-login-code", null) { LoginContent(LoginState(server = "https://kodex.example", config = config, ticket = "t"), LoginActions()) }
+    }
+
+    @Test fun loginWaiting() {
+        val config = AuthConfig(localLogin = false, passkeys = true, oidc = true, oidcName = "Authentik", setupRequired = false, authDisabled = false)
+        shoot("19-login-browser", null) {
+            LoginContent(LoginState(server = "https://kodex.example", config = config, browserSince = System.currentTimeMillis()), LoginActions())
+        }
+    }
+
+    @Test fun setup() {
+        val config = AuthConfig(localLogin = true, passkeys = false, oidc = false, oidcName = "", setupRequired = true, authDisabled = false,
+            setupCodeRequired = true)
+        shoot("20-setup", null) { LoginContent(LoginState(server = "https://kodex.example", config = config), LoginActions()) }
     }
 
     /** An e-book's reader with the text's look open (the 2.4 look). */

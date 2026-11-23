@@ -359,4 +359,24 @@
     <string name="release_missing">Not in the library</string>
     <string name="release_request">Request</string>
     <string name="release_requested">Requested</string>
+    <string name="login_connect_title">Connect to your server</string>
+    <string name="login_title">Log in</string>
+    <string name="login_subtitle">Log in to your server to sync your library and what you read.</string>
+    <string name="login_or">or</string>
+    <string name="login_second_title">Two-step login</string>
+    <string name="login_use_recovery">Use a recovery code instead</string>
+    <string name="login_use_app_code">Use the code from the app</string>
+    <string name="login_waiting_title">Waiting for the browser…</string>
+    <string name="login_waiting_text">Finish logging in in the tab that opened. Kodex syncs your library as soon as the app is approved.</string>
+    <string name="login_reopen">Open the browser again</string>
+    <string name="login_cancel">Cancel and start over</string>
+    <string name="login_waiting_left">Stops by itself in %1$s</string>
+    <string name="login_setup_title">Welcome to Kodex</string>
+    <string name="login_setup_text">The server has no users yet. Create the admin account that looks after the library and the server.</string>
+    <string name="login_email">Email (optional)</string>
+    <string name="login_setup_code">Setup code from the server\'s log</string>
+    <string name="login_setup_create">Create admin</string>
+    <string name="login_show_password">Show the password</string>
+    <string name="login_hide_password">Hide the password</string>
+    <string name="login_password_hint">At least 8 characters.</string>
 </resources>

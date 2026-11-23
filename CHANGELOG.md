@@ -30,6 +30,12 @@ All notable changes to Kodex are listed here. The format follows
   asked for ("Önska": a request on the server, as on the web); one in the
   library can be read straight away. What is coming is grouped by date, and a
   tablet shows the new and coming beside the suggestions and the followed.
+- The app's login goes a step at a time: the server's address (with a clear
+  error when it isn't a Kodex server), the password with passkey and the
+  browser as their own buttons, the two-step code in six boxes (or a recovery
+  code), and a wait for the browser that can be reopened or cancelled and gives
+  up after five minutes. A server without an admin can get its first one from
+  the app (with the setup code from its log when it asks for one).
 - The app has Sök: the server's search over titles and metadata and in the
   books' text (a hit opens an e-book at its chapter, a PDF at its page), with
   the words marked; without a connection it searches the catalog on the device.

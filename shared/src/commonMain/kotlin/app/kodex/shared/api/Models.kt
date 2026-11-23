@@ -14,6 +14,8 @@ data class AuthConfig(
     val oidcName: String,
     val setupRequired: Boolean,
     val authDisabled: Boolean,
+    /** The server has users but no admin who can log in: setting up takes the code from its log. */
+    val setupCodeRequired: Boolean = false,
 )
 
 @Serializable
@@ -244,4 +246,14 @@ data class RequestIn(
     val mediaType: String = "series",
     val seriesId: Int? = null,
     val issueNumber: Double? = null,
+)
+
+/** The first admin, set up from the app (with the code from the server's log when it asks for one). */
+@Serializable
+data class SetupIn(
+    val username: String,
+    val password: String,
+    val email: String? = null,
+    val code: String? = null,
+    val remember: Boolean = false,
 )

@@ -147,6 +147,16 @@ class KodexApi(
     /** New numbers in the followed series, soonest first (the hidden ones left out). */
     suspend fun releases(): List<ReleaseEvent> = call { http.get("releases") { auth() }.body() }
 
+    /** Sets up the first admin on a server without one (the app then logs in as it does otherwise). */
+    suspend fun setup(body: SetupIn) {
+        call {
+            http.post("auth/setup") {
+                contentType(ContentType.Application.Json)
+                setBody(body)
+            }
+        }
+    }
+
     /** Asks for something not in the library; the server answers with the request, which the app doesn't need. */
     suspend fun request(request: RequestIn) {
         call {

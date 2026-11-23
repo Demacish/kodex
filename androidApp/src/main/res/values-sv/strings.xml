@@ -358,4 +358,24 @@
     <string name="release_missing">Saknas i biblioteket</string>
     <string name="release_request">Önska</string>
     <string name="release_requested">Önskad</string>
+    <string name="login_connect_title">Anslut till din server</string>
+    <string name="login_title">Logga in</string>
+    <string name="login_subtitle">Logga in på din server för att synkronisera biblioteket och det du läser.</string>
+    <string name="login_or">eller</string>
+    <string name="login_second_title">Tvåstegsinloggning</string>
+    <string name="login_use_recovery">Använd en återställningskod i stället</string>
+    <string name="login_use_app_code">Använd koden från appen</string>
+    <string name="login_waiting_title">Väntar på webbläsaren …</string>
+    <string name="login_waiting_text">Slutför inloggningen i fliken som öppnades. Kodex synkroniserar biblioteket så fort appen är godkänd.</string>
+    <string name="login_reopen">Öppna webbläsaren igen</string>
+    <string name="login_cancel">Avbryt och börja om</string>
+    <string name="login_waiting_left">Avbryts av sig själv om %1$s</string>
+    <string name="login_setup_title">Välkommen till Kodex</string>
+    <string name="login_setup_text">Servern har inga användare än. Skapa administratörskontot som sköter biblioteket och servern.</string>
+    <string name="login_email">E-post (valfritt)</string>
+    <string name="login_setup_code">Installationskod från serverns logg</string>
+    <string name="login_setup_create">Skapa administratör</string>
+    <string name="login_show_password">Visa lösenordet</string>
+    <string name="login_hide_password">Dölj lösenordet</string>
+    <string name="login_password_hint">Minst 8 tecken.</string>
 </resources>

@@ -9,6 +9,7 @@ import app.kodex.account.AccountStore
 import app.kodex.account.PendingBrowserLogin
 import app.kodex.data.db.KodexDatabase
 import app.kodex.download.Downloads
+import app.kodex.shared.api.SetupIn
 import app.kodex.shared.api.AppKey
 import app.kodex.shared.api.AuthConfig
 import app.kodex.shared.api.KodexApi
@@ -33,6 +34,8 @@ data class LoginState(
     /** The account needs the code from its authenticator app (or a recovery code). */
     val ticket: String? = null,
     val error: LoginError? = null,
+    /** When the browser was opened for the login: waiting for it to come back. */
+    val browserSince: Long? = null,
 )
 
 sealed interface LoginError {
@@ -66,7 +69,11 @@ class LoginViewModel(
         }
     }
 
-    fun setServer(value: String) = _state.update { it.copy(server = value, config = null, error = null, ticket = null) }
+    fun setServer(value: String) = _state.update { it.copy(server = value, config = null, error = null, ticket = null, browserSince = null) }
+
+    /** No longer waiting for the browser (cancelled, or it took too long). */
+    fun cancelBrowser(timedOut: Boolean = false) =
+        _state.update { it.copy(browserSince = null, error = if (timedOut) LoginError.BrowserTimedOut else it.error) }
 
     private fun normalized(server: String): String {
         val trimmed = server.trim().trimEnd('/')
@@ -79,11 +86,22 @@ class LoginViewModel(
         _state.update { it.copy(server = server, config = config) }
     }
 
-    fun login(username: String, password: String) = work {
+    fun login(username: String, password: String) = work { passwordLogin(username, password) }
+
+    private suspend fun passwordLogin(username: String, password: String) {
         val server = _state.value.server
         val answer = apis.anonymous(server).use { it.login(username.trim(), password, accounts.deviceName) }
         val key = answer.key
         if (key != null) finish(server, key) else _state.update { it.copy(ticket = answer.secondStep?.ticket) }
+    }
+
+    /** Sets up the server's first admin here, then logs in as them as with a password. */
+    fun setup(username: String, password: String, email: String, code: String) = work {
+        val server = _state.value.server
+        apis.anonymous(server).use {
+            it.setup(SetupIn(username.trim(), password, email.trim().ifBlank { null }, code.trim().ifBlank { null }))
+        }
+        passwordLogin(username, password)
     }
 
     fun secondStep(code: String) = work {
@@ -100,13 +118,14 @@ class LoginViewModel(
         val url = apis.anonymous(server).use { it.approveUrl(accounts.deviceName, login.challenge, login.state) }
         CustomTabsIntent.Builder().build().apply { intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK) }
             .launchUrl(context, url.toUri())
+        _state.update { it.copy(browserSince = System.currentTimeMillis()) }
     }
 
     fun finishBrowser(code: String?, state: String?) = work {
         val pending = accounts.pendingBrowserLogin()
         val login = pending?.let { Pkce.restore(it.verifier, it.state) }
         if (code == null || login == null || !login.answers(state)) {
-            _state.update { it.copy(error = LoginError.BrowserTimedOut) }
+            _state.update { it.copy(error = LoginError.BrowserTimedOut, browserSince = null) }
             return@work
         }
         _state.update { it.copy(server = pending.server) }

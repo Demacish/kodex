@@ -3,6 +3,7 @@ package app.kodex.shared
 import app.kodex.shared.api.BookSearchHit
 import app.kodex.shared.api.FulltextHit
 import app.kodex.shared.api.RequestIn
+import app.kodex.shared.api.SetupIn
 import app.kodex.shared.api.Account
 import app.kodex.shared.api.AppKey
 import app.kodex.shared.api.AppLoginIn
@@ -70,7 +71,7 @@ class ContractTest {
             "get /api/releases", "post /api/releases/{event_id}/dismiss",
             "get /api/ai/recommendations", "post /api/ai/recommendations/generate",
             "post /api/ai/recommendations/{recommendation_id}/swipe",
-            "get /api/search/books", "get /api/search/fulltext", "post /api/requests",
+            "get /api/search/books", "get /api/search/fulltext", "post /api/requests", "post /api/auth/setup",
         )
         val missing = called.filter { endpoint ->
             val (method, path) = endpoint.split(" ")
@@ -106,7 +107,7 @@ class ContractTest {
             AppLoginIn.serializer() to "AppLoginIn", AppSecondStepIn.serializer() to "AppSecondStepIn",
             AppTokenIn.serializer() to "AppTokenIn", ReadingProgressIn.serializer() to "ReadingProgressIn",
             BookmarkIn.serializer() to "BookmarkIn", SwipeIn.serializer() to "AISwipeIn",
-            RequestIn.serializer() to "RequestCreate",
+            RequestIn.serializer() to "RequestCreate", SetupIn.serializer() to "SetupIn",
         )
         val problems = sent.flatMap { (serializer, name) ->
             val schema = schema(name)
